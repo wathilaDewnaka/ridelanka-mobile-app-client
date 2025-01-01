@@ -1,4 +1,4 @@
-import 'package:client/src/features/screens/on_board_screen.dart';
+import 'package:client/src/auth/screens/on_board_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
               "assets/images/splash_screen/van.png", // Ensure this path is correct
               height: 200,
             ),
-            const SizedBox(height: 20), // Spacing between logo and text
+            const SizedBox(height: 14), // Spacing between logo and text
             // App Name
             const Text(
               "RideLanka",
