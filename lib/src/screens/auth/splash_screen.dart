@@ -1,4 +1,4 @@
-import 'package:client/src/auth/screens/on_board_screen.dart';
+import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
