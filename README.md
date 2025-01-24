@@ -1,17 +1,50 @@
-# client
+# RideLanka - Innovative Mobile App for School and Staff Transport Services
 
-A new Flutter project.
+## Overview
+RideLanka is an innovative mobile application designed to simplify school and staff transportation in Sri Lanka. Developed using Flutter and Firebase, the app provides an efficient solution for finding and managing transport services.
 
-## Getting Started
+## Features
+- Real-time transport tracking
+- School and staff transport booking
+- Secure user authentication
+- GPS-enabled route mapping
+- Payment integration
 
-This project is a starting point for a Flutter application.
+## Tech Stack
+- **Frontend:** Flutter
+- **Backend:** Firebase
+- **State Management:** Provider/Riverpod
+- **Authentication:** Firebase Authentication
 
-A few resources to get you started if this is your first Flutter project:
+## Prerequisites
+- Flutter SDK (latest stable version)
+- Android Studio or VS Code
+- Firebase account
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Installation
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/RideLanka.git
+```
+2. Install dependencies
+```bash
+flutter pub get
+```
+3. Configure Firebase
+   - Add `google-services.json` in `android/app/`
+   - Add `GoogleService-Info.plist` in `ios/Runner/`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-"# ridelanka-mobile-app-client" 
+## Running the App
+```bash
+flutter run
+```
+
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+MIT License

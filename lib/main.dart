@@ -1,4 +1,5 @@
 import 'package:client/src/screens/auth/splash_screen.dart';
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.blue, // Set a default color for the app
       ),
-      home: const SplashScreen(), // Onboarding screen
+      home: const RiderNavigationMenu(), // Onboarding screen
     );
   }
 }
