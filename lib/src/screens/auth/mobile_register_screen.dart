@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 class MobileRegisterScreen extends StatefulWidget {
   const MobileRegisterScreen({super.key});
@@ -10,7 +12,10 @@ class MobileRegisterScreen extends StatefulWidget {
 class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
   bool isPassenger = true;
   bool agreeToTerms = false;
-  int selectedIndex = 0;
+
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  String phoneNumber = "";
 
   @override
   Widget build(BuildContext context) {
@@ -29,26 +34,39 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
                 labelText: "Full Name",
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
                 labelText: "Email",
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
-            const TextField(
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: "Your mobile number",
-                border: OutlineInputBorder(),
-              ),
+            IntlPhoneField(
+              decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                  border: OutlineInputBorder(),
+                  counterText: ''),
+              initialCountryCode: 'LK', // Default country 
+              onChanged: (phone) {
+                setState(() {
+                  phoneNumber = phone.completeNumber;
+                });
+              },
+              inputFormatters: [
+                FilteringTextInputFormatter
+                    .digitsOnly, // Ensures only digits are entered
+              ],
+              showDropdownIcon: false,
+              showCountryFlag: false,
             ),
             const SizedBox(height: 20),
             Row(
@@ -56,13 +74,14 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                 // Passenger Button
                 Expanded(
                   child: TextButton(
-                    onPressed: () => setState(() => selectedIndex = 0),
+                    onPressed: () => setState(() => isPassenger = true),
                     style: TextButton.styleFrom(
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)), // Removes rounding
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(10)), // Removes rounding
                       ),
                       backgroundColor:
-                      selectedIndex == 0 ? Colors.grey[100] : Colors.white,
+                          isPassenger ? Colors.grey[200] : Colors.white,
                     ),
                     child: const Text(
                       'Passenger',
@@ -76,12 +95,13 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                 // Driver Button
                 Expanded(
                   child: TextButton(
-                    onPressed: () => setState(() => selectedIndex = 1),
+                    onPressed: () => setState(() => isPassenger = false),
                     style: TextButton.styleFrom(
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)), // Removes rounding
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                      backgroundColor: selectedIndex == 1 ? Colors.grey[100] : Colors.white,
+                      backgroundColor:
+                          !isPassenger ? Colors.grey[100] : Colors.white,
                     ),
                     child: const Text(
                       'Driver',
@@ -96,12 +116,15 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                
+              },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: const Color(0xFF0051ED),
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)), // Removes rounding
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(10)), 
                 ),
               ),
               child: const Text(
@@ -116,6 +139,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
+                  activeColor: const Color(0xFF0051ED),
                   value: agreeToTerms,
                   onChanged: (bool? value) {
                     setState(() {
@@ -157,13 +181,13 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Don’t have an account? "),
+                const Text("Already have an account? "),
                 GestureDetector(
                   onTap: () {
                     
                   },
                   child: const Text(
-                    "Sign up",
+                    "Sign in",
                     style: TextStyle(
                       color: Color(0xFF0051ED),
                       fontWeight: FontWeight.bold,

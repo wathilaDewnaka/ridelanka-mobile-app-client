@@ -1,4 +1,5 @@
 import 'package:client/firebase_options.dart';
+import 'package:client/src/screens/auth/mobile_register_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.blue, // Set a default color for the app
       ),
-      home: const RiderNavigationMenu(), // Onboarding screen
+      home: const MobileRegisterScreen(), // Onboarding screen
     );
   }
 }
