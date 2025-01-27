@@ -1,3 +1,6 @@
+import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -5,17 +8,98 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 class MobileRegisterScreen extends StatefulWidget {
   const MobileRegisterScreen({super.key});
 
+  static const String id = "signup";
+
   @override
   State<MobileRegisterScreen> createState() => _MobileRegisterScreenState();
 }
 
 class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
   bool isPassenger = true;
+  bool isLoading = false;
   bool agreeToTerms = false;
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   String phoneNumber = "";
+
+  void registerUser() async {
+    try {
+      // Validate email
+      setState(() {
+        isLoading = true;
+      });
+      String email = emailController.text.trim();
+      String name = nameController.text.trim();
+
+      if (!RegExp(
+              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+          .hasMatch(email)) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Invalid email address!",
+            type: MessageType.error));
+        return;
+      }
+
+      // Check if phone number exists
+      bool phoneNum =
+          await HelperMethods.checkPhoneNumberExists(phoneNumber, isPassenger);
+
+      if (phoneNum) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Phone number already exists!",
+            type: MessageType.error));
+        return;
+      } else if (name.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Name cannot be empty!",
+            type: MessageType.error));
+        return;
+      } else if (!agreeToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "You must agree to the terms and conditions!",
+            type: MessageType.error));
+        return;
+      } else if (name.length < 4) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Please enter a valid name!",
+            type: MessageType.error));
+        return;
+      }
+
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (phoneAuthCredential) async {
+          await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+        },
+        verificationFailed: (error) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Unable to verify the phone number !",
+              type: MessageType.error));
+        },
+        codeSent: (verificationId, forceResendingToken) {},
+        codeAutoRetrievalTimeout: (verificationId) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Auto retrievel time out !",
+              type: MessageType.error));
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error", message: e.toString(), type: MessageType.error));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +139,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                   labelText: 'Phone Number',
                   border: OutlineInputBorder(),
                   counterText: ''),
-              initialCountryCode: 'LK', // Default country 
+              initialCountryCode: 'LK', // Default country
               onChanged: (phone) {
                 setState(() {
                   phoneNumber = phone.completeNumber;
@@ -101,7 +185,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
                       backgroundColor:
-                          !isPassenger ? Colors.grey[100] : Colors.white,
+                          !isPassenger ? Colors.grey[200] : Colors.white,
                     ),
                     child: const Text(
                       'Driver',
@@ -117,22 +201,29 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                
+                registerUser();
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: const Color(0xFF0051ED),
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.all(Radius.circular(10)), 
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
               ),
-              child: const Text(
-                "Sign Up",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white
+                    ),
+                  )
+                  : const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
             ),
             const SizedBox(height: 20),
             Row(
@@ -183,9 +274,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               children: [
                 const Text("Already have an account? "),
                 GestureDetector(
-                  onTap: () {
-                    
-                  },
+                  onTap: () {},
                   child: const Text(
                     "Sign in",
                     style: TextStyle(
