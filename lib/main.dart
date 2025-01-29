@@ -1,5 +1,6 @@
 import 'package:client/firebase_options.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
+import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: MobileRegisterScreen.id,
       routes: {
-        MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
+        MobileRegisterScreen.id: (context) => const SplashScreen(),
         
       },
     );

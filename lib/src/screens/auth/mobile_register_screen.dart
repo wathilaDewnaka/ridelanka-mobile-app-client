@@ -1,4 +1,5 @@
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/auth/mobile_otp_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,25 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               message: "Unable to verify the phone number !",
               type: MessageType.error));
         },
-        codeSent: (verificationId, forceResendingToken) {},
+        codeSent: (verificationId, forceResendingToken) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Success",
+              message: "OTP Sent to $phoneNumber successfully !",
+              type: MessageType.success));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MobileOTPScreen(
+                verificationId: verificationId,
+                fullName: name,
+                phoneNumber: phoneNumber,
+                email: email,
+                isPassenger: isPassenger,
+                isRegister: true,
+              ),
+            ),
+          );
+        },
         codeAutoRetrievalTimeout: (verificationId) {
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Error",
@@ -212,12 +231,10 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               ),
               child: isLoading
                   ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      color: Colors.white
-                    ),
-                  )
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
                   : const Text(
                       "Sign Up",
                       style: TextStyle(
