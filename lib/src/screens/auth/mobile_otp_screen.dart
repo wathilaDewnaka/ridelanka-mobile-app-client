@@ -1,4 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
+
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -60,6 +65,62 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         });
       }
     });
+  }
+
+  void validateOTP() async {
+    try {
+      final cred = PhoneAuthProvider.credential(
+          verificationId: widget.verificationId, smsCode: otpController.text);
+
+      // Sign in with the credential
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(cred);
+
+      DatabaseReference databaseReference = (widget.isPassenger)
+          ? FirebaseDatabase.instance
+              .ref()
+              .child('drivers/${userCredential.user!.uid}')
+          : FirebaseDatabase.instance
+              .ref()
+              .child('users/${userCredential.user!.uid}');
+
+      if (widget.isRegister) {
+        Map<String, String> userMap = {
+          "fullname": widget.fullName,
+          "email": widget.email,
+          "phone": widget.phoneNumber,
+        };
+
+        databaseReference.set(userMap);
+        log("Completed !");
+        return;
+      }
+
+      databaseReference.once().then((DatabaseEvent event) {
+        final snapshot = event.snapshot;
+        if (snapshot.exists) {
+          return;
+        } else {
+          return;
+        }
+      }).catchError((error) {
+        return;
+      });
+    } catch (e) {
+      
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Invalid OTP Code !",
+        type: MessageType.error));
+  }
+  
+  }
+
+  void resendOTP() async {
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "OTP sent again to ${widget.phoneNumber} successfully !",
+        type: MessageType.success));
   }
 
   @override
@@ -132,6 +193,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
                       )
                     : GestureDetector(
                         onTap: () {
+                          resendOTP();
                           startCountdown();
                         },
                         child: const Text(
@@ -144,7 +206,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
             const SizedBox(height: 50),
             ElevatedButton(
               onPressed: () {
-                
+                validateOTP();
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
