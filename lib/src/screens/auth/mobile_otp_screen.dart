@@ -107,16 +107,43 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         return;
       });
     } catch (e) {
-      
-    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Invalid OTP Code !",
-        type: MessageType.error));
-  }
-  
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "Invalid OTP Code !",
+          type: MessageType.error));
+    }
   }
 
   void resendOTP() async {
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: widget.phoneNumber,
+        verificationCompleted: (phoneAuthCredential) async {
+          await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+        },
+        verificationFailed: (error) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Unable to verify the phone number !",
+              type: MessageType.error));
+        },
+        codeSent: (verificationId, forceResendingToken) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Success",
+              message: "OTP Sent to ${widget.phoneNumber} successfully !",
+              type: MessageType.success));
+        },
+        codeAutoRetrievalTimeout: (verificationId) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Auto retrievel time out !",
+              type: MessageType.error));
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error", message: e.toString(), type: MessageType.error));
+    }
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
         message: "OTP sent again to ${widget.phoneNumber} successfully !",
