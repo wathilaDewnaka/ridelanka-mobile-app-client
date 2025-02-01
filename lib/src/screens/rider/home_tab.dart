@@ -16,17 +16,20 @@ class _HomeTabState extends State<HomeTab> {
   double mapBottomPadding = 0;
 
   Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
-  Set<Circle> _circles = {};
-  List<LatLng> polylineCoordinates = [];
-
   late Position currentPosition;
-  var geoLocator = Geolocator();
 
   static final CameraPosition _initialLocation = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
   );
+
+  final Color customBlue = Color(0xFF0051ED); 
+
+  @override
+  void initState() {
+    super.initState();
+    _setUpPositionLocator();
+  }
 
   Future<void> _checkPermissions() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -49,7 +52,7 @@ class _HomeTabState extends State<HomeTab> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation,
+        desiredAccuracy: LocationAccuracy.high,
       );
       setState(() {
         currentPosition = position;
@@ -59,16 +62,23 @@ class _HomeTabState extends State<HomeTab> {
       CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 17);
 
       mapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-      print('Current Position: ${position.latitude}, ${position.longitude}');
+
+      _setMapMarker(pos);
     } catch (e) {
       print('Error while getting location: $e');
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _setUpPositionLocator();
+  void _setMapMarker(LatLng position) {
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: MarkerId("currentLocation"),
+          position: position,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
+    });
   }
 
   @override
@@ -76,30 +86,138 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
+       
           GoogleMap(
             padding: EdgeInsets.only(bottom: mapBottomPadding),
             mapType: MapType.normal,
-            myLocationButtonEnabled: true,
+            myLocationButtonEnabled: false,
             myLocationEnabled: true,
             zoomGesturesEnabled: true,
-            zoomControlsEnabled: true,
+            zoomControlsEnabled: false,
             initialCameraPosition: _initialLocation,
-            polylines: _polylines,
             markers: _markers,
-            circles: _circles,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
               mapController = controller;
 
               setState(() {
-                mapBottomPadding = 280;
+                mapBottomPadding = 80;
               });
 
               _setUpPositionLocator();
             },
+          ),
+
+          
+          Positioned(
+            top: 40,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Pickup location",
+                  border: InputBorder.none,
+                  icon: Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: Icon(Icons.close, color: Colors.grey),
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            left: 15,
+            right: 15,
+            bottom: 20,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  SizedBox(height: 5),
+                  
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Where are you going?",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+
+                 
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: customBlue, 
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "School",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 3),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: customBlue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "Staff",
+                            style: TextStyle(color: customBlue),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 }
+
