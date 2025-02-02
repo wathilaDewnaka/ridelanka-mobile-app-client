@@ -3,10 +3,8 @@ import 'dart:convert';
 
 class RequestHelper {
   static Future<dynamic> getRequest(String url) async {
-
     try {
-
-       Uri uri = Uri.parse(url);
+      Uri uri = Uri.parse(url);
 
       http.Response response = await http.get(uri);
 
