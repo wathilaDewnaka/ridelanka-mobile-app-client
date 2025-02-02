@@ -1,4 +1,8 @@
+import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/auth/mobile_otp_screen.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -14,10 +18,106 @@ class MobileLoginScreen extends StatefulWidget {
 
 class _MobileLoginScreenState extends State<MobileLoginScreen> {
   bool isPassenger = true;
+  bool isLoading = false;
   bool agreeToTerms = false;
 
   final emailController = TextEditingController();
   String phoneNumber = "";
+
+  void loginUser() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      String email = emailController.text.trim();
+
+      if (!RegExp(
+              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+          .hasMatch(email)) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Invalid email address!",
+            type: MessageType.error));
+        return;
+      }
+
+      // Check if phone number exists
+      bool phoneNum =
+          await HelperMethods.checkPhoneNumberExists(phoneNumber, isPassenger);
+      bool phoneNumAndEmail = await HelperMethods.checkPhoneAndEmail(
+          phoneNumber, email, isPassenger);
+
+      if (!phoneNum) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Phone number not registered!",
+            type: MessageType.error));
+        return;
+      } else if (!phoneNumAndEmail) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Phone number doesn't match with the email!",
+            type: MessageType.error));
+        return;
+      } else if (!agreeToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "You must agree to the terms and conditions!",
+            type: MessageType.error));
+        return;
+      }
+
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (phoneAuthCredential) async {
+          await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+        },
+        verificationFailed: (error) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Unable to verify the phone number !",
+              type: MessageType.error));
+        },
+        codeSent: (verificationId, forceResendingToken) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Success",
+              message: "OTP Sent to $phoneNumber successfully !",
+              type: MessageType.success));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MobileOTPScreen(
+                verificationId: verificationId,
+                fullName: "",
+                phoneNumber: phoneNumber,
+                email: email,
+                isPassenger: isPassenger,
+                isRegister: false,
+                forceResendingToken: forceResendingToken
+
+              ),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (verificationId) {
+          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+              title: "Error",
+              message: "Auto retrievel time out !",
+              type: MessageType.error));
+        },
+      );
+
+       await Future.delayed(const Duration(seconds: 8));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error", message: e.toString(), type: MessageType.error));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +175,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                             Radius.circular(10)), // Removes rounding
                       ),
                       backgroundColor:
-                          isPassenger ? Colors.grey[100] : Colors.white,
+                          isPassenger ? Colors.grey[200] : Colors.white,
                     ),
                     child: const Text(
                       'Passenger',
@@ -110,7 +210,9 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                loginUser();
+              },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: const Color(0xFF0051ED),
@@ -119,18 +221,25 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                       BorderRadius.all(Radius.circular(10)), // Removes rounding
                 ),
               ),
-              child: const Text(
-                "Sign Up",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : const Text(
+                      "Sign In",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
             ),
             const SizedBox(height: 20),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
+                  activeColor: const Color(0xFF0051ED),
                   value: agreeToTerms,
                   onChanged: (bool? value) {
                     setState(() {

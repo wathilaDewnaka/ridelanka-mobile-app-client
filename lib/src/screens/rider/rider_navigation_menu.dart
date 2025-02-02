@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 class RiderNavigationMenu extends StatefulWidget {
   const RiderNavigationMenu({super.key});
 
+  static const String id = "ridermainpage";
+
   @override
   State<RiderNavigationMenu> createState() => _RiderNavigationMenuState();
 }

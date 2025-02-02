@@ -76,6 +76,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
 
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
         verificationCompleted: (phoneAuthCredential) async {
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
         },
@@ -100,6 +101,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                 email: email,
                 isPassenger: isPassenger,
                 isRegister: true,
+                forceResendingToken: forceResendingToken
               ),
             ),
           );
@@ -111,6 +113,8 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               type: MessageType.error));
         },
       );
+
+      await Future.delayed(const Duration(seconds: 8));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
           title: "Error", message: e.toString(), type: MessageType.error));

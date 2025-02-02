@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -8,18 +9,22 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class MobileOTPScreen extends StatefulWidget {
-  const MobileOTPScreen(
-      {super.key,
-      required this.verificationId,
-      required this.fullName,
-      required this.phoneNumber,
-      required this.email,
-      required this.isPassenger,
-      required this.isRegister});
+  const MobileOTPScreen({
+    super.key,
+    required this.verificationId,
+    required this.fullName,
+    required this.phoneNumber,
+    required this.email,
+    required this.isPassenger,
+    required this.isRegister,
+    required this.forceResendingToken,
+  });
+
   final String verificationId;
   final String fullName;
   final String phoneNumber;
   final String email;
+  final int? forceResendingToken;
   final bool isPassenger;
   final bool isRegister;
 
@@ -29,10 +34,13 @@ class MobileOTPScreen extends StatefulWidget {
 
 class _MobileOTPScreenState extends State<MobileOTPScreen> {
   TextEditingController otpController = TextEditingController();
-
   late StreamController<ErrorAnimationType> errorController;
 
   String currentText = "";
+  String verificationIds = "";
+  int? forceResendingToken;
+  bool isLoading = false;
+  bool isResendLoading = false;
   int countdown = 60;
   Timer? _timer;
 
@@ -40,6 +48,10 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
   void initState() {
     super.initState();
     errorController = StreamController<ErrorAnimationType>();
+    verificationIds = widget.verificationId;
+    forceResendingToken = widget.forceResendingToken;
+    print("verificationIds");
+    print(verificationIds);
     startCountdown();
   }
 
@@ -69,8 +81,11 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
 
   void validateOTP() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       final cred = PhoneAuthProvider.credential(
-          verificationId: widget.verificationId, smsCode: otpController.text);
+          verificationId: verificationIds, smsCode: otpController.text);
 
       // Sign in with the credential
       UserCredential userCredential =
@@ -79,10 +94,10 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
       DatabaseReference databaseReference = (widget.isPassenger)
           ? FirebaseDatabase.instance
               .ref()
-              .child('drivers/${userCredential.user!.uid}')
+              .child('users/${userCredential.user!.uid}')
           : FirebaseDatabase.instance
               .ref()
-              .child('users/${userCredential.user!.uid}');
+              .child('drivers/${userCredential.user!.uid}');
 
       if (widget.isRegister) {
         Map<String, String> userMap = {
@@ -92,7 +107,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         };
 
         databaseReference.set(userMap);
-        log("Completed !");
+        log("Registration Completed!");
         return;
       }
 
@@ -100,54 +115,79 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         final snapshot = event.snapshot;
         if (snapshot.exists) {
           return;
-        } else {
-          return;
         }
       }).catchError((error) {
         return;
       });
+
+      if (widget.isPassenger) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RiderNavigationMenu.id,
+          (route) => false, // Removes all previous routes
+        );
+      }
+      await Future.delayed(const Duration(seconds: 1));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
           title: "Error",
-          message: "Invalid OTP Code !",
+          message: "Invalid OTP Code!",
           type: MessageType.error));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   void resendOTP() async {
     try {
+      setState(() {
+        isResendLoading = true;
+      });
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: widget.phoneNumber,
+        timeout: const Duration(seconds: 60),
+        forceResendingToken: forceResendingToken, // Ensure token is used
         verificationCompleted: (phoneAuthCredential) async {
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (error) {
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Error",
-              message: "Unable to verify the phone number !",
+              message: "Unable to verify the phone number!",
               type: MessageType.error));
         },
-        codeSent: (verificationId, forceResendingToken) {
+        codeSent: (verificationId, newResendToken) {
+          setState(() {
+            verificationIds = verificationId;
+            forceResendingToken = newResendToken; // Update the token
+            startCountdown(); // Restart countdown timer
+          });
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Success",
-              message: "OTP Sent to ${widget.phoneNumber} successfully !",
+              message: "OTP sent to ${widget.phoneNumber} successfully!",
               type: MessageType.success));
         },
         codeAutoRetrievalTimeout: (verificationId) {
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Error",
-              message: "Auto retrievel time out !",
+              message: "Auto retrieval timeout!",
               type: MessageType.error));
         },
       );
+
+      print("verificationIds");
+      print(verificationIds);
+      await Future.delayed(const Duration(seconds: 8));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
           title: "Error", message: e.toString(), type: MessageType.error));
+    } finally {
+      setState(() {
+        isResendLoading = false;
+      });
     }
-    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Success",
-        message: "OTP sent again to ${widget.phoneNumber} successfully !",
-        type: MessageType.success));
   }
 
   @override
@@ -195,18 +235,10 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
               enableActiveFill: true,
               errorAnimationController: errorController,
               controller: otpController,
-              onCompleted: (v) {
-                print("Completed: $v");
-              },
               onChanged: (value) {
-                print(value);
                 setState(() {
                   currentText = value;
                 });
-              },
-              beforeTextPaste: (text) {
-                print("Allowing to paste $text");
-                return true;
               },
             ),
             const SizedBox(height: 10),
@@ -218,23 +250,25 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
                         "Resend in $countdown s",
                         style: const TextStyle(color: Colors.grey),
                       )
-                    : GestureDetector(
-                        onTap: () {
-                          resendOTP();
-                          startCountdown();
-                        },
-                        child: const Text(
-                          "Resend",
-                          style: TextStyle(color: Color(0xFF0051ED)),
-                        ),
-                      ),
+                    : isResendLoading
+                        ? const Text(
+                            "Wait...",
+                            style: TextStyle(color: Colors.grey),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              resendOTP();
+                            },
+                            child: const Text(
+                              "Resend",
+                              style: TextStyle(color: Color(0xFF0051ED)),
+                            ),
+                          ),
               ],
             ),
             const SizedBox(height: 50),
             ElevatedButton(
-              onPressed: () {
-                validateOTP();
-              },
+              onPressed: validateOTP,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: const Color(0xFF0051ED),
@@ -242,12 +276,16 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
               ),
-              child: const Text(
-                "Verify",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : const Text(
+                      "Verify",
+                      style: TextStyle(color: Colors.white),
+                    ),
             ),
           ],
         ),
