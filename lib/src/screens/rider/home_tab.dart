@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:client/src/screens/rider/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -83,8 +84,6 @@ class _HomeTabState extends State<HomeTab> {
     });
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,7 +129,7 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ],
               ),
-              child: TextField(
+              child: const TextField(
                 decoration: InputDecoration(
                   hintText: "Pickup location",
                   border: InputBorder.none,
@@ -162,8 +161,16 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   SizedBox(height: 5),
                   GestureDetector(
-                    onTap: () {
-                      print("This is Ditector");
+                    onTap: () async {
+                      print("This is Ditector before");
+                      var response = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SearchPage()));
+                      print("This is Ditector after");
+                      print("This is response");
+                      print(response);
+                      print("this is aafter res");
                     },
                     child: Container(
                       padding:
