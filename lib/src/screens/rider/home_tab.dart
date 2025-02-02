@@ -23,7 +23,7 @@ class _HomeTabState extends State<HomeTab> {
     zoom: 14.4746,
   );
 
-  final Color customBlue = Color(0xFF0051ED); 
+  final Color customBlue = Color(0xFF0051ED);
 
   @override
   void initState() {
@@ -61,7 +61,8 @@ class _HomeTabState extends State<HomeTab> {
       LatLng pos = LatLng(position.latitude, position.longitude);
       CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 17);
 
-      mapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      mapController
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
       _setMapMarker(pos);
     } catch (e) {
@@ -75,25 +76,30 @@ class _HomeTabState extends State<HomeTab> {
         Marker(
           markerId: MarkerId("currentLocation"),
           position: position,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         ),
       );
     });
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-       
           GoogleMap(
-            padding: EdgeInsets.only(bottom: mapBottomPadding),
+            padding: EdgeInsets.only(
+              top: 100,
+              bottom: mapBottomPadding,
+            ),
             mapType: MapType.normal,
-            myLocationButtonEnabled: false,
+            myLocationButtonEnabled: true,
             myLocationEnabled: true,
             zoomGesturesEnabled: true,
-            zoomControlsEnabled: false,
+            zoomControlsEnabled: true,
             initialCameraPosition: _initialLocation,
             markers: _markers,
             onMapCreated: (GoogleMapController controller) {
@@ -101,14 +107,12 @@ class _HomeTabState extends State<HomeTab> {
               mapController = controller;
 
               setState(() {
-                mapBottomPadding = 80;
+                mapBottomPadding = 185;
               });
 
               _setUpPositionLocator();
             },
           ),
-
-          
           Positioned(
             top: 40,
             left: 20,
@@ -136,7 +140,6 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ),
-
           Positioned(
             left: 15,
             right: 15,
@@ -157,32 +160,40 @@ class _HomeTabState extends State<HomeTab> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   SizedBox(height: 5),
-                  
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Where are you going?",
-                        border: InputBorder.none,
+                  GestureDetector(
+                    onTap: () {
+                      print("This is Ditector");
+                    },
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Where are you going?",
+                              style: TextStyle(
+                                  color: Colors.black54, fontSize: 16),
+                            ),
+                          ),
+                          Icon(Icons.search, color: Colors.grey),
+                        ],
                       ),
                     ),
                   ),
                   SizedBox(height: 15),
-
-                 
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: customBlue, 
+                            backgroundColor: customBlue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -220,4 +231,3 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 }
-
