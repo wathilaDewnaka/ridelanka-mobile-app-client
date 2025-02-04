@@ -28,6 +28,13 @@ class _SearchPageState extends State<SearchPage> {
 
   void searchPlace(String placeName) async {
     print("search Page");
+
+    if (placeName.length <= 0) {
+      setState(() {
+        destinationPredictionList.clear();
+      });
+      print("this is clear");
+    }
     
 
     if (placeName.length > 0) {
