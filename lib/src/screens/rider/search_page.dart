@@ -2,6 +2,7 @@ import 'package:client/src/data_provider/prediction.dart';
 import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/widgets/brand_divier.dart';
+import 'package:client/src/widgets/prediction_tile.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
@@ -27,7 +28,9 @@ class _SearchPageState extends State<SearchPage> {
 
   void searchPlace(String placeName) async {
     print("search Page");
-    if (placeName.length > 1) {
+    
+
+    if (placeName.length > 0) {
       String countryCode = 'LK';
       String url =
           'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&types=geocode&components=country:$countryCode&key=$mapKey';
@@ -181,6 +184,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
+          
         ],
       ),
     );

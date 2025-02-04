@@ -38,6 +38,8 @@ dependencies:
   google_maps_flutter: ^2.10.0
   geolocator: ^13.0.2
   http: ^1.2.2
+  provider: ^6.1.2
+  outline_material_icons: ^1.0.0
 
 dev_dependencies:
   flutter_test:
