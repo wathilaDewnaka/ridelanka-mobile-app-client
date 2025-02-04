@@ -1,10 +1,12 @@
 import 'package:client/firebase_options.dart';
+import 'package:client/global_variable.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/screens/rider/vehicle_details.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +15,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  firebaseUser = FirebaseAuth.instance.currentUser;
   runApp(const MyApp());
 }
 
@@ -31,7 +35,7 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.blue, // Set a default color for the app
       ),
-      initialRoute: VehicleDetails.id,
+      initialRoute: SplashScreen.id,
       routes: {
         SplashScreen.id: (context) => const SplashScreen(),
         MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),

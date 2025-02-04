@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _navigateBasedOnUser() async {
     if (firebaseUser == null) {
-      Future.delayed(const Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const OnBoardScreen()),
         );
@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
       bool isPassenger =
           await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
-      Future.delayed(const Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => isPassenger
