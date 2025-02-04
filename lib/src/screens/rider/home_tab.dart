@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/rider/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -162,7 +164,6 @@ class _HomeTabState extends State<HomeTab> {
                   SizedBox(height: 5),
                   GestureDetector(
                     onTap: () async {
-                      print("This is Ditector before");
                       var response = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -170,6 +171,11 @@ class _HomeTabState extends State<HomeTab> {
 
                       if (response == 'getDirection') {
                         print("res recieved");
+                        var latestDestination =
+                            Provider.of<AppData>(context, listen: false)
+                                .destinationAddress;
+
+                        print("this is your Destination : ${latestDestination}");
                       }
                       print("This is Ditector after");
                       print("This is response");

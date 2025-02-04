@@ -1,4 +1,5 @@
 import 'package:client/src/data_provider/app_data.dart';
+import 'package:provider/provider.dart';
 import 'package:client/src/data_provider/prediction.dart';
 import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
@@ -6,7 +7,7 @@ import 'package:client/src/models/address.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
-import 'package:provider/provider.dart';
+
 
 class PredictionTile extends StatelessWidget {
   final Prediction prediction;
