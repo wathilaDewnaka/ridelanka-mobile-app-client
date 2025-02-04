@@ -167,6 +167,10 @@ class _HomeTabState extends State<HomeTab> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => SearchPage()));
+
+                      if (response == 'getDirection') {
+                        print("res recieved");
+                      }
                       print("This is Ditector after");
                       print("This is response");
                       print(response);
