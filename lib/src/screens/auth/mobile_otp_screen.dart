@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -124,6 +125,12 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         Navigator.pushNamedAndRemoveUntil(
           context,
           RiderNavigationMenu.id,
+          (route) => false, // Removes all previous routes
+        );
+      } else {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          DriverDashboard.id,
           (route) => false, // Removes all previous routes
         );
       }
