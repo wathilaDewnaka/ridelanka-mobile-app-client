@@ -1,7 +1,6 @@
 import 'package:client/src/widgets/brand_divier.dart';
 import 'package:flutter/material.dart';
 
-
 class SearchPage extends StatefulWidget {
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -21,12 +20,9 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
- 
-
   @override
   Widget build(BuildContext context) {
     setFocus();
-
 
     return Scaffold(
       body: Column(
@@ -128,7 +124,7 @@ class _SearchPageState extends State<SearchPage> {
                               },
                               focusNode: focusDestination,
                               controller: destinationController,
-                              decoration:const InputDecoration(
+                              decoration: const InputDecoration(
                                   hintText: 'Where to?',
                                   fillColor: Color(0xFFe2e2e2),
                                   filled: true,
@@ -146,8 +142,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
           ),
-          
-          
         ],
       ),
     );
