@@ -126,7 +126,16 @@ class NotificationTab extends StatelessWidget {
                                       color: Colors.black87,
                                     ),
                                   ),
-                                  
+                                  const SizedBox(width: 10),
+                                  if (!notification.isRead)
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: mainBlue,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                                 ],
                               ),
                             ],
