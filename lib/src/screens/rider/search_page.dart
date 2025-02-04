@@ -1,3 +1,6 @@
+import 'package:client/src/data_provider/prediction.dart';
+import 'package:client/src/globle_variable.dart';
+import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/widgets/brand_divier.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +20,41 @@ class _SearchPageState extends State<SearchPage> {
     if (!focused) {
       FocusScope.of(context).requestFocus(focusDestination);
       focused = true;
+    }
+  }
+
+  List<Prediction> destinationPredictionList = [];
+
+  void searchPlace(String placeName) async {
+    print("search Page");
+    if (placeName.length > 1) {
+      String countryCode = 'LK';
+      String url =
+          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&types=geocode&components=country:$countryCode&key=$mapKey';
+
+      var response = await RequestHelper.getRequest(url);
+      print("res ok");
+      print(response);
+
+      if (response == 'failed') {
+        print("res faild");
+        return;
+      }
+
+      if (response['status'] == 'OK') {
+        print("status ok");
+        var predictionJson = response['predictions'];
+
+        var thisList = (predictionJson as List)
+            .map((e) => Prediction.fromJson(e))
+            .toList();
+
+        setState(() {
+          destinationPredictionList = thisList;
+          print("this is Destination List : ");
+          print(destinationPredictionList.toString());
+        });
+      }
     }
   }
 
@@ -121,6 +159,7 @@ class _SearchPageState extends State<SearchPage> {
                             child: TextField(
                               onChanged: (value) {
                                 print("this is destination");
+                                searchPlace(value);
                               },
                               focusNode: focusDestination,
                               controller: destinationController,
