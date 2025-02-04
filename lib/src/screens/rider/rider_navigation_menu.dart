@@ -45,7 +45,7 @@ class _RiderNavigationMenuState extends State<RiderNavigationMenu>
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: tabController,
-        children: [HomeTab(), HistoryTab(), NotificationsTab(), ProfileTab()],
+        children: [HomeTab(), NotificationTab(), HistoryTab(), ProfileTab()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
