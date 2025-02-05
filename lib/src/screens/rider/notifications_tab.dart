@@ -153,7 +153,7 @@ class NotificationTab extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '${notification.time}',
+                               _formatTime(notification.time),
                                 style: TextStyle(
                                   color: Colors.grey[400],
                                   fontSize: 12,
@@ -173,5 +173,18 @@ class NotificationTab extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    final difference = now.difference(time);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${time.day}/${time.month}/${time.year}';
+    }
   }
 }
