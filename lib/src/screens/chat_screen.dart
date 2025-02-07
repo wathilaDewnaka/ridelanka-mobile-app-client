@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -18,6 +19,18 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+
+  late String receiverId;
+  late String receiverName;
+  int countMsg = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    receiverId = widget.recieverUid;
+    receiverName = widget.recieverName;
+  }
 
   void _makePhoneCall() async {
     String phoneNumber = widget.recieverTel;
@@ -44,8 +57,8 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: const Color(0xFF0051ED),
         title: Row(
           children: [
-            const Text(
-              "Sample Name",
+            Text(
+              receiverName,
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             const Spacer(),
