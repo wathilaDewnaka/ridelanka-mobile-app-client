@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen(
@@ -18,6 +19,17 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
 
+  void _makePhoneCall() async {
+    String phoneNumber = widget.recieverTel;
+
+    final Uri url = Uri.parse('tel:$phoneNumber');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +41,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Navigator.pop(context); // Go back to the previous screen
           },
         ),
-        backgroundColor: Color(0xFF0051ED),
+        backgroundColor: const Color(0xFF0051ED),
         title: Row(
           children: [
             const Text(
@@ -39,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
             const Spacer(),
             GestureDetector(
               child: const Icon(Icons.call, color: Colors.white),
-              onTap: () {},
+              onTap: _makePhoneCall,
             ),
           ],
         ),
