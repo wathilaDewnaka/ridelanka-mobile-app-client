@@ -23,7 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
+          icon: const Icon(Icons.arrow_back,
               color: Colors.white, size: 24), // Small back button
           onPressed: () {
             Navigator.pop(context); // Go back to the previous screen
@@ -32,9 +32,14 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: Color(0xFF0051ED),
         title: Row(
           children: [
-            Text(
+            const Text(
               "Sample Name",
               style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            const Spacer(),
+            GestureDetector(
+              child: const Icon(Icons.call, color: Colors.white),
+              onTap: () {},
             ),
           ],
         ),
@@ -43,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(child: Container()),
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
@@ -57,18 +62,18 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         vertical: 10,
                         horizontal: 20,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 CircleAvatar(
                   backgroundColor: Color(0xFF0051ED),
                   child: IconButton(
-                    icon: Icon(Icons.send, color: Colors.white),
+                    icon: const Icon(Icons.send, color: Colors.white),
                     onPressed: () {},
                   ),
                 ),
