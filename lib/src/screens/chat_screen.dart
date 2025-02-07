@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({
-    super.key,
-    required this.recieverName,
-	required this.recieverUid,
-	required this.recieverTel
-  });
+  const ChatScreen(
+      {super.key,
+      required this.recieverName,
+      required this.recieverUid,
+      required this.recieverTel});
 
   final String recieverName;
   final String recieverUid;
@@ -23,6 +22,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,
+              color: Colors.white, size: 24), // Small back button
+          onPressed: () {
+            Navigator.pop(context); // Go back to the previous screen
+          },
+        ),
         backgroundColor: Color(0xFF0051ED),
         title: Row(
           children: [
