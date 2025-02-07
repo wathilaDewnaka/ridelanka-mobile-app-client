@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({
+    super.key,
+    required this.recieverName,
+	required this.recieverUid,
+	required this.recieverTel
+  });
+
+  final String recieverName;
+  final String recieverUid;
+  final String recieverTel;
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
