@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:client/src/data_provider/app_data.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/rider/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -67,6 +68,8 @@ class _HomeTabState extends State<HomeTab> {
       mapController
           .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
+      String address =
+          await HelperMethods.findCordinateAddress(currentPosition, context);
       _setMapMarker(pos);
     } catch (e) {
       print('Error while getting location: $e');
@@ -131,12 +134,33 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                 ],
               ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  hintText: "Pickup location",
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.grey),
-                  suffixIcon: Icon(Icons.close, color: Colors.grey),
+              child: Container(
+                height: 50,
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        Provider.of<AppData>(context)
+                                .pickupAddress
+                                ?.placeName ??
+                            "Pickup Location",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(Icons.close, color: Colors.grey),
+                  ],
                 ),
               ),
             ),
@@ -175,7 +199,8 @@ class _HomeTabState extends State<HomeTab> {
                             Provider.of<AppData>(context, listen: false)
                                 .destinationAddress;
 
-                        print("this is your Destination : ${latestDestination}");
+                        print(
+                            "this is your Destination : ${latestDestination}");
                       }
                       print("This is Ditector after");
                       print("This is response");

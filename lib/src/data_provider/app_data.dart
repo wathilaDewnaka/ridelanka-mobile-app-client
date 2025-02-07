@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class AppData extends ChangeNotifier {
   Address pickupAddress = Address(
-    placeName: 'Add Home',
+    placeName: 'Pickup Location',
     latitude: 0.0,
     longituge: 0.0,
     placeId: '',

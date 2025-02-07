@@ -6,9 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class HelperMethods {
-
   static Future<String> findCordinateAddress(Position position, context) async {
-    
+    print("this is position ");
+    print(position);
     String placeAddress = '';
 
     String url =
@@ -16,10 +16,12 @@ class HelperMethods {
 
     var response = await RequestHelper.getRequest(url);
     print('this is res :');
+    print(response);
+    print(url);
 
     if (response != 'failed') {
       placeAddress = response['results'][0]['formatted_address'];
-
+      print('this is res :' + placeAddress);
       Address pickupAddress = new Address(
           placeId: '',
           latitude: position.latitude,
