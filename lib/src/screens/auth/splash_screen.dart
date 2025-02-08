@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    _navigateBasedOnUser();
+    // _navigateBasedOnUser();
   }
 
   Future<void> _navigateBasedOnUser() async {
@@ -70,9 +70,10 @@ class _SplashScreenState extends State<SplashScreen> {
             // Logo
             Image.asset(
               "assets/images/splash_screen/van.png",
-              height: 200,
+              width: 325,
+              height: 220,
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 14),
             // App Name
             const Text(
               "RideLanka",

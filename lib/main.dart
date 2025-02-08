@@ -39,7 +39,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: SplashScreen.id,
       routes: {
-        SplashScreen.id: (context) => ChatScreen(recieverName: "recieverName", recieverUid: "recieverUid", recieverTel: "+94770891499"),
+        SplashScreen.id: (context) => SplashScreen(),
+        // SplashScreen.id: (context) => ChatScreen(recieverName: "recieverName", recieverUid: "recieverUid", recieverTel: "+94770891499"),
         MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
         MobileLoginScreen.id: (context) => const MobileLoginScreen(),
         RiderNavigationMenu.id: (context) => const RiderNavigationMenu(),

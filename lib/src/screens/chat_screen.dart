@@ -1,3 +1,4 @@
+import 'package:client/global_variable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -43,6 +44,20 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void sendMessage() {
+    if (_messageController.text.isNotEmpty) {
+      final messageData = {
+        'text': _messageController.text,
+        'sender': firebaseUser!.uid,
+        'receiver': receiverId,
+        'timestamp': ServerValue.timestamp,
+      };
+
+      _dbRef.child('messages').push().set(messageData);
+      _messageController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,13 +74,12 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Text(
               receiverName,
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
             const Spacer(),
-            GestureDetector(
-              child: const Icon(Icons.call, color: Colors.white),
-              onTap: _makePhoneCall,
-            ),
+            IconButton(
+                onPressed: _makePhoneCall,
+                icon: const Icon(Icons.call, color: Colors.white))
           ],
         ),
       ),
@@ -96,10 +110,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(width: 8),
                 CircleAvatar(
-                  backgroundColor: Color(0xFF0051ED),
+                  backgroundColor: const Color(0xFF0051ED),
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: () {},
+                    onPressed: sendMessage,
                   ),
                 ),
               ],
