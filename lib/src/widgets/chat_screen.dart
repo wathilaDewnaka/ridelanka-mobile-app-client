@@ -24,7 +24,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   late String receiverId;
   late String receiverName;
-  int countMsg = 0;
 
   @override
   void initState() {
@@ -63,10 +62,9 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Colors.white, size: 24), // Small back button
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
           onPressed: () {
-            Navigator.pop(context); // Go back to the previous screen
+            Navigator.pop(context);
           },
         ),
         backgroundColor: const Color(0xFF0051ED),
@@ -85,7 +83,76 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          Expanded(child: Container()),
+          Expanded(
+            child: StreamBuilder(
+              stream:
+                  _dbRef.child('messages').orderByChild('timestamp').onValue,
+              builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                var data = snapshot.data!.snapshot.value;
+                if (data == null) {
+                  return const Center(
+                      child: Text("No messages yet. Start a conversation!"));
+                }
+
+                Map<dynamic, dynamic> messagesMap =
+                    data as Map<dynamic, dynamic>;
+
+                List<Map<String, dynamic>> messages = messagesMap.entries
+                    .map((entry) => {
+                          'text': entry.value['text'],
+                          'sender': entry.value['sender'],
+                          'receiver': entry.value['receiver'],
+                          'timestamp': entry.value['timestamp'] ?? 0,
+                        })
+                    .where((message) =>
+                        (message['sender'] == firebaseUser!.uid &&
+                            message['receiver'] == receiverId))
+                    .toList();
+
+                messages
+                    .sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
+
+                // If no messages match the criteria
+                if (messages.isEmpty) {
+                  return const Center(
+                      child: Text("No messages found.! Start a conversation"));
+                }
+
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    var message = messages[index];
+                    bool isMe = message['sender'] == firebaseUser!.uid;
+
+                    return Align(
+                      alignment:
+                          isMe ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color:
+                              isMe ? const Color(0xFF0051ED) : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          message['text'],
+                          style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
