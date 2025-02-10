@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/rider/search_page.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -271,5 +272,9 @@ class _HomeTabState extends State<HomeTab> {
         ],
       ),
     );
+
+    
   }
+
+  
 }
