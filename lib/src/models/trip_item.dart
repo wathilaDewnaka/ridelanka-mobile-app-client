@@ -6,6 +6,8 @@ class TripItem {
   final double price;
   final String vehicleType;
   final String expDate;
+  final String driverName;
+  final String driverId;
 
   TripItem(
       {required this.id,
@@ -14,8 +16,10 @@ class TripItem {
       required this.status,
       required this.price,
       required this.vehicleType,
-      required this.expDate});
+      required this.expDate,
+      required this.driverName,
+      required this.driverId
+      });
 }
-
 
 enum TripStatus { active, inactive }
