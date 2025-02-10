@@ -3,7 +3,6 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
-import 'package:client/src/screens/driver/trips_screen.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
@@ -40,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: SplashScreen.id,
       routes: {
-        SplashScreen.id: (context) => TripScreen(),
+        SplashScreen.id: (context) => RiderNavigationMenu(),
         // SplashScreen.id: (context) => ChatScreen(recieverName: "recieverName", recieverUid: "recieverUid", recieverTel: "+94770891499"),
         MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
         MobileLoginScreen.id: (context) => const MobileLoginScreen(),
