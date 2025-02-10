@@ -1,4 +1,5 @@
 import 'package:client/src/models/trip_item.dart';
+import 'package:client/src/widgets/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 class HistoryTab extends StatefulWidget {
@@ -315,28 +316,37 @@ class _HistoryTabState extends State<HistoryTab> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: Colors.blue,
-                                      child: Text(
-                                        trips[index].driverName[0],
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatScreen(recieverName: trips[index].driverName[0], recieverUid: trips[index].driverId, recieverTel: "")),
+                                    );
+                                  },
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 24,
+                                        backgroundColor: Colors.blue,
+                                        child: Text(
+                                          trips[index].driverName[0],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      trips[index].driverName.split(" ")[0],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        trips[index].driverName.split(" ")[0],
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 ElevatedButton.icon(
                                   onPressed: () {},
