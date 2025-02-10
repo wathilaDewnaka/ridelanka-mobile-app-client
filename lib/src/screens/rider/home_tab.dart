@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/models/direction_details.dart';
 import 'package:client/src/screens/rider/search_page.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,8 @@ class _HomeTabState extends State<HomeTab> {
 
   Set<Marker> _markers = {};
   late Position currentPosition;
+
+  DirectionDetails? tripDirectionDetails;
 
   static final CameraPosition _initialLocation = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -200,6 +203,8 @@ class _HomeTabState extends State<HomeTab> {
                             Provider.of<AppData>(context, listen: false)
                                 .destinationAddress;
 
+                        await getDirection();
+
                         print(
                             "this is your Destination : ${latestDestination}");
                       }
@@ -272,9 +277,32 @@ class _HomeTabState extends State<HomeTab> {
         ],
       ),
     );
-
-    
   }
 
-  
+  Future<void> getDirection() async {
+    var pickup = Provider.of<AppData>(context, listen: false).pickupAddress;
+    var destination =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+
+    var pickLatLng = LatLng(pickup.latitude, pickup.longituge);
+    var destinationLatLng = LatLng(destination.latitude, destination.longituge);
+
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'));
+
+    var thisDetails =
+        await HelperMethods.getDirectionDetails(pickLatLng, destinationLatLng);
+
+    setState(() {
+      tripDirectionDetails = thisDetails;
+    });
+
+    Navigator.pop(context);
+
+    print("print details");
+    print(thisDetails?.encodedPoints);
+  }
 }
