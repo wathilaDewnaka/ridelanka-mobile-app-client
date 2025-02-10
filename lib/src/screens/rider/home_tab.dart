@@ -329,7 +329,7 @@ class _HomeTabState extends State<HomeTab> {
       setState(() {
         Polyline polyline = Polyline(
             polylineId: PolylineId('polyid'),
-            color: Color.fromARGB(255, 95, 109, 237),
+            color: Color(0xFF0051ED),
             points: polylineCoordinates,
             jointType: JointType.round,
             width: 4,
@@ -377,7 +377,7 @@ class _HomeTabState extends State<HomeTab> {
         markerId: MarkerId('destination'),
         position: destinationLatLng,
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: pickup.placeName, snippet: 'Destination'),
+        infoWindow: InfoWindow(title: destination.placeName, snippet: 'Destination'),
       );
 
       setState(() {
