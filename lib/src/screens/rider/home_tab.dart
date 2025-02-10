@@ -5,6 +5,7 @@ import 'package:client/src/models/direction_details.dart';
 import 'package:client/src/screens/rider/search_page.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,11 @@ class _HomeTabState extends State<HomeTab> {
   late GoogleMapController mapController;
   double mapBottomPadding = 0;
 
-  Set<Marker> _markers = {};
+  List<LatLng> polylineCoordinates = [];
+  Set<Polyline> _polylines = {};
+  Set<Marker> _Markers = {};
+  Set<Circle> _Circles = {};
+
   late Position currentPosition;
 
   DirectionDetails? tripDirectionDetails;
@@ -82,7 +87,7 @@ class _HomeTabState extends State<HomeTab> {
 
   void _setMapMarker(LatLng position) {
     setState(() {
-      _markers.add(
+      _Markers.add(
         Marker(
           markerId: MarkerId("currentLocation"),
           position: position,
@@ -109,7 +114,9 @@ class _HomeTabState extends State<HomeTab> {
             zoomGesturesEnabled: true,
             zoomControlsEnabled: true,
             initialCameraPosition: _initialLocation,
-            markers: _markers,
+            markers: _Markers,
+            polylines: _polylines,
+            circles: _Circles,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
               mapController = controller;
@@ -304,5 +311,101 @@ class _HomeTabState extends State<HomeTab> {
 
     print("print details");
     print(thisDetails?.encodedPoints);
+
+    if (thisDetails != null) {
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> results =
+          polylinePoints.decodePolyline(thisDetails.encodedPoints);
+
+      polylineCoordinates.clear();
+
+      if (results.isNotEmpty) {
+        results.forEach((PointLatLng point) =>
+            {polylineCoordinates.add(LatLng(point.latitude, point.longitude))});
+      }
+
+      _polylines.clear();
+
+      setState(() {
+        Polyline polyline = Polyline(
+            polylineId: PolylineId('polyid'),
+            color: Color.fromARGB(255, 95, 109, 237),
+            points: polylineCoordinates,
+            jointType: JointType.round,
+            width: 4,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            geodesic: true);
+
+        _polylines.add(polyline);
+      });
+
+
+      // make the polyline fit to the map
+      LatLngBounds bounds;
+
+      if (pickLatLng.latitude > destinationLatLng.latitude &&
+          pickLatLng.longitude > destinationLatLng.longitude) {
+        bounds =
+            LatLngBounds(southwest: destinationLatLng, northeast: pickLatLng);
+      } else if (pickLatLng.longitude > destinationLatLng.longitude) {
+        bounds = LatLngBounds(
+            southwest: LatLng(pickLatLng.latitude, destinationLatLng.longitude),
+            northeast:
+                LatLng(destinationLatLng.latitude, pickLatLng.longitude));
+      } else if (pickLatLng.latitude > destinationLatLng.latitude) {
+        bounds = LatLngBounds(
+            southwest: LatLng(destinationLatLng.latitude, pickLatLng.longitude),
+            northeast:
+                LatLng(pickLatLng.latitude, destinationLatLng.longitude));
+      } else {
+        bounds =
+            LatLngBounds(southwest: pickLatLng, northeast: destinationLatLng);
+      }
+
+
+      mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
+
+      Marker pickupMarker = Marker(
+        markerId: MarkerId('pickup'),
+        position: pickLatLng,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: InfoWindow(title: pickup.placeName, snippet: 'My Location'),
+      );
+
+      Marker destinationMarker = Marker(
+        markerId: MarkerId('destination'),
+        position: destinationLatLng,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(title: pickup.placeName, snippet: 'Destination'),
+      );
+
+      setState(() {
+        _Markers.add(pickupMarker);
+        _Markers.add(destinationMarker);
+      });
+
+      Circle pickupCircle = Circle(
+          circleId: CircleId('pickup'),
+          strokeColor: Colors.green,
+          strokeWidth: 3,
+          radius: 12,
+          center: pickLatLng,
+          fillColor: Color(0xFF40cf89));
+
+      Circle destinationCircle = Circle(
+          circleId: CircleId('destination'),
+          strokeColor: Color(0xFF4f5cd1),
+          strokeWidth: 3,
+          radius: 12,
+          center: destinationLatLng,
+          fillColor: Color(0xFF4f5cd1));
+
+      setState(() {
+        _Circles.add(pickupCircle);
+        _Circles.add(destinationCircle);
+      });
+
+    }
   }
 }

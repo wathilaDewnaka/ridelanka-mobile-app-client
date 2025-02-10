@@ -40,6 +40,7 @@ dependencies:
   http: ^1.2.2
   provider: ^6.1.2
   outline_material_icons: ^1.0.0
+  flutter_polyline_points: ^2.1.0
 
 dev_dependencies:
   flutter_test:
