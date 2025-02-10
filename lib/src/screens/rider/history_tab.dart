@@ -17,7 +17,7 @@ class _HistoryTabState extends State<HistoryTab> {
       id: "T1001",
       source: "New York",
       destination: "Los Angeles",
-      status: TripStatus.active,
+      status: TripStatus.inactive,
       driverId: "",
       driverName: "Wathila Dewnaka",
       price: 299.99,
@@ -45,6 +45,19 @@ class _HistoryTabState extends State<HistoryTab> {
         vehicleType: "Premium",
         expDate: ""),
   ];
+
+  List<TripItem> getFilteredTrips() {
+    switch (selectedFilter) {
+      case 'Active Rides':
+        return trips.where((trip) => trip.status == TripStatus.active).toList();
+      case 'Inactive Rides':
+        return trips
+            .where((trip) => trip.status == TripStatus.inactive)
+            .toList();
+      default:
+        return trips;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +152,9 @@ class _HistoryTabState extends State<HistoryTab> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(top: 8, bottom: 20),
-                itemCount: trips.length,
+                itemCount: getFilteredTrips().length,
                 itemBuilder: (context, index) {
-                  TripItem trip = trips[index];
+                  TripItem trip = getFilteredTrips()[index];
                   return Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
