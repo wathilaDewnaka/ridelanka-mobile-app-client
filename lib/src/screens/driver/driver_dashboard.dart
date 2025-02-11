@@ -60,6 +60,25 @@ class DriverHome {
             ],
           ),
           const SizedBox(height: 50),
+
+          // Button Grid
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16.0),
+              crossAxisSpacing: 16.0,
+              mainAxisSpacing: 16.0,
+              children: [
+                MenuButton(
+                  iconImage: '',
+                  label: "Add",
+                  onPressed: () {
+                    print("Add pressed");
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
