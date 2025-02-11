@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:client/src/models/notification_item.dart';
 
 class NotificationTab extends StatelessWidget {
-  NotificationTab({Key? key}) : super(key: key);
+  NotificationTab({super.key});
 
   static const Color mainBlue = Color(0xFF0051ED);
 

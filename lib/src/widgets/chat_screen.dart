@@ -1,4 +1,5 @@
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/encrypt_methods.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,12 +25,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   late String receiverId;
   late String receiverName;
+  late String senderId;
 
   @override
   void initState() {
     super.initState();
     receiverId = widget.recieverUid;
     receiverName = widget.recieverName;
+    senderId = firebaseUser!.uid;
   }
 
   void _makePhoneCall() async {
@@ -44,17 +47,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMessage() {
+    print("object");
     if (_messageController.text.isNotEmpty) {
+      print("object2");
       final messageData = {
-        'text': _messageController.text,
-        'sender': firebaseUser!.uid,
-        'receiver': receiverId,
+        'text': EncryptMethods.encryptText(_messageController.text),
+        'sender': EncryptMethods.encryptText(senderId),
+        'receiver': EncryptMethods.encryptText(receiverId),
         'timestamp': ServerValue.timestamp,
       };
 
       _dbRef.child('messages').push().set(messageData);
+      print("object3");
       _messageController.clear();
     }
+    print("object4");
   }
 
   @override
@@ -94,7 +101,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 var data = snapshot.data!.snapshot.value;
                 if (data == null) {
-                  return const Center(
+                  return const Align(
+                      alignment: Alignment.bottomCenter,
                       child: Text("No messages yet. Start a conversation!"));
                 }
 
@@ -103,14 +111,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 List<Map<String, dynamic>> messages = messagesMap.entries
                     .map((entry) => {
-                          'text': entry.value['text'],
-                          'sender': entry.value['sender'],
-                          'receiver': entry.value['receiver'],
+                          'text':
+                              EncryptMethods.decryptText(entry.value['text']),
+                          'sender':
+                              EncryptMethods.decryptText(entry.value['sender']),
+                          'receiver': EncryptMethods.decryptText(
+                              entry.value['receiver']),
                           'timestamp': entry.value['timestamp'] ?? 0,
                         })
-                    .where((message) =>
-                        (message['sender'] == firebaseUser!.uid &&
-                            message['receiver'] == receiverId))
+                    .where((message) => (message['sender'] == senderId &&
+                        message['receiver'] == receiverId))
                     .toList();
 
                 messages
@@ -118,8 +128,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 // If no messages match the criteria
                 if (messages.isEmpty) {
-                  return const Center(
-                      child: Text("No messages found.! Start a conversation"));
+                  return const Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Text("No messages yet. Start a conversation!"));
                 }
 
                 return ListView.builder(
@@ -127,7 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     var message = messages[index];
-                    bool isMe = message['sender'] == firebaseUser!.uid;
+                    bool isMe = message['sender'] == senderId;
 
                     return Align(
                       alignment:

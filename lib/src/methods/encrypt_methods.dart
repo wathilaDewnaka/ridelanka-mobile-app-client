@@ -2,12 +2,11 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'dart:convert';
 
 class EncryptMethods {
-  // https://medium.com/@afridi.khondakar/how-to-encrypt-decrypt-data-in-dart-flutter-a-guide-to-encrypting-and-decrypting-data-65d733b6dd99
-  static const String _key = "thisistheridelankaproject12345678";
+  static const String _key = "thisisridelanka!"; // 16-byte key for AES-128
 
   static String encryptText(String plainText) {
     final key = encrypt.Key.fromUtf8(_key);
-    final iv = encrypt.IV.fromLength(16);
+    final iv = encrypt.IV.fromLength(16); // IV should be 16 bytes for AES-CBC
 
     final encrypter =
         encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
@@ -20,7 +19,6 @@ class EncryptMethods {
     final key = encrypt.Key.fromUtf8(_key);
 
     final parts = encryptedText.split(":");
-
     if (parts.length != 2) {
       return "Invalid encrypted data";
     }

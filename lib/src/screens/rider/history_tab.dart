@@ -230,7 +230,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                   ),
                                   Text(
                                     'Rs.${trip.price.toStringAsFixed(2)}/Month',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: mainBlue,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -247,7 +247,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                       color: mainBlue.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.location_on,
                                       color: mainBlue,
                                       size: 20,
@@ -331,7 +331,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                         backgroundColor: Colors.blue,
                                         child: Text(
                                           trips[index].driverName[0],
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
