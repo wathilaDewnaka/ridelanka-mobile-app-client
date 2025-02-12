@@ -76,6 +76,19 @@ class DriverHome {
                     print("Add pressed");
                   },
                 ),
+                MenuButton(
+                  iconImage: '',
+                  label: "Attendance",
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AttendancePage(),
+                      ),
+                    );
+                    print("Attendance pressed");
+                  },
+                ),
               ],
             ),
           ),
