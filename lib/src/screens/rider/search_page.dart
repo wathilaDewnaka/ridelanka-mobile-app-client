@@ -62,7 +62,6 @@ class _SearchPageState extends State<SearchPage> {
 
         setState(() {
           destinationPredictionList = thisList;
-          print("this is Destination List : ");
           print(destinationPredictionList.toString());
         });
       }

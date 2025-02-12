@@ -244,8 +244,11 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          MaterialPageRoute(
-                              builder: (context) => VehicleDetails());
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      VehicleDetails(isStudent: true)));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: customBlue,
@@ -266,7 +269,8 @@ class _HomeTabState extends State<HomeTab> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => VehicleDetails()));
+                                  builder: (context) =>
+                                      VehicleDetails(isStudent: false)));
                         },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: customBlue),

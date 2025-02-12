@@ -127,7 +127,8 @@ class HelperMethods {
     }
   }
 
-  static Future<Map<String, dynamic>?> fetchVehicleDetails() async {
+  static Future<Map<String, dynamic>?> fetchVehicleDetails(
+      bool isStudent) async {
     try {
       final DatabaseEvent event =
           await FirebaseDatabase.instance.ref('drivers').once();
@@ -139,13 +140,16 @@ class HelperMethods {
         Map<String, dynamic> filteredDetails = {};
 
         driversData.forEach((uid, driverData) {
-          if (driverData['location'] != null) {
-            filteredDetails[uid] = {
-              'startLat': driverData['location']['startLat'],
-              'startLng': driverData['location']['startLng'],
-              'endLat': driverData['location']['endLat'],
-              'endLng': driverData['location']['endLng']
-            };
+          if (!(isStudent) && driverData['type'] == 'staff' ||
+              isStudent && driverData['type'] == 'student') {
+            if (driverData['location'] != null) {
+              filteredDetails[uid] = {
+                'startLat': driverData['location']['startLat'],
+                'startLng': driverData['location']['startLng'],
+                'endLat': driverData['location']['endLat'],
+                'endLng': driverData['location']['endLng']
+              };
+            }
           }
         });
 
@@ -160,9 +164,11 @@ class HelperMethods {
     }
   }
 
-  static Future<List<String>> findNearestVehicles(BuildContext context) async {
+  static Future<List<String>> findNearestVehicles(
+      BuildContext context, bool isStudent) async {
     // Fetch vehicle details
-    Map<String, dynamic>? vehiclesDetails = await fetchVehicleDetails();
+    Map<String, dynamic>? vehiclesDetails =
+        await fetchVehicleDetails(isStudent);
     List<String> stringList = [];
 
     if (vehiclesDetails != null) {
@@ -213,9 +219,8 @@ class HelperMethods {
           }
 
           if (isStartNearby && isEndNearby) {
-            stringList.add(uid); 
+            stringList.add(uid);
           }
-
         } else {
           print('Direction details not available for UID: $uid');
         }

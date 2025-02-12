@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
           MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
           MobileLoginScreen.id: (context) => const MobileLoginScreen(),
           RiderNavigationMenu.id: (context) => const RiderNavigationMenu(),
-          VehicleDetails.id: (context) => VehicleDetails(),
+          // VehicleDetails.id: (context) => VehicleDetails(),
           DriverDashboard.id: (context) => const DriverDashboard()
         },
       ),

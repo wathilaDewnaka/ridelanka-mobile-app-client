@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    // _navigateBasedOnUser();
+    _navigateBasedOnUser();
   }
 
   Future<void> _navigateBasedOnUser() async {
