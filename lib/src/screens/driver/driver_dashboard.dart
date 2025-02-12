@@ -88,7 +88,15 @@ class DriverHome {
                     );
                     print("Attendance pressed");
                   },
-                ),
+                ), // attendance button
+
+                MenuButton(
+                  iconImage: '',
+                  label: "View",
+                  onPressed: () {
+                    print("View pressed");
+                  },
+                ), // view button
               ],
             ),
           ),
