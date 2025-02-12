@@ -13,8 +13,14 @@ class VehicleDetails extends StatefulWidget {
 class _VehicleDetailsState extends State<VehicleDetails> {
   @override
   void initState() {
-    // TODO: implement initState
-    HelperMethods.fetchVehicleDetails();
+    super.initState();
+    _initializeAsyncTasks();
+  }
+
+  Future<void> _initializeAsyncTasks() async {
+    List<String> vehicles = await HelperMethods.findNearestVehicles(context);
+    print("Vehicles are");
+    print(vehicles);
   }
 
   final List<Map<String, String>> rides = [

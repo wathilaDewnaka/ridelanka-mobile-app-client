@@ -5,6 +5,8 @@ import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/models/address.dart';
 import 'package:client/src/models/direction_details.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -125,16 +127,15 @@ class HelperMethods {
     }
   }
 
-  
-  static Future<void> fetchVehicleDetails() async {
-    Map <String, dynamic>? vehicleDetailsList;
+  static Future<Map<String, dynamic>?> fetchVehicleDetails() async {
     try {
-      final DatabaseEvent event = await FirebaseDatabase.instance.ref('drivers').once();
+      final DatabaseEvent event =
+          await FirebaseDatabase.instance.ref('drivers').once();
       final data = event.snapshot.value;
 
       if (data != null) {
-        Map<String, dynamic> driversData = Map<String, dynamic>.from(data as Map);
-
+        Map<String, dynamic> driversData =
+            Map<String, dynamic>.from(data as Map);
         Map<String, dynamic> filteredDetails = {};
 
         driversData.forEach((uid, driverData) {
@@ -148,18 +149,88 @@ class HelperMethods {
           }
         });
 
-        vehicleDetailsList = filteredDetails;
-      
-        print('Filtered Vehicle Details: $vehicleDetailsList');
+        return filteredDetails; // Returning the filtered details
       } else {
         print('No data available for any drivers.');
+        return null;
       }
     } catch (e) {
       print('Error fetching data: $e');
+      return null;
     }
   }
 
-  static int haversine(Position start, Position end) {
+  static Future<List<String>> findNearestVehicles(BuildContext context) async {
+    // Fetch vehicle details
+    Map<String, dynamic>? vehiclesDetails = await fetchVehicleDetails();
+    List<String> stringList = [];
+
+    if (vehiclesDetails != null) {
+      for (var entry in vehiclesDetails.entries) {
+        var uid = entry.key;
+        var vehicleData = entry.value;
+
+        LatLng start = LatLng(vehicleData['startLat'], vehicleData['startLng']);
+        LatLng end = LatLng(vehicleData['endLat'], vehicleData['endLng']);
+
+        var directionDetails = await getDirectionDetails(start, end);
+
+        if (directionDetails != null) {
+          PolylinePoints polylinePoints = PolylinePoints();
+
+          List<PointLatLng> decodedPoints =
+              polylinePoints.decodePolyline(directionDetails.encodedPoints);
+
+          bool isStartNearby = false;
+          bool isEndNearby = false;
+
+          LatLng pickDestination = LatLng(
+            Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
+            Provider.of<AppData>(context, listen: false)
+                .pickupAddress
+                .longituge,
+          );
+
+          LatLng userDestination = LatLng(
+            Provider.of<AppData>(context, listen: false)
+                .destinationAddress
+                .latitude,
+            Provider.of<AppData>(context, listen: false)
+                .destinationAddress
+                .longituge,
+          );
+
+          for (PointLatLng point in decodedPoints) {
+            LatLng positionOnWay = LatLng(point.latitude, point.longitude);
+
+            if (haversine(positionOnWay, userDestination) < 5) {
+              isEndNearby = true;
+            }
+
+            if (haversine(positionOnWay, pickDestination) < 5) {
+              isStartNearby = true;
+            }
+          }
+
+          if (isStartNearby && isEndNearby) {
+            stringList.add(uid); 
+          }
+
+        } else {
+          print('Direction details not available for UID: $uid');
+        }
+      }
+
+      // Print the results
+      print('Nearest Vehicles: $stringList');
+    } else {
+      print('No vehicle details found.');
+    }
+
+    return stringList;
+  }
+
+  static int haversine(LatLng start, LatLng end) {
     const double R = 6371000; // Earth's radius in meters
     double phi1 = start.latitude * pi / 180; // Start latitude in radians
     double phi2 = end.latitude * pi / 180; // End latitude in radians
