@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
@@ -42,8 +44,8 @@ class HelperMethods {
   static Future<DirectionDetails?> getDirectionDetails(
       LatLng startPosition, LatLng endPosition) async {
     String url =
-        'https://maps.googleapis.com/maps/api/directions/json?destination=${endPosition.latitude.toString()},${endPosition.longitude.toString()}&origin=${startPosition.latitude.toString()},${startPosition.longitude.toString()}&key=$mapKey';
-    
+        'https://maps.googleapis.com/maps/api/directions/json?destination=${endPosition.latitude.toString()},${endPosition.longitude.toString()}&origin=${startPosition.latitude.toString()},${startPosition.longitude.toString()}&key=$mapKey&avoid=tolls';
+
     var response = await RequestHelper.getRequest(url);
 
     if (response == 'failed') {
@@ -59,7 +61,7 @@ class HelperMethods {
 
     return directionDetails;
   }
-  
+
   static Future<bool> checkPhoneNumberExists(
       String phoneNumber, bool isPassenger) async {
     final databaseReference = (isPassenger)
@@ -116,13 +118,31 @@ class HelperMethods {
     DatabaseReference ref = FirebaseDatabase.instance.ref("passengers/$uid");
 
     try {
-      DatabaseEvent event = await ref.once(); 
-      return event.snapshot
-          .exists; 
+      DatabaseEvent event = await ref.once();
+      return event.snapshot.exists;
     } catch (e) {
-      return false; 
+      return false;
     }
   }
-  
-}
 
+  static int haversine(Position start, Position end) {
+    const double R = 6371000; // Earth's radius in meters
+    double phi1 = start.latitude * pi / 180; // Start latitude in radians
+    double phi2 = end.latitude * pi / 180; // End latitude in radians
+    double deltaPhi = (end.latitude - start.latitude) *
+        pi /
+        180; // Latitude difference in radians
+    double deltaLambda = (end.longitude - start.longitude) *
+        pi /
+        180; // Longitude difference in radians
+
+    double a = pow(sin(deltaPhi / 2), 2) +
+        cos(phi1) * cos(phi2) * pow(sin(deltaLambda / 2), 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    double distanceInMeters = R * c; // Distance in meters
+    double distanceInKm = distanceInMeters / 1000; // Convert to kilometers
+
+    return distanceInKm.round(); // Return rounded distance in kilometers
+  }
+}

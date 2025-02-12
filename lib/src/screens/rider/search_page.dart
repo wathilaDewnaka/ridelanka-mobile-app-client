@@ -37,7 +37,6 @@ class _SearchPageState extends State<SearchPage> {
       });
       print("this is clear");
     }
-    
 
     if (placeName.length > 0) {
       String countryCode = 'LK';

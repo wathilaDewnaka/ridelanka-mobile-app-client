@@ -231,7 +231,9 @@ class _HomeTabState extends State<HomeTab> {
                         children: [
                           Expanded(
                             child: Text(
-                              "Where are you going?",
+                              Provider.of<AppData>(context)
+                                .destinationAddress
+                                .placeName,
                               style: TextStyle(
                                   color: Colors.black54, fontSize: 16),
                             ),
@@ -282,7 +284,8 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
         ],
-      ),
+      )
+    );
   }
 
   Future<void> getDirection() async {
