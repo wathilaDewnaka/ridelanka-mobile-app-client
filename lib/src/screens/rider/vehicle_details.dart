@@ -1,4 +1,5 @@
 import 'package:client/src/models/vehicles.dart';
+// import 'package:client/src/screens/rider/expanded_view.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -117,14 +118,130 @@ class _VehicleDetailsState extends State<VehicleDetails> {
         padding: const EdgeInsets.only(top: 16),
         child: Column(
           children: [
-            
+            isLoading == false && vehiclesAll.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey.shade200,
+                            ),
+                            child: Icon(
+                              Icons.directions_car,
+                              size: 50,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "No Vehicles Available",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "We apologize, but there are currently no vehicles available in your area. We're working to expand our coverage.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Card(
+                            elevation: 2,
+                            color: Colors.blue.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 16),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Need assistance?",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.phone,
+                                        size: 32,
+                                        color: Colors.blue,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // Add call functionality here
+                                        },
+                                        child: Column(
+                                          children: [
+                                            const Text(
+                                              "Contact RideLanka Support",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                            const Text(
+                                              "+94 77 123 4567",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.blue,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Container(),
             Expanded(
               child: ListView.builder(
                 itemCount: vehiclesAll.length,
                 itemBuilder: (context, index) {
                   final ride = vehiclesAll[index];
                   return GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => ExpandedView(
+                      //             driverName: ride.driverName,
+                      //             driverUid: ride.driverUid,
+                      //             routeDetails: ride.routeDetails,
+                      //             image: ride.vehicleImage,
+                      //             vehicleName: ride.vehicleNo,
+                      //             price: ride.vehiclePrice)));
+                    },
                     child: Card(
                       margin: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
@@ -153,15 +270,25 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    ride.driverName,
+                                    ride.vehicleNo,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),
                                   ),
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(
+                                    ride.driverName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                   const SizedBox(height: 6),
                                   Text(
-                                    "Rs. ${ride.vehiclePrice}/Month",
+                                    "LKR ${ride.vehiclePrice.toStringAsFixed(2)} / Month",
                                     style: const TextStyle(
                                       color: Color(0xFF0051ED),
                                       fontSize: 16,
@@ -198,7 +325,80 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                   );
                 },
               ),
-            )
+            ),
+            isLoading == false && vehiclesAll.length < 4
+                ? Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            // Icon Section
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: Colors.orange.withOpacity(0.2),
+                              child: const Icon(
+                                Icons.directions_car,
+                                color: Colors.orange,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+
+                            // Text Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Only ${vehiclesAll.length} vehicles found nearby",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  RichText(
+                                    text: TextSpan(
+                                      text: "Need help? ",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: "Call +94 77 123 4567",
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    "We’re here to assist you in finding the right ride or resolving any issues you might face.",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : Container()
           ],
         ),
       ),

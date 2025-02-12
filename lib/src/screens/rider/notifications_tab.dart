@@ -37,7 +37,7 @@ class NotificationTab extends StatelessWidget {
               backgroundColor: const Color(0xFF0051ED),
               leading: IconButton(
                 icon:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -47,10 +47,10 @@ class NotificationTab extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.only(top: 17.0),
               child: Text(
-                "Trip History",
+                "Notifications",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
               ), 

@@ -73,7 +73,7 @@ class _HistoryTabState extends State<HistoryTab> {
               backgroundColor: const Color(0xFF0051ED),
               leading: IconButton(
                 icon:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -86,7 +86,7 @@ class _HistoryTabState extends State<HistoryTab> {
                 "Trip History",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
               ),
