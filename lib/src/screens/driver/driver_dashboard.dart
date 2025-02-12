@@ -97,6 +97,14 @@ class DriverHome {
                     print("View pressed");
                   },
                 ), // view button
+
+                MenuButton(
+                  iconImage: '',
+                  label: "Profile",
+                  onPressed: () {
+                    print("Profile pressed");
+                  },
+                ), //profile button
               ],
             ),
           ),
