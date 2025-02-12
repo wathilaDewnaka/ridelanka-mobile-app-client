@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:client/src/methods/helper_methods.dart';
 
-class VehicleDetails extends StatelessWidget {
+class VehicleDetails extends StatefulWidget {
   VehicleDetails({super.key});
 
   static const String id = "vehicles";
+
+  @override
+  State<VehicleDetails> createState() => _VehicleDetailsState();
+}
+
+class _VehicleDetailsState extends State<VehicleDetails> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    HelperMethods.fetchVehicleDetails();
+  }
 
   final List<Map<String, String>> rides = [
     {

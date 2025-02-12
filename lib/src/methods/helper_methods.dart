@@ -125,6 +125,40 @@ class HelperMethods {
     }
   }
 
+  
+  static Future<void> fetchVehicleDetails() async {
+    Map <String, dynamic>? vehicleDetailsList;
+    try {
+      final DatabaseEvent event = await FirebaseDatabase.instance.ref('drivers').once();
+      final data = event.snapshot.value;
+
+      if (data != null) {
+        Map<String, dynamic> driversData = Map<String, dynamic>.from(data as Map);
+
+        Map<String, dynamic> filteredDetails = {};
+
+        driversData.forEach((uid, driverData) {
+          if (driverData['location'] != null) {
+            filteredDetails[uid] = {
+              'startLat': driverData['location']['startLat'],
+              'startLng': driverData['location']['startLng'],
+              'endLat': driverData['location']['endLat'],
+              'endLng': driverData['location']['endLng']
+            };
+          }
+        });
+
+        vehicleDetailsList = filteredDetails;
+      
+        print('Filtered Vehicle Details: $vehicleDetailsList');
+      } else {
+        print('No data available for any drivers.');
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
+
   static int haversine(Position start, Position end) {
     const double R = 6371000; // Earth's radius in meters
     double phi1 = start.latitude * pi / 180; // Start latitude in radians
