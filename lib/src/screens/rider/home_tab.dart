@@ -283,7 +283,6 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ],
       ),
-    );
   }
 
   Future<void> getDirection() async {

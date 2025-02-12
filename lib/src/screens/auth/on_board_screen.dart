@@ -150,7 +150,7 @@ class OnBoardData extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+            padding: const EdgeInsets.only(left: 7.0, right: 7.0),
             child: Text(
               description,
               textAlign: TextAlign.center,
