@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
 
-class ExpandedView extends StatelessWidget {
+class ExpandedView extends StatefulWidget {
   const ExpandedView({super.key});
 
   @override
+  State<ExpandedView> createState() => _ExpandedViewState();
+}
+
+class _ExpandedViewState extends State<ExpandedView> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vehicle Booking'),
-        backgroundColor: Color(0xFF0051ED),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              elevation: 0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Rides",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,7 +57,7 @@ class ExpandedView extends StatelessWidget {
                   topRight: Radius.circular(12),
                 ),
                 child: Image.network(
-                  'https://via.placeholder.com/400x200', 
+                  'https://via.placeholder.com/400x200',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -71,17 +102,17 @@ class ExpandedView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        
-                      },
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF0051ED),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text('Book', 
-                          style: TextStyle(color: Colors.white),),
+                      child: const Text(
+                        'Book',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
