@@ -50,6 +50,54 @@ class VehicleAddScreen extends StatelessWidget {
   }
 }
 
+class VehicleAddScreen2 extends StatelessWidget {
+  final TextEditingController startLocationController = TextEditingController();
+  final TextEditingController endLocationController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
+  final TextEditingController experienceController = TextEditingController();
+  final TextEditingController countController = TextEditingController();
+  final TextEditingController languagesController = TextEditingController();
+  final TextEditingController refereeController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Add Vehicle')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              buildCard('Pricing', [
+                buildTextField(startLocationController, 'Start Location'),
+                buildTextField(endLocationController, 'End Location'),
+                buildTextField(priceController, 'Price'),
+                ElevatedButton(onPressed: () {}, child: Text('Predict Price')),
+              ]),
+              buildCard('Background Details', [
+                buildTextField(experienceController, 'Work Experience'),
+                buildTextField(countController, 'Current Count in Vehicle'),
+                buildTextField(languagesController, 'Languages'),
+                buildDropdown(
+                    ['Cash', 'Card', 'Online Payment'], 'Payment Method'),
+              ]),
+              buildCard('Referee Details', [
+                buildTextField(refereeController, 'Write a description here',
+                    maxLines: 3),
+              ]),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 Widget buildTextField(TextEditingController controller, String label,
     {int maxLines = 1}) {
   return Padding(
