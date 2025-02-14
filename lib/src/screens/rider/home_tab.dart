@@ -93,7 +93,7 @@ class _HomeTabState extends State<HomeTab> {
           markerId: MarkerId("currentLocation"),
           position: position,
           icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
         ),
       );
     });
@@ -375,14 +375,14 @@ class _HomeTabState extends State<HomeTab> {
       Marker pickupMarker = Marker(
         markerId: MarkerId('pickup'),
         position: pickLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
         infoWindow: InfoWindow(title: pickup.placeName, snippet: 'My Location'),
       );
 
       Marker destinationMarker = Marker(
         markerId: MarkerId('destination'),
         position: destinationLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         infoWindow:
             InfoWindow(title: destination.placeName, snippet: 'Destination'),
       );

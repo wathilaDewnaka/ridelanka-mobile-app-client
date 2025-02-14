@@ -1,10 +1,20 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:client/src/models/notification_item.dart';
 
-class NotificationTab extends StatelessWidget {
+class NotificationTab extends StatefulWidget {
   NotificationTab({super.key});
 
   static const Color mainBlue = Color(0xFF0051ED);
+
+  @override
+  State<NotificationTab> createState() => _NotificationTabState();
+}
+
+class _NotificationTabState extends State<NotificationTab> {
+  List<Notification> notificationAll = [];
 
   final List<NotificationItem> notifications = [
     NotificationItem(
@@ -21,13 +31,45 @@ class NotificationTab extends StatelessWidget {
         time: DateTime.now().subtract(const Duration(hours: 2)),
         isRead: true,
         icon: Icons.payment),
-    
   ];
+
+  void getNotifications() async {
+    bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+
+    DatabaseReference notifications = isPassenger
+        ? FirebaseDatabase.instance
+            .ref()
+            .child('users/${firebaseUser!.uid}/notifications')
+        : FirebaseDatabase.instance
+            .ref()
+            .child('drivers/${firebaseUser!.uid}/notifications');
+
+    DataSnapshot mainNotificationsSnapshot = await notifications.get();
+    if (mainNotificationsSnapshot.exists) {
+      mainNotificationsSnapshot.children.forEach((child) {
+        Map<dynamic, dynamic> notificationData =
+            child.value as Map<dynamic, dynamic>;
+        // notificationAll.add(notificationData);
+
+        print("Notification Key: ${child.key}");
+        print(notificationData);
+      });
+    } else {
+      print("No notifications found in the main path.");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: mainBlue,
+      backgroundColor: NotificationTab.mainBlue,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Stack(
@@ -53,7 +95,7 @@ class NotificationTab extends StatelessWidget {
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
-              ), 
+              ),
             ),
           ],
         ),
@@ -99,12 +141,12 @@ class NotificationTab extends StatelessWidget {
                       border: Border.all(
                         color: notification.isRead
                             ? Colors.grey.withOpacity(0.2)
-                            : mainBlue.withOpacity(0.3),
+                            : NotificationTab.mainBlue.withOpacity(0.3),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: mainBlue.withOpacity(0.1),
+                          color: NotificationTab.mainBlue.withOpacity(0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 5),
                         ),
@@ -119,14 +161,15 @@ class NotificationTab extends StatelessWidget {
                             height: 50,
                             decoration: BoxDecoration(
                               color: notification.isRead
-                                  ? mainBlue.withOpacity(0.1)
-                                  : mainBlue,
+                                  ? NotificationTab.mainBlue.withOpacity(0.1)
+                                  : NotificationTab.mainBlue,
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Icon(
                               notification.icon,
-                              color:
-                                  notification.isRead ? mainBlue : Colors.white,
+                              color: notification.isRead
+                                  ? NotificationTab.mainBlue
+                                  : Colors.white,
                               size: 24,
                             ),
                           ),
@@ -150,7 +193,7 @@ class NotificationTab extends StatelessWidget {
                                       width: 8,
                                       height: 8,
                                       decoration: const BoxDecoration(
-                                        color: mainBlue,
+                                        color: NotificationTab.mainBlue,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -171,7 +214,7 @@ class NotificationTab extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                               _formatTime(notification.time),
+                                _formatTime(notification.time),
                                 style: TextStyle(
                                   color: Colors.grey[400],
                                   fontSize: 12,

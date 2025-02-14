@@ -73,7 +73,7 @@ class _SearchPageState extends State<SearchPage> {
     setFocus();
 
     String address =
-        Provider.of<AppData>(context).pickupAddress.placeName ?? '';
+        Provider.of<AppData>(context).pickupAddress.placeName;
     pickupController.text = address;
 
     return Scaffold(
@@ -118,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: <Widget>[
                       Image.asset(
-                        'images/pickicon.png',
+                        'assets/images/maps/pickicon.png',
                         height: 16,
                         width: 16,
                       ),
@@ -155,7 +155,7 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: <Widget>[
                       Image.asset(
-                        'images/desticon.png',
+                        'assets/images/maps/desticon.png',
                         height: 16,
                         width: 16,
                       ),
