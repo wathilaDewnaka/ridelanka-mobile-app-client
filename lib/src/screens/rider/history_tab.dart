@@ -1,5 +1,8 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/widgets/chat_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class HistoryTab extends StatefulWidget {
@@ -13,48 +16,47 @@ class _HistoryTabState extends State<HistoryTab> {
   static const Color mainBlue = Color(0xFF0051ED);
   String selectedFilter = 'All';
 
-  final List<TripItem> trips = [
-    TripItem(
-      id: "T1001",
-      source: "New York",
-      destination: "Los Angeles",
-      status: TripStatus.inactive,
-      driverId: "",
-      driverName: "Wathila Dewnaka",
-      price: 299.99,
-      vehicleType: "SUV",
-      expDate: "",
-    ),
-    TripItem(
-        id: "T1002",
-        source: "San Francisco",
-        destination: "Las Vegas",
-        status: TripStatus.active,
-        price: 199.99,
-        driverId: "",
-        driverName: "Wathila Dewnaka",
-        vehicleType: "Sedan",
-        expDate: ""),
-    TripItem(
-        id: "T1003",
-        source: "Miami",
-        destination: "Orlando",
-        status: TripStatus.active,
-        price: 149.99,
-        driverId: "",
-        driverName: "Wathila Dewnaka",
-        vehicleType: "Premium",
-        expDate: ""),
-  ];
+  List<TripItem> trips = [];
+
+  Future<void> getTrips() async {
+    DatabaseReference notifications = FirebaseDatabase.instance
+        .ref()
+        .child('users/${firebaseUser!.uid}/bookings');
+
+    DataSnapshot mainNotificationsSnapshot = await notifications.get();
+    if (mainNotificationsSnapshot.exists) {
+      List<TripItem> newNotifications = [];
+      mainNotificationsSnapshot.children.forEach((child) {
+        Map<dynamic, dynamic> notificationData =
+            child.value as Map<dynamic, dynamic>;
+
+        // TripItem notificationItem =
+        //     .fromJson(notificationData, child.key);
+        newNotifications.add(notificationItem);
+
+        markAsRead(child.key);
+      });
+
+      if (mounted) {
+        setState(() {
+          notificationAll = newNotifications.reversed
+              .toList(); // Update the state with the new notifications
+        });
+      }
+    } else {
+      print("No notifications found in the main path.");
+    }
+  }
 
   List<TripItem> getFilteredTrips() {
     switch (selectedFilter) {
       case 'Active Rides':
-        return trips.where((trip) => trip.status == TripStatus.active).toList();
+        return trips.where((trip) => trip.status == "Active").toList();
       case 'Inactive Rides':
-        return trips
-            .where((trip) => trip.status == TripStatus.inactive)
-            .toList();
+        return trips.where((trip) => trip.status == "Inactive").toList();
+
+      case 'Pending Rides':
+        return trips.where((trip) => trip.status == "Pending").toList();
       default:
         return trips;
     }
@@ -115,6 +117,7 @@ class _HistoryTabState extends State<HistoryTab> {
                         'All',
                         'Active Rides',
                         'Inactive Rides',
+                        'Pending Rides'
                       ]
                           .map((filter) => Padding(
                                 padding: const EdgeInsets.only(right: 12),
@@ -163,7 +166,7 @@ class _HistoryTabState extends State<HistoryTab> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: trip.status == TripStatus.active
+                        color: trip.status == "Active"
                             ? mainBlue.withOpacity(0.3)
                             : Colors.grey.withOpacity(0.2),
                         width: 1,
@@ -321,7 +324,12 @@ class _HistoryTabState extends State<HistoryTab> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ChatScreen(recieverName: trips[index].driverName[0], recieverUid: trips[index].driverId, recieverTel: "")),
+                                          builder: (context) => ChatScreen(
+                                              recieverName:
+                                                  trips[index].driverName[0],
+                                              recieverUid:
+                                                  trips[index].driverId,
+                                              recieverTel: "")),
                                     );
                                   },
                                   child: Row(

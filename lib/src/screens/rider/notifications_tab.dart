@@ -1,6 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
-import 'package:client/src/screens/auth/on_board_screen.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:client/src/models/notification_item.dart';
@@ -17,7 +17,7 @@ class NotificationTab extends StatefulWidget {
 class _NotificationTabState extends State<NotificationTab> {
   List<NotificationItem> notificationAll = [];
 
-  void getNotifications() async {
+  Future<void> getNotifications() async {
     bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
     DatabaseReference notifications = isPassenger
@@ -35,9 +35,8 @@ class _NotificationTabState extends State<NotificationTab> {
         Map<dynamic, dynamic> notificationData =
             child.value as Map<dynamic, dynamic>;
 
-        // Convert the notification data to NotificationItem
         NotificationItem notificationItem =
-            NotificationItem.fromJson(notificationData);
+            NotificationItem.fromJson(notificationData, child.key);
         newNotifications.add(notificationItem);
 
         markAsRead(child.key);
@@ -45,8 +44,8 @@ class _NotificationTabState extends State<NotificationTab> {
 
       if (mounted) {
         setState(() {
-          notificationAll =
-              newNotifications; // Update the state with the new notifications
+          notificationAll = newNotifications.reversed
+              .toList(); // Update the state with the new notifications
         });
       }
     } else {
@@ -55,15 +54,56 @@ class _NotificationTabState extends State<NotificationTab> {
   }
 
   void updateBookings(String? notificationId, String? userId) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
     DatabaseReference databaseReference = FirebaseDatabase.instance
         .ref()
         .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
 
-    await databaseReference.update({
-      'isRead': "true",
+    DatabaseReference userReference = FirebaseDatabase.instance
+        .ref()
+        .child('users/${userId}/bookings/$notificationId');
+
+    await databaseReference.update({'isRead': "true", 'isActive': ''});
+
+    await userReference.update({
+      'isActive': "true",
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString()
     });
 
     getNotifications();
+    Navigator.pop(context);
+  }
+
+  void rejectBookings(String? notificationId, String? userId) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+    DatabaseReference databaseReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
+
+    DatabaseReference userReference = FirebaseDatabase.instance
+        .ref()
+        .child('users/${userId}/bookings/$notificationId');
+
+    await databaseReference.update({
+      'isRead': "true",
+      'isActive': '',
+    });
+
+    await userReference.remove();
+
+    getNotifications();
+    Navigator.pop(context);
   }
 
   void markAsRead(String? notificationId) async {
@@ -83,7 +123,22 @@ class _NotificationTabState extends State<NotificationTab> {
   @override
   void initState() {
     super.initState();
-    getNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getNotifications().then((_) {
+        // After tasks are complete, dismiss the dialog
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
+    });
   }
 
   @override
@@ -244,53 +299,62 @@ class _NotificationTabState extends State<NotificationTab> {
                             ],
                           ),
                         ),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: NotificationTab.mainBlue.withOpacity(0.03),
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(20),
-                              bottomRight: Radius.circular(20),
+                        if (notification.isActive.isNotEmpty &&
+                            notification.title == "Booking Request")
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: NotificationTab.mainBlue.withOpacity(0.03),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: () {},
-                                style: TextButton.styleFrom(
-                                  foregroundColor: NotificationTab.mainBlue,
-                                ),
-                                child: const Text(
-                                  'Reject',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    rejectBookings(
+                                        notification.id, notification.isActive);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: NotificationTab.mainBlue,
+                                  ),
+                                  child: const Text(
+                                    'Reject',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: NotificationTab.mainBlue,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    updateBookings(
+                                        notification.id, notification.isActive);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: NotificationTab.mainBlue,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Approve',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w600),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Approve',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                              ],
+                            ),
+                          )
                       ],
                     ),
                   );
@@ -304,28 +368,30 @@ class _NotificationTabState extends State<NotificationTab> {
   }
 
   String _formatTime(String microsecondsSinceEpoch) {
-  final now = DateTime.now();
-  final time = DateTime.fromMicrosecondsSinceEpoch(int.parse(microsecondsSinceEpoch));
+    final now = DateTime.now();
+    final time =
+        DateTime.fromMicrosecondsSinceEpoch(int.parse(microsecondsSinceEpoch));
 
-  final difference = now.difference(time);
+    final difference = now.difference(time);
 
-  // Calculate the difference in microseconds
-  final microseconds = difference.inMicroseconds.toDouble(); // Explicitly convert to double
+    // Calculate the difference in microseconds
+    final microseconds =
+        difference.inMicroseconds.toDouble(); // Explicitly convert to double
 
-  final oneMillion = 1000000.0; 
+    final oneMillion = 1000000.0;
 
-  if (microseconds < 60 * oneMillion) {
-    // Less than 1 minute
-    return '${(microseconds / oneMillion).toStringAsFixed(0)} seconds ago'; // Showing microseconds in seconds
-  } else if (microseconds < 60 * 60 * oneMillion) {
-    // Less than 1 hour
-    return '${(microseconds / oneMillion / 60).toStringAsFixed(0)} minutes ago'; // Showing minutes with decimal
-  } else if (microseconds < 24 * 60 * 60 * oneMillion) {
-    // Less than 1 day
-    return '${(microseconds / oneMillion / 60 / 60).toStringAsFixed(0)} hours ago'; // Showing hours with decimal
-  } else {
-    // More than 1 day
-    return '${time.day}/${time.month}/${time.year}';
+    if (microseconds < 60 * oneMillion) {
+      // Less than 1 minute
+      return '${(microseconds / oneMillion).toStringAsFixed(0)} seconds ago'; // Showing microseconds in seconds
+    } else if (microseconds < 60 * 60 * oneMillion) {
+      // Less than 1 hour
+      return '${(microseconds / oneMillion / 60).toStringAsFixed(0)} minutes ago'; // Showing minutes with decimal
+    } else if (microseconds < 24 * 60 * 60 * oneMillion) {
+      // Less than 1 day
+      return '${(microseconds / oneMillion / 60 / 60).toStringAsFixed(0)} hours ago'; // Showing hours with decimal
+    } else {
+      // More than 1 day
+      return '${time.day}/${time.month}/${time.year}';
+    }
   }
-}
 }

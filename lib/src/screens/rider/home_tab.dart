@@ -4,6 +4,7 @@ import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/direction_details.dart';
 import 'package:client/src/screens/rider/search_page.dart';
 import 'package:client/src/screens/rider/vehicle_details.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -244,6 +245,18 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
+                          String dest = Provider.of<AppData>(context, listen: false)
+                              .destinationAddress
+                              .placeName;
+                          if (dest == "Where are you going ?") {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              message: "Please select your destination",
+                              title: "Error",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          }
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -266,6 +279,18 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
+                          String dest = Provider.of<AppData>(context, listen: false)
+                              .destinationAddress
+                              .placeName;
+                          if (dest == "Where are you going ?") {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              message: "Please select your destination",
+                              title: "Error",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          }
                           Navigator.push(
                               context,
                               MaterialPageRoute(

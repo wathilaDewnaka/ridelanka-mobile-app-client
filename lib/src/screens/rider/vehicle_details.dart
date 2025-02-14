@@ -277,7 +277,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                       fontSize: 18,
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 4,
                                   ),
                                   Text(
