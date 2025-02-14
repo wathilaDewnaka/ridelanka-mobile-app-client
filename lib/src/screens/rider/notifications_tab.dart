@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:client/src/models/notification_item.dart';
@@ -14,24 +15,7 @@ class NotificationTab extends StatefulWidget {
 }
 
 class _NotificationTabState extends State<NotificationTab> {
-  List<Notification> notificationAll = [];
-
-  final List<NotificationItem> notifications = [
-    NotificationItem(
-        title: "New Feature Available",
-        description:
-            "Check out our latest update with exciting new features! Tap to explore what's new in the app.",
-        time: DateTime.now().subtract(const Duration(minutes: 5)),
-        isRead: false,
-        icon: Icons.auto_awesome),
-    NotificationItem(
-        title: "Payment Successful",
-        description:
-            "Your transaction of \$299.99 has been processed successfully. Tap to view transaction details.",
-        time: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: true,
-        icon: Icons.payment),
-  ];
+  List<NotificationItem> notificationAll = [];
 
   void getNotifications() async {
     bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
@@ -46,22 +30,58 @@ class _NotificationTabState extends State<NotificationTab> {
 
     DataSnapshot mainNotificationsSnapshot = await notifications.get();
     if (mainNotificationsSnapshot.exists) {
+      List<NotificationItem> newNotifications = [];
       mainNotificationsSnapshot.children.forEach((child) {
         Map<dynamic, dynamic> notificationData =
             child.value as Map<dynamic, dynamic>;
-        // notificationAll.add(notificationData);
 
-        print("Notification Key: ${child.key}");
-        print(notificationData);
+        // Convert the notification data to NotificationItem
+        NotificationItem notificationItem =
+            NotificationItem.fromJson(notificationData);
+        newNotifications.add(notificationItem);
+
+        markAsRead(child.key);
       });
+
+      if (mounted) {
+        setState(() {
+          notificationAll =
+              newNotifications; // Update the state with the new notifications
+        });
+      }
     } else {
       print("No notifications found in the main path.");
     }
   }
 
+  void updateBookings(String? notificationId, String? userId) async {
+    DatabaseReference databaseReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
+
+    await databaseReference.update({
+      'isRead': "true",
+    });
+
+    getNotifications();
+  }
+
+  void markAsRead(String? notificationId) async {
+    bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+
+    DatabaseReference notifications = isPassenger
+        ? FirebaseDatabase.instance
+            .ref()
+            .child('users/${firebaseUser!.uid}/notifications/$notificationId')
+        : FirebaseDatabase.instance.ref().child(
+            'drivers/${firebaseUser!.uid}/notifications/$notificationId');
+    await notifications.update({
+      'isRead': "true",
+    });
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getNotifications();
   }
@@ -116,7 +136,7 @@ class _NotificationTabState extends State<NotificationTab> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${notifications.length} Notifications',
+                    '${notificationAll.length} Notifications',
                     style: const TextStyle(
                       color: Colors.black87,
                       fontWeight: FontWeight.w600,
@@ -129,9 +149,9 @@ class _NotificationTabState extends State<NotificationTab> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(top: 8, bottom: 14),
-                itemCount: notifications.length,
+                itemCount: notificationAll.length,
                 itemBuilder: (context, index) {
-                  final notification = notifications[index];
+                  final notification = notificationAll[index];
                   return Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -166,7 +186,7 @@ class _NotificationTabState extends State<NotificationTab> {
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Icon(
-                              notification.icon,
+                              Icons.new_label,
                               color: notification.isRead
                                   ? NotificationTab.mainBlue
                                   : Colors.white,
@@ -214,11 +234,58 @@ class _NotificationTabState extends State<NotificationTab> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                _formatTime(notification.time),
+                                _formatTime(notification.date),
                                 style: TextStyle(
                                   color: Colors.grey[400],
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: NotificationTab.mainBlue.withOpacity(0.03),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  foregroundColor: NotificationTab.mainBlue,
+                                ),
+                                child: const Text(
+                                  'Reject',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: NotificationTab.mainBlue,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Approve',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
@@ -236,16 +303,29 @@ class _NotificationTabState extends State<NotificationTab> {
     );
   }
 
-  String _formatTime(DateTime time) {
-    final now = DateTime.now();
-    final difference = now.difference(time);
+  String _formatTime(String microsecondsSinceEpoch) {
+  final now = DateTime.now();
+  final time = DateTime.fromMicrosecondsSinceEpoch(int.parse(microsecondsSinceEpoch));
 
-    if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${time.day}/${time.month}/${time.year}';
-    }
+  final difference = now.difference(time);
+
+  // Calculate the difference in microseconds
+  final microseconds = difference.inMicroseconds.toDouble(); // Explicitly convert to double
+
+  final oneMillion = 1000000.0; 
+
+  if (microseconds < 60 * oneMillion) {
+    // Less than 1 minute
+    return '${(microseconds / oneMillion).toStringAsFixed(0)} seconds ago'; // Showing microseconds in seconds
+  } else if (microseconds < 60 * 60 * oneMillion) {
+    // Less than 1 hour
+    return '${(microseconds / oneMillion / 60).toStringAsFixed(0)} minutes ago'; // Showing minutes with decimal
+  } else if (microseconds < 24 * 60 * 60 * oneMillion) {
+    // Less than 1 day
+    return '${(microseconds / oneMillion / 60 / 60).toStringAsFixed(0)} hours ago'; // Showing hours with decimal
+  } else {
+    // More than 1 day
+    return '${time.day}/${time.month}/${time.year}';
   }
+}
 }

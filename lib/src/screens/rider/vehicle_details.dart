@@ -1,4 +1,5 @@
 import 'package:client/src/models/vehicles.dart';
+import 'package:client/src/screens/rider/expanded_view.dart';
 // import 'package:client/src/screens/rider/expanded_view.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -231,16 +232,16 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                   final ride = vehiclesAll[index];
                   return GestureDetector(
                     onTap: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) => ExpandedView(
-                      //             driverName: ride.driverName,
-                      //             driverUid: ride.driverUid,
-                      //             routeDetails: ride.routeDetails,
-                      //             image: ride.vehicleImage,
-                      //             vehicleName: ride.vehicleNo,
-                      //             price: ride.vehiclePrice)));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ExpandedView(
+                                  driverName: ride.driverName,
+                                  driverUid: ride.driverUid,
+                                  routeDetails: ride.routeDetails,
+                                  image: ride.vehicleImage,
+                                  vehicleName: ride.vehicleNo,
+                                  price: ride.vehiclePrice)));
                     },
                     child: Card(
                       margin: const EdgeInsets.symmetric(
