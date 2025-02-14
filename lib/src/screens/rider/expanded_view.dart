@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
 class ExpandedView extends StatefulWidget {
-  const ExpandedView({super.key});
+  const ExpandedView({super.key,
+  required this.driverName,
+  required this.driverUid,
+  required this.routeDetails,
+  required this.image,
+  required this.vehicleName,
+  required this.price});
+
+  final String driverUid;
+  final String driverName;
+  final String routeDetails;
+  final String image;
+  final String vehicleName;
+  final String price;
 
   @override
   State<ExpandedView> createState() => _ExpandedViewState();
@@ -57,7 +70,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   topRight: Radius.circular(12),
                 ),
                 child: Image.network(
-                  'https://via.placeholder.com/400x200',
+                  widget.image,
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -69,7 +82,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Mr. Nimshan Munasinghe',
+                    widget.driverName,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -87,7 +100,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'LKR 10,500.00 / Month',
+                      "Rs.${widget.price}/Month",
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,
@@ -120,7 +133,7 @@ class _ExpandedViewState extends State<ExpandedView> {
               const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                  'A spacious and versatile van designed for comfort and functionality, perfect for transporting goods or passengers. Features ample cargo space, modern interiors, and reliable performance to meet all your travel needs.',
+                  widget.routeDetails,
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ),
