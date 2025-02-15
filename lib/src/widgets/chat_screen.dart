@@ -9,11 +9,13 @@ class ChatScreen extends StatefulWidget {
       {super.key,
       required this.recieverName,
       required this.recieverUid,
-      required this.recieverTel});
+      required this.recieverTel,
+      required this.isMobile});
 
   final String recieverName;
   final String recieverUid;
   final String recieverTel;
+  final bool isMobile;
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -82,9 +84,10 @@ class _ChatScreenState extends State<ChatScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
             const Spacer(),
-            IconButton(
-                onPressed: _makePhoneCall,
-                icon: const Icon(Icons.call, color: Colors.white))
+            if (widget.isMobile)
+              IconButton(
+                  onPressed: _makePhoneCall,
+                  icon: const Icon(Icons.call, color: Colors.white))
           ],
         ),
       ),

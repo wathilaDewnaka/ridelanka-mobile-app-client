@@ -1,3 +1,4 @@
+import 'package:client/src/models/available_vehicles.dart';
 import 'package:client/src/models/vehicles.dart';
 import 'package:client/src/screens/rider/expanded_view.dart';
 // import 'package:client/src/screens/rider/expanded_view.dart';
@@ -54,20 +55,20 @@ class _VehicleDetailsState extends State<VehicleDetails> {
   }
 
   Future<void> _initializeAsyncTasks() async {
-    List<String> vehicles =
+    List<AvailableVehicles> vehicles =
         await HelperMethods.findNearestVehicles(context, widget.isStudent);
     final databaseReference = FirebaseDatabase.instance.ref("drivers");
 
     try {
       List<Vehicle> fetchedVehicles = [];
 
-      for (String uid in vehicles) {
-        final vehicleSnapshot = await databaseReference.child(uid).get();
+      for (AvailableVehicles uid in vehicles) {
+        final vehicleSnapshot = await databaseReference.child(uid.uid).get();
 
         if (vehicleSnapshot.exists) {
           final Map<String, dynamic> vehicleData =
               Map<String, dynamic>.from(vehicleSnapshot.value as Map);
-          fetchedVehicles.add(Vehicle.fromJson(vehicleData, uid));
+          fetchedVehicles.add(Vehicle.fromJson(vehicleData, uid.uid, uid.startKm, uid.endKm, uid.startPlaceName, uid.endPlaceName));
         } else {
           print("No data found for UID: $uid");
         }
@@ -241,7 +242,11 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                   routeDetails: ride.routeDetails,
                                   image: ride.vehicleImage,
                                   vehicleName: ride.vehicleNo,
-                                  price: ride.vehiclePrice)));
+                                  price: ride.vehiclePrice,
+                                  startKm: ride.startKm,
+                                  endKm: ride.endKm,
+                                  startPl: ride.startPlaceName,
+                                  endPl: ride.endPlaceName,)));
                     },
                     child: Card(
                       margin: const EdgeInsets.symmetric(
