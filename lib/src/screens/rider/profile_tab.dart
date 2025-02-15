@@ -13,6 +13,64 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('User Profile'),
+        backgroundColor: Color(0xFF0051ED),
+        centerTitle: true,
+      ),
+      body: ListView(
+        children: [
+          const SizedBox(height: 50),
+          Icon(Icons.person, size: 72),
+          Text(
+            'Thisuri Nethma',
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 50),
+          Padding(
+            padding: const EdgeInsets.only(left: 25.0),
+            child: Text(
+              'My Details',
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 15, bottom: 15),
+            margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'username',
+                    ),
+                    SizedBox(height: 50),
+                  ],
+                ),
+                Text('thisurinethma'),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 15, bottom: 15),
+            margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'e-mail',
+                    ),
+                    SizedBox(height: 50),
+                  ],
+                ),
+                Text('thisurinethma@gmailcom'),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
