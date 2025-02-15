@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class DriverHome {
+class DriverHome extends StatelessWidget {
   const DriverHome({super.key});
 
   @override
@@ -12,9 +12,15 @@ class DriverHome {
           // Header Section with Background Image
           Stack(
             children: [
-              SizedBox(
+              Container(
                 width: double.infinity,
                 height: 200,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/driverhomebg.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               Positioned(
                 top: 150,
@@ -70,28 +76,23 @@ class DriverHome {
               mainAxisSpacing: 16.0,
               children: [
                 MenuButton(
-                  iconImage: '',
+                  iconImage: 'assets/images/driver_dashboard_images/van.png',
                   label: "Add",
                   onPressed: () {
                     print("Add pressed");
                   },
                 ),
                 MenuButton(
-                  iconImage: '',
+                  iconImage:
+                      'assets/images/driver_dashboard_images/attendance.png',
                   label: "Attendance",
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AttendancePage(),
-                      ),
-                    );
                     print("Attendance pressed");
                   },
                 ), // attendance button
 
                 MenuButton(
-                  iconImage: '',
+                  iconImage: 'assets/images/driver_dashboard_images/view.png',
                   label: "View",
                   onPressed: () {
                     print("View pressed");
@@ -99,7 +100,8 @@ class DriverHome {
                 ), // view button
 
                 MenuButton(
-                  iconImage: '',
+                  iconImage:
+                      'assets/images/driver_dashboard_images/profile.png',
                   label: "Profile",
                   onPressed: () {
                     print("Profile pressed");
