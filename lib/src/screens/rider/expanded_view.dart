@@ -76,7 +76,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +130,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   ],
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   widget.routeDetails,
