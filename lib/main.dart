@@ -1,5 +1,4 @@
 import 'package:client/firebase_options.dart';
-import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

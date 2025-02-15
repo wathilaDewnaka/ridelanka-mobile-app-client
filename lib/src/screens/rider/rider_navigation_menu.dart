@@ -43,7 +43,12 @@ class _RiderNavigationMenuState extends State<RiderNavigationMenu>
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: tabController,
-        children: [HomeTab(), HistoryTab(), NotificationsTab(), ProfileTab()],
+        children: const [
+          HomeTab(),
+          HistoryTab(),
+          NotificationsTab(),
+          ProfileTab()
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -69,7 +74,8 @@ class _RiderNavigationMenuState extends State<RiderNavigationMenu>
         selectedItemColor: const Color(0xFF0051ED),
         showUnselectedLabels: true,
         showSelectedLabels: true,
-        selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800), 
+        selectedLabelStyle:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         iconSize: 30,
         type: BottomNavigationBarType.fixed,

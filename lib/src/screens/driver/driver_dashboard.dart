@@ -12,7 +12,7 @@ class DriverHome {
           // Header Section with Background Image
           Stack(
             children: [
-              Container(
+              SizedBox(
                 width: double.infinity,
                 height: 200,
               ),
@@ -34,9 +34,9 @@ class DriverHome {
                       ),
                     ],
                   ),
-                  child: Column(
+                  child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         "Good morning,",
                         style: TextStyle(
@@ -106,6 +106,57 @@ class DriverHome {
                   },
                 ), //profile button
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Menu Button Widget
+class MenuButton extends StatelessWidget {
+  final String iconImage;
+  final String label;
+  final VoidCallback onPressed;
+  final bool isHighlighted;
+
+  const MenuButton({
+    super.key,
+    required this.iconImage,
+    required this.label,
+    required this.onPressed,
+    this.isHighlighted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.all(20),
+        backgroundColor: Colors.white,
+        shadowColor: Colors.blueAccent.withOpacity(0.3),
+        elevation: isHighlighted ? 10 : 6, // Highlight effect
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isHighlighted ? Colors.blueAccent : Colors.grey.shade300,
+            width: 2,
+          ),
+        ),
+      ),
+      onPressed: onPressed,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(iconImage, height: 48, width: 48),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
         ],
