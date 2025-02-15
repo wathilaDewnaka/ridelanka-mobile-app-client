@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _NotificationTabState extends State<NotificationTab> {
             .ref()
             .child('drivers/${firebaseUser!.uid}/notifications');
 
-    DataSnapshot mainNotificationsSnapshot = await notifications.get();
+    DataSnapshot mainNotificationsSnapshot = await notifications.limitToLast(10).get();
     if (mainNotificationsSnapshot.exists) {
       List<NotificationItem> newNotifications = [];
       mainNotificationsSnapshot.children.forEach((child) {
@@ -72,11 +73,16 @@ class _NotificationTabState extends State<NotificationTab> {
     await databaseReference.update({'isRead': "true", 'isActive': ''});
 
     await userReference.update({
-      'isActive': "true",
+      'isActive': "Active",
       "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString()
     });
 
     getNotifications();
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+      message: "Booking approved successfully !",
+      title: "Success",
+      type: MessageType.success,
+    ));
     Navigator.pop(context);
   }
 
@@ -103,6 +109,12 @@ class _NotificationTabState extends State<NotificationTab> {
     await userReference.remove();
 
     getNotifications();
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+      message: "Booking rejected successfully !",
+      title: "Success",
+      type: MessageType.success,
+    ));
     Navigator.pop(context);
   }
 

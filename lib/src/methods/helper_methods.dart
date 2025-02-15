@@ -117,7 +117,7 @@ class HelperMethods {
   }
 
   static Future<bool> checkIsPassenger(String uid) async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref("passengers/$uid");
+    DatabaseReference ref = FirebaseDatabase.instance.ref("users/$uid");
 
     try {
       DatabaseEvent event = await ref.once();

@@ -245,10 +245,16 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          String dest = Provider.of<AppData>(context, listen: false)
-                              .destinationAddress
-                              .placeName;
-                          if (dest == "Where are you going ?") {
+                          String dest =
+                              Provider.of<AppData>(context, listen: false)
+                                  .destinationAddress
+                                  .placeName;
+                          String pick =
+                              Provider.of<AppData>(context, listen: false)
+                                  .pickupAddress
+                                  .placeName;
+                          if (dest == "Where are you going ?" ||
+                              pick == "Pickup Location") {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(createMessageBar(
                               message: "Please select your destination",
@@ -279,10 +285,16 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          String dest = Provider.of<AppData>(context, listen: false)
-                              .destinationAddress
-                              .placeName;
-                          if (dest == "Where are you going ?") {
+                          String dest =
+                              Provider.of<AppData>(context, listen: false)
+                                  .destinationAddress
+                                  .placeName;
+                          String pick =
+                              Provider.of<AppData>(context, listen: false)
+                                  .pickupAddress
+                                  .placeName;
+                          if (dest == "Where are you going ?" ||
+                              pick == "Pickup Location") {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(createMessageBar(
                               message: "Please select your destination",

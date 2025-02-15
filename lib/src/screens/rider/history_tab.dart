@@ -1,5 +1,4 @@
 import 'package:client/global_variable.dart';
-import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -30,17 +29,13 @@ class _HistoryTabState extends State<HistoryTab> {
         Map<dynamic, dynamic> notificationData =
             child.value as Map<dynamic, dynamic>;
 
-        // TripItem notificationItem =
-        //     .fromJson(notificationData, child.key);
-        newNotifications.add(notificationItem);
-
-        markAsRead(child.key);
+        newNotifications.add(TripItem.fromJson(notificationData));
+        print(notificationData);
       });
 
       if (mounted) {
         setState(() {
-          notificationAll = newNotifications.reversed
-              .toList(); // Update the state with the new notifications
+          trips = newNotifications.reversed.toList();
         });
       }
     } else {
@@ -50,16 +45,49 @@ class _HistoryTabState extends State<HistoryTab> {
 
   List<TripItem> getFilteredTrips() {
     switch (selectedFilter) {
-      case 'Active Rides':
+      case 'Active':
         return trips.where((trip) => trip.status == "Active").toList();
-      case 'Inactive Rides':
+      case 'Inactive':
         return trips.where((trip) => trip.status == "Inactive").toList();
-
-      case 'Pending Rides':
+      case 'Pending':
         return trips.where((trip) => trip.status == "Pending").toList();
       default:
         return trips;
     }
+  }
+
+  int daysLeft(String subscriptionDate) {
+    // Convert the subscription date string to an integer
+    int subscriptionDateInt = int.parse(subscriptionDate);
+
+    // If the timestamp is in microseconds, convert it to milliseconds
+    if (subscriptionDateInt.toString().length == 16) {
+      subscriptionDateInt = (subscriptionDateInt / 1000).round();
+    }
+
+    // Convert the integer to a DateTime object
+    DateTime subscriptionStartDate =
+        DateTime.fromMillisecondsSinceEpoch(subscriptionDateInt);
+
+    // Add 30 days to the subscription start date
+    DateTime subscriptionEndDate =
+        subscriptionStartDate.add(Duration(days: 30));
+
+    // Get the current date and time
+    DateTime currentDate = DateTime.now();
+
+    // Calculate the difference in days
+    int remainingDays = subscriptionEndDate.difference(currentDate).inDays;
+
+    // Return the remaining days if positive, otherwise return -1
+    return remainingDays > 0 ? remainingDays : -1;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTrips();
   }
 
   @override
@@ -113,12 +141,7 @@ class _HistoryTabState extends State<HistoryTab> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: [
-                        'All',
-                        'Active Rides',
-                        'Inactive Rides',
-                        'Pending Rides'
-                      ]
+                      children: ['All', 'Active', 'Inactive', 'Pending']
                           .map((filter) => Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: FilterChip(
@@ -197,21 +220,25 @@ class _HistoryTabState extends State<HistoryTab> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color:
-                                              trip.status == TripStatus.active
-                                                  ? mainBlue.withOpacity(0.1)
+                                          color: trip.status == "Active"
+                                              ? mainBlue.withOpacity(0.1)
+                                              : trip.status == "Pending"
+                                                  ? Colors.yellow[50]
                                                   : Colors.grey[100],
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
                                         child: Text(
-                                          trip.status == TripStatus.active
+                                          trip.status == "Active"
                                               ? 'Active'
-                                              : 'Completed',
+                                              : trip.status == "Pending"
+                                                  ? "Pending"
+                                                  : 'Inactive',
                                           style: TextStyle(
-                                            color:
-                                                trip.status == TripStatus.active
-                                                    ? mainBlue
+                                            color: trip.status == "Active"
+                                                ? mainBlue
+                                                : trip.status == "Pending"
+                                                    ? Colors.yellow[900]
                                                     : Colors.grey[600],
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
@@ -288,9 +315,15 @@ class _HistoryTabState extends State<HistoryTab> {
                                             ),
                                             const SizedBox(width: 12),
                                             Text(
-                                              "Expires in 30 days",
+                                              "Expires in ${daysLeft(trip.date)} days",
                                               style: TextStyle(
-                                                color: Colors.grey[500],
+                                                color: daysLeft(trip.date) < 5
+                                                    ? Colors.red[600]
+                                                    : Colors.grey[500],
+                                                fontWeight:
+                                                    daysLeft(trip.date) < 5
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
                                                 fontSize: 14,
                                               ),
                                             ),
@@ -302,10 +335,21 @@ class _HistoryTabState extends State<HistoryTab> {
                                 ],
                               ),
                               const SizedBox(height: 16),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.drive_eta),
+                                    SizedBox(width: 8,),
+                                    Text("Vehicle No - ${trip.vehicleNo}", style: TextStyle(fontWeight: FontWeight.bold),),
+                                  ],
+                                ),
+                              )
+                              
                             ],
                           ),
                         ),
-                        if (trip.status == TripStatus.active)
+                        if (trip.status == "Active")
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(16),
@@ -325,10 +369,8 @@ class _HistoryTabState extends State<HistoryTab> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ChatScreen(
-                                              recieverName:
-                                                  trips[index].driverName[0],
-                                              recieverUid:
-                                                  trips[index].driverId,
+                                              recieverName: trip.driverName,
+                                              recieverUid: trip.id,
                                               recieverTel: "")),
                                     );
                                   },
@@ -338,7 +380,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                         radius: 24,
                                         backgroundColor: Colors.blue,
                                         child: Text(
-                                          trips[index].driverName[0],
+                                          trip.driverName,
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
@@ -348,7 +390,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        trips[index].driverName.split(" ")[0],
+                                        trip.driverName,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16),
@@ -356,20 +398,47 @@ class _HistoryTabState extends State<HistoryTab> {
                                     ],
                                   ),
                                 ),
-                                ElevatedButton.icon(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.visibility, size: 18),
-                                  label: const Text('Track Trip'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: mainBlue,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {},
+                                      icon: const Icon(Icons.visibility,
+                                          size: 18),
+                                      label: const Text('Track Trip '),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: mainBlue,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    if (daysLeft(trip.date) < 5)
+                                      ElevatedButton.icon(
+                                        onPressed: () {},
+                                        icon: const Icon(
+                                          Icons.plus_one_outlined,
+                                          size: 18,
+                                        ),
+                                        label: const Text('Renew Trip'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red[600],
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      )
+                                  ],
                                 ),
                               ],
                             ),
