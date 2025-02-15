@@ -1,3 +1,6 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class ExpandedView extends StatefulWidget {
@@ -21,21 +24,56 @@ class ExpandedView extends StatefulWidget {
 }
 
 class _ExpandedViewState extends State<ExpandedView> {
+  void confirmSubscription() async {
+    DatabaseReference firebaseDatabase = FirebaseDatabase.instance.ref().child(
+        'users/${firebaseUser!.uid}/bookings');
+
+    Map<String, String> details = {
+      "driverUid": widget.driverUid,
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString()
+    };
+
+    firebaseDatabase.push().set(details).then((_) {
+      createMessageBar(
+          message: "Booking request sent successfully", title: "Success");
+    }).catchError((error) {
+      createMessageBar(
+          message: "Something went wrong", title: "Error", type: MessageType.error);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0051ED),
-        title: const Text(
-          "Rides",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              elevation: 0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Rides",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 2,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -60,6 +98,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   fit: BoxFit.cover,
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -67,7 +106,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   children: [
                     Text(
                     widget.driverName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -100,9 +139,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle booking
-                    },
+                    onPressed: confirmSubscription,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0051ED),
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -121,6 +158,34 @@ class _ExpandedViewState extends State<ExpandedView> {
                   ),
                 ),
               ),
+              SizedBox(height: 18),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.blue,
+                      child: Text(
+                        widget.driverName[0],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      widget.driverName.split(" ")[0],
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
