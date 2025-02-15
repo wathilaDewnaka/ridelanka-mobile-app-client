@@ -1,6 +1,6 @@
+import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/data_provider/prediction.dart';
-import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/widgets/brand_divier.dart';
 import 'package:client/src/widgets/prediction_tile.dart';

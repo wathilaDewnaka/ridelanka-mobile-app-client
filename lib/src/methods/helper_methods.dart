@@ -1,9 +1,10 @@
 import 'dart:math';
 
+import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
-import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/models/address.dart';
+import 'package:client/src/models/available_vehicles.dart';
 import 'package:client/src/models/direction_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -22,14 +23,11 @@ class HelperMethods {
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=${mapKey}';
 
     var response = await RequestHelper.getRequest(url);
-    print('this is res :');
-    print(response);
-    print(url);
-
+    
     if (response != 'failed') {
       placeAddress = response['results'][0]['formatted_address'];
       print('this is res :' + placeAddress);
-      Address pickupAddress = new Address(
+      Address pickupAddress = Address(
           placeId: '',
           latitude: position.latitude,
           longituge: position.longitude,
@@ -38,6 +36,21 @@ class HelperMethods {
 
       Provider.of<AppData>(context, listen: false)
           .updatePickupAddress(pickupAddress);
+    }
+
+    return placeAddress;
+  }
+
+  static Future<String> returnPlaceAddress(LatLng position) async {
+    String placeAddress = '';
+
+    String url =
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=${mapKey}';
+
+    var response = await RequestHelper.getRequest(url);
+
+    if (response != 'failed') {
+      placeAddress = response['results'][0]['formatted_address'];
     }
 
     return placeAddress;
@@ -135,25 +148,42 @@ class HelperMethods {
       final data = event.snapshot.value;
 
       if (data != null) {
-        Map<String, dynamic> driversData =
-            Map<String, dynamic>.from(data as Map);
+        Map<String, dynamic> driversData = {};
+
+        // Check if the data is a Map<Object?, Object?> and manually convert it
+        if (data is Map<Object?, Object?>) {
+          driversData = Map<String, dynamic>.fromIterable(
+            data.keys,
+            key: (key) => key.toString(),
+            value: (key) =>
+                Map<String, dynamic>.from(data[key] as Map<Object?, Object?>),
+          );
+        } else {
+          print("Data is not a Map, cannot convert");
+          return null;
+        }
+
         Map<String, dynamic> filteredDetails = {};
 
+        // Process each driver data
         driversData.forEach((uid, driverData) {
-          if (!(isStudent) && driverData['type'] == 'staff' ||
-              isStudent && driverData['type'] == 'student') {
-            if (driverData['location'] != null) {
+          final type = driverData['type'];
+          final location = driverData['location'];
+
+          if ((isStudent && type == 'student') ||
+              (!isStudent && type == 'staff')) {
+            if (location != null) {
               filteredDetails[uid] = {
-                'startLat': driverData['location']['startLat'],
-                'startLng': driverData['location']['startLng'],
-                'endLat': driverData['location']['endLat'],
-                'endLng': driverData['location']['endLng']
+                'startLat': location['startLat'],
+                'startLng': location['startLng'],
+                'endLat': location['endLat'],
+                'endLng': location['endLng']
               };
             }
           }
         });
 
-        return filteredDetails; // Returning the filtered details
+        return filteredDetails;
       } else {
         print('No data available for any drivers.');
         return null;
@@ -164,75 +194,81 @@ class HelperMethods {
     }
   }
 
-  static Future<List<String>> findNearestVehicles(
+  static Future<List<AvailableVehicles>> findNearestVehicles(
       BuildContext context, bool isStudent) async {
-    // Fetch vehicle details
-    Map<String, dynamic>? vehiclesDetails =
-        await fetchVehicleDetails(isStudent);
-    List<String> stringList = [];
+    final vehiclesDetails = await fetchVehicleDetails(isStudent);
+    if (vehiclesDetails == null) {
+      print('No vehicle details found.');
+      return [];
+    }
 
-    if (vehiclesDetails != null) {
-      for (var entry in vehiclesDetails.entries) {
-        var uid = entry.key;
-        var vehicleData = entry.value;
+    final appData = Provider.of<AppData>(context, listen: false);
+    final LatLng pickDestination = LatLng(
+      appData.pickupAddress.latitude,
+      appData.pickupAddress.longituge,
+    );
+    final LatLng userDestination = LatLng(
+      appData.destinationAddress.latitude,
+      appData.destinationAddress.longituge,
+    );
 
-        LatLng start = LatLng(vehicleData['startLat'], vehicleData['startLng']);
-        LatLng end = LatLng(vehicleData['endLat'], vehicleData['endLng']);
+    final List<Future<AvailableVehicles?>> vehicleFutures =
+        vehiclesDetails.entries.map((entry) async {
+      final uid = entry.key;
+      final vehicleData = entry.value;
 
-        var directionDetails = await getDirectionDetails(start, end);
+      final LatLng start =
+          LatLng(vehicleData['startLat'], vehicleData['startLng']);
+      final LatLng end = LatLng(vehicleData['endLat'], vehicleData['endLng']);
+      final directionDetails = await getDirectionDetails(start, end);
 
-        if (directionDetails != null) {
-          PolylinePoints polylinePoints = PolylinePoints();
+      if (directionDetails == null) {
+        print('Direction details not available for UID: $uid');
+        return null;
+      }
 
-          List<PointLatLng> decodedPoints =
-              polylinePoints.decodePolyline(directionDetails.encodedPoints);
+      final List<PointLatLng> decodedPoints =
+          PolylinePoints().decodePolyline(directionDetails.encodedPoints);
 
-          bool isStartNearby = false;
-          bool isEndNearby = false;
+      // Initialize min distance variables
+      int startKm = 100, endKm = 100;
+      LatLng startLatLng = LatLng(0.0, 0.0), endLatLng = LatLng(0.0, 0.0);
 
-          LatLng pickDestination = LatLng(
-            Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
-            Provider.of<AppData>(context, listen: false)
-                .pickupAddress
-                .longituge,
-          );
+      for (final point in decodedPoints) {
+        final LatLng positionOnWay = LatLng(point.latitude, point.longitude);
 
-          LatLng userDestination = LatLng(
-            Provider.of<AppData>(context, listen: false)
-                .destinationAddress
-                .latitude,
-            Provider.of<AppData>(context, listen: false)
-                .destinationAddress
-                .longituge,
-          );
+        // Calculate haversine distances
+        final int haversineStart = haversine(positionOnWay, pickDestination);
+        if (haversineStart < 5 && haversineStart < startKm) {
+          startKm = haversineStart;
+          startLatLng = positionOnWay;
+        }
 
-          for (PointLatLng point in decodedPoints) {
-            LatLng positionOnWay = LatLng(point.latitude, point.longitude);
-
-            if (haversine(positionOnWay, userDestination) < 5) {
-              isEndNearby = true;
-            }
-
-            if (haversine(positionOnWay, pickDestination) < 5) {
-              isStartNearby = true;
-            }
-          }
-
-          if (isStartNearby && isEndNearby) {
-            stringList.add(uid);
-          }
-        } else {
-          print('Direction details not available for UID: $uid');
+        final int haversineEnd = haversine(positionOnWay, userDestination);
+        if (haversineEnd < 5 && haversineEnd < endKm) {
+          endKm = haversineEnd;
+          endLatLng = positionOnWay;
         }
       }
 
-      // Print the results
-      print('Nearest Vehicles: $stringList');
-    } else {
-      print('No vehicle details found.');
-    }
+      if (startKm > 0 && endKm > 0) {
+        final startPlaceName = await returnPlaceAddress(startLatLng);
+        final endPlaceName = await returnPlaceAddress(endLatLng);
 
-    return stringList;
+        return AvailableVehicles(
+          startKm: startKm,
+          endKm: endKm,
+          uid: uid,
+          startPlaceName: startPlaceName,
+          endPlaceName: endPlaceName,
+        );
+      }
+      return null;
+    }).toList();
+
+    // Process vehicle futures in parallel
+    final vehicles = await Future.wait(vehicleFutures);
+    return vehicles.whereType<AvailableVehicles>().toList();
   }
 
   static int haversine(LatLng start, LatLng end) {
