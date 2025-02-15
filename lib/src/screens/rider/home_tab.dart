@@ -163,7 +163,7 @@ class _HomeTabState extends State<HomeTab> {
                     child: Text(
                       Provider.of<AppData>(context).pickupAddress?.placeName ??
                           "Pickup Location",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
                       ),

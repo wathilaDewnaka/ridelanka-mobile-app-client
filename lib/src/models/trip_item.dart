@@ -8,6 +8,7 @@ class TripItem {
   final String date;
   final String driverName;
   final String vehicleNo;
+  final String trpId;
 
   TripItem(
       {required this.id,
@@ -18,9 +19,10 @@ class TripItem {
       required this.vehicleType,
       required this.date,
       required this.driverName,
+      required this.trpId,
       required this.vehicleNo});
 
-  factory TripItem.fromJson(Map<dynamic, dynamic> json) {
+  factory TripItem.fromJson(Map<dynamic, dynamic> json, String? trpId) {
     return TripItem(
         id: json['driverUid'] ?? '',
         source: json['start'] ?? '',
@@ -30,9 +32,10 @@ class TripItem {
             ? json['price']
             : double.tryParse(json['price'].toString()) ??
                 0.0, // Convert price to double
-        vehicleType: json['vehicleType'] ?? '',
+        vehicleType: json['vehicleName'] ?? '',
         date: json['subscriptionDate'] ?? '',
-        driverName: json['driverName'] ?? '', 
-        vehicleNo: json['vehicleNo'] ?? '');
+        driverName: json['driverName'] ?? '',
+        vehicleNo: json['vehicleNo'] ?? '',
+        trpId: trpId ?? "");
   }
 }

@@ -5,6 +5,7 @@ import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,15 +35,15 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       });
     } else {
-      bool isPassenger =
-          await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+      final prefs = await SharedPreferences.getInstance();
+      bool isPassenger = prefs.getString('isPassenger') == "true" ? true : false;
 
       Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => isPassenger
                 ? const RiderNavigationMenu()
-                : const DriverDashboard(),
+                : const RiderNavigationMenu(),
           ),
         );
       });

@@ -26,11 +26,15 @@ class _HistoryTabState extends State<HistoryTab> {
     if (mainNotificationsSnapshot.exists) {
       List<TripItem> newNotifications = [];
       mainNotificationsSnapshot.children.forEach((child) {
-        Map<dynamic, dynamic> notificationData =
-            child.value as Map<dynamic, dynamic>;
-
-        newNotifications.add(TripItem.fromJson(notificationData));
-        print(notificationData);
+        if (child.value is Map<dynamic, dynamic>) {
+          Map<dynamic, dynamic> notificationData =
+              child.value as Map<dynamic, dynamic>;
+          newNotifications.add(TripItem.fromJson(notificationData, child.key));
+          print(notificationData);
+        } else {
+          // Handle invalid or unexpected data
+          print('Invalid notification data: ${child.value}');
+        }
       });
 
       if (mounted) {
@@ -40,6 +44,18 @@ class _HistoryTabState extends State<HistoryTab> {
       }
     } else {
       print("No notifications found in the main path.");
+    }
+  }
+
+  void updateExpiredTrips(String tripId, String subscriptionDate) async {
+    if (tripId.isNotEmpty &&
+        daysLeft(subscriptionDate) > -2 &&
+        daysLeft(subscriptionDate) < 1) {
+      DatabaseReference book = FirebaseDatabase.instance
+          .ref()
+          .child('users/${firebaseUser!.uid}/bookings/$tripId');
+      await book.update({'isActive': "Inactive"});
+      getTrips();
     }
   }
 
@@ -58,29 +74,33 @@ class _HistoryTabState extends State<HistoryTab> {
 
   int daysLeft(String subscriptionDate) {
     // Convert the subscription date string to an integer
-    int subscriptionDateInt = int.parse(subscriptionDate);
+    try {
+      int subscriptionDateInt = int.parse(subscriptionDate);
 
-    // If the timestamp is in microseconds, convert it to milliseconds
-    if (subscriptionDateInt.toString().length == 16) {
-      subscriptionDateInt = (subscriptionDateInt / 1000).round();
+      // If the timestamp is in microseconds, convert it to milliseconds
+      if (subscriptionDateInt.toString().length == 16) {
+        subscriptionDateInt = (subscriptionDateInt / 1000).round();
+      }
+
+      // Convert the integer to a DateTime object
+      DateTime subscriptionStartDate =
+          DateTime.fromMillisecondsSinceEpoch(subscriptionDateInt);
+
+      // Add 30 days to the subscription start date
+      DateTime subscriptionEndDate =
+          subscriptionStartDate.add(Duration(days: 30));
+
+      // Get the current date and time
+      DateTime currentDate = DateTime.now();
+
+      // Calculate the difference in days
+      int remainingDays = subscriptionEndDate.difference(currentDate).inDays;
+
+      // Return the remaining days if positive, otherwise return -1
+      return remainingDays > 0 ? remainingDays : -1;
+    } catch (e) {
+      return -2;
     }
-
-    // Convert the integer to a DateTime object
-    DateTime subscriptionStartDate =
-        DateTime.fromMillisecondsSinceEpoch(subscriptionDateInt);
-
-    // Add 30 days to the subscription start date
-    DateTime subscriptionEndDate =
-        subscriptionStartDate.add(Duration(days: 30));
-
-    // Get the current date and time
-    DateTime currentDate = DateTime.now();
-
-    // Calculate the difference in days
-    int remainingDays = subscriptionEndDate.difference(currentDate).inDays;
-
-    // Return the remaining days if positive, otherwise return -1
-    return remainingDays > 0 ? remainingDays : -1;
   }
 
   @override
@@ -135,7 +155,7 @@ class _HistoryTabState extends State<HistoryTab> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
                   SingleChildScrollView(
@@ -182,6 +202,7 @@ class _HistoryTabState extends State<HistoryTab> {
                 itemCount: getFilteredTrips().length,
                 itemBuilder: (context, index) {
                   TripItem trip = getFilteredTrips()[index];
+                  updateExpiredTrips(trip.trpId, trip.date);
                   return Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -250,7 +271,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                           color: Colors.grey[600], size: 16),
                                       const SizedBox(width: 4),
                                       Text(
-                                        trip.vehicleType,
+                                        trip.vehicleNo,
                                         style: TextStyle(
                                           color: Colors.grey[600],
                                           fontSize: 14,
@@ -315,7 +336,9 @@ class _HistoryTabState extends State<HistoryTab> {
                                             ),
                                             const SizedBox(width: 12),
                                             Text(
-                                              "Expires in ${daysLeft(trip.date)} days",
+                                              daysLeft(trip.date) > 0
+                                                  ? "Expires in ${daysLeft(trip.date)} days"
+                                                  : "Expired",
                                               style: TextStyle(
                                                 color: daysLeft(trip.date) < 5
                                                     ? Colors.red[600]
@@ -340,12 +363,17 @@ class _HistoryTabState extends State<HistoryTab> {
                                 child: Row(
                                   children: [
                                     Icon(Icons.drive_eta),
-                                    SizedBox(width: 8,),
-                                    Text("Vehicle No - ${trip.vehicleNo}", style: TextStyle(fontWeight: FontWeight.bold),),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(
+                                      trip.vehicleType,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ],
                                 ),
                               )
-                              
                             ],
                           ),
                         ),
@@ -369,9 +397,11 @@ class _HistoryTabState extends State<HistoryTab> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ChatScreen(
-                                              recieverName: trip.driverName,
-                                              recieverUid: trip.id,
-                                              recieverTel: "")),
+                                                recieverName: trip.driverName,
+                                                recieverUid: trip.id,
+                                                recieverTel: "",
+                                                isMobile: true,
+                                              )),
                                     );
                                   },
                                   child: Row(
@@ -390,7 +420,9 @@ class _HistoryTabState extends State<HistoryTab> {
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        trip.driverName,
+                                        trip.driverName.contains(" ")
+                                      ? trip.driverName.split(" ")[0] + " " + trip.driverName.split(" ")[1]
+                                      : trip.driverName[0],
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16),

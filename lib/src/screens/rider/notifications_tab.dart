@@ -24,7 +24,7 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference notifications = isPassenger
         ? FirebaseDatabase.instance
             .ref()
-            .child('users/${firebaseUser!.uid}/notifications')
+            .child('drivers/${firebaseUser!.uid}/notifications')
         : FirebaseDatabase.instance
             .ref()
             .child('drivers/${firebaseUser!.uid}/notifications');
@@ -124,7 +124,7 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference notifications = isPassenger
         ? FirebaseDatabase.instance
             .ref()
-            .child('users/${firebaseUser!.uid}/notifications/$notificationId')
+            .child('drivers/${firebaseUser!.uid}/notifications/$notificationId')
         : FirebaseDatabase.instance.ref().child(
             'drivers/${firebaseUser!.uid}/notifications/$notificationId');
     await notifications.update({
