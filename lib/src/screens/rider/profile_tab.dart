@@ -30,9 +30,32 @@ class _ProfilePageState extends State<ProfilePage> {
       body: ListView(
         children: [
           const SizedBox(height: 50),
-          Icon(
-            Icons.person,
-            size: 70,
+          Transform(
+            transform: Matrix4.rotationX(0.1),
+            child: Container(
+              padding: EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: Color(0xFFD0D8E8),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.4),
+                    offset: Offset(5, 5),
+                    blurRadius: 8,
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.6),
+                    offset: Offset(-3, -3),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.person,
+                size: 70,
+                color: Color(0xFF0051ED),
+              ),
+            ),
           ),
           SizedBox(height: 20),
           Text(
@@ -52,6 +75,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: EdgeInsets.only(left: 15, bottom: 15),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Column(
@@ -79,6 +106,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: EdgeInsets.only(left: 15, bottom: 15),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Column(
@@ -106,6 +137,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: EdgeInsets.only(left: 15, bottom: 15),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Column(
@@ -138,9 +173,32 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.settings,
-                    size: 26,
+                  Transform(
+                    transform: Matrix4.rotationX(0.1),
+                    child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFD0D8E8),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.4),
+                            offset: Offset(5, 5),
+                            blurRadius: 8,
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.6),
+                            offset: Offset(-3, -3),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.settings,
+                        size: 26,
+                        color: Color(0xFF0051ED),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 8),
                   Text(
@@ -153,9 +211,32 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.logout,
-                    size: 26,
+                  Transform(
+                    transform: Matrix4.rotationX(0.1),
+                    child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFD0D8E8),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.4),
+                            offset: Offset(5, 5),
+                            blurRadius: 8,
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.6),
+                            offset: Offset(-3, -3),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.logout,
+                        size: 26,
+                        color: Color(0xFF0051ED),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 8),
                   Text('Log Out'),
