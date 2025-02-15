@@ -24,46 +24,30 @@ class _ExpandedViewState extends State<ExpandedView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            AppBar(
-              backgroundColor: const Color(0xFF0051ED),
-              leading: IconButton(
-                icon:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              elevation: 0,
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 17.0),
-              child: Text(
-                "Rides",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0051ED),
+        title: const Text(
+          "Rides",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 2,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 4,
+          elevation: 6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Vehicle Image
               ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
@@ -71,39 +55,41 @@ class _ExpandedViewState extends State<ExpandedView> {
                 ),
                 child: Image.network(
                   widget.image,
-                  height: 200,
+                  height: 220,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                     widget.driverName,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                      ],
+                      children: List.generate(
+                        5,
+                        (index) => const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      "Rs.${widget.price}/Month",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
+                      "LKR ${double.parse(widget.price).toStringAsFixed(2)} / Month",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFF0051ED),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -111,30 +97,39 @@ class _ExpandedViewState extends State<ExpandedView> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF0051ED),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Book',
-                        style: TextStyle(color: Colors.white),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Handle booking
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0051ED),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ],
+                    child: const Text(
+                      'Book Now',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
                   widget.routeDetails,
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    height: 1.5,
+                  ),
                 ),
               ),
             ],
