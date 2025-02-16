@@ -2,6 +2,7 @@ import 'package:client/firebase_options.dart';
 
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
+import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/screens/rider/home_tab.dart';
 import 'package:client/global_variable.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: SplashScreen.id,
         routes: {
-          SplashScreen.id: (context) => const SplashScreen(),
+          SplashScreen.id: (context) => OnBoardScreen(),
           MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
           MobileLoginScreen.id: (context) => const MobileLoginScreen(),
           RiderNavigationMenu.id: (context) => const RiderNavigationMenu(selectedIndex: 0),
