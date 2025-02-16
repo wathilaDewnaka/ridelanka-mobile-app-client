@@ -4,13 +4,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class ExpandedView extends StatefulWidget {
-  const ExpandedView({super.key,
-  required this.driverName,
-  required this.driverUid,
-  required this.routeDetails,
-  required this.image,
-  required this.vehicleName,
-  required this.price});
+  const ExpandedView(
+      {super.key,
+      required this.driverName,
+      required this.driverUid,
+      required this.routeDetails,
+      required this.image,
+      required this.vehicleName,
+      required this.price});
 
   final String driverUid;
   final String driverName;
@@ -25,21 +26,62 @@ class ExpandedView extends StatefulWidget {
 
 class _ExpandedViewState extends State<ExpandedView> {
   void confirmSubscription() async {
-    DatabaseReference firebaseDatabase = FirebaseDatabase.instance.ref().child(
-        'users/${firebaseUser!.uid}/bookings');
+    DatabaseReference driverBookingsRef = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${widget.driverUid}/bookings');
 
-    Map<String, String> details = {
-      "driverUid": widget.driverUid,
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString()
+    // Booking details for the driver
+    Map<String, String> driverBookingDetails = {
+      "userUid": firebaseUser!.uid,
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isActive": "false",
     };
 
-    firebaseDatabase.push().set(details).then((_) {
+    // Booking details for the user
+    Map<String, String> userBookingDetails = {
+      "driverUid": widget.driverUid,
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isActive": "false",
+    };
+
+    // Notification for the driver
+    Map<String, String> driverNotifications = {
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isActive": "false",
+      "isRead": "false"
+    };
+
+    try {
+      // Save booking details in both user and driver nodes
+      DatabaseReference driverDetails = driverBookingsRef.push();
+      await driverDetails.set(driverBookingDetails);
+
+      // References for user and driver bookings in Firebase
+      DatabaseReference userBookingsRef = FirebaseDatabase.instance
+          .ref()
+          .child('users/${firebaseUser!.uid}/bookings/${driverDetails.key}');
+
+      DatabaseReference driverNotification = FirebaseDatabase.instance
+          .ref()
+          .child(
+              'drivers/${widget.driverUid}/notifications/${driverDetails.key}');
+
+      await userBookingsRef.set(userBookingDetails);
+      await driverNotification.set(driverNotifications);
+
+      // Show success message
       createMessageBar(
-          message: "Booking request sent successfully", title: "Success");
-    }).catchError((error) {
+        message: "Booking request sent successfully",
+        title: "Success",
+      );
+    } catch (error) {
+      // Handle errors and show an error message
       createMessageBar(
-          message: "Something went wrong", title: "Error", type: MessageType.error);
-    });
+        message: "Something went wrong",
+        title: "Error",
+        type: MessageType.error,
+      );
+    }
   }
 
   @override
@@ -105,7 +147,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                    widget.driverName,
+                      widget.driverName,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
