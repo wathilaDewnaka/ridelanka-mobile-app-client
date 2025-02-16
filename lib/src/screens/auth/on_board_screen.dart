@@ -96,8 +96,8 @@ class _OnBoardLoadingScreenState extends State<OnBoardScreen> {
               ],
             ),
             Positioned(
-              top: 16,
-              right: 16,
+              top: 3,
+              right: 14,
               child: TextButton(
                 onPressed: navigateToLogin,
                 child: Text(

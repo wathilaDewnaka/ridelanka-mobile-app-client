@@ -12,6 +12,7 @@ import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
+import 'package:client/src/screens/rider/expanded_view.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/screens/rider/vehicle_details.dart';
 import 'package:firebase_auth/firebase_auth.dart';
