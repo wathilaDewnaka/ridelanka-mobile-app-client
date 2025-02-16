@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -17,6 +18,7 @@ class NotificationTab extends StatefulWidget {
 
 class _NotificationTabState extends State<NotificationTab> {
   List<NotificationItem> notificationAll = [];
+  bool loading = true;
 
   Future<void> getNotifications() async {
     bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
@@ -24,13 +26,15 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference notifications = isPassenger
         ? FirebaseDatabase.instance
             .ref()
-            .child('drivers/${firebaseUser!.uid}/notifications')
+            .child('users/${firebaseUser!.uid}/notifications')
         : FirebaseDatabase.instance
             .ref()
             .child('drivers/${firebaseUser!.uid}/notifications');
 
-    DataSnapshot mainNotificationsSnapshot = await notifications.limitToLast(10).get();
+    DataSnapshot mainNotificationsSnapshot =
+        await notifications.limitToLast(10).get();
     if (mainNotificationsSnapshot.exists) {
+      print("Exist");
       List<NotificationItem> newNotifications = [];
       mainNotificationsSnapshot.children.forEach((child) {
         Map<dynamic, dynamic> notificationData =
@@ -39,7 +43,6 @@ class _NotificationTabState extends State<NotificationTab> {
         NotificationItem notificationItem =
             NotificationItem.fromJson(notificationData, child.key);
         newNotifications.add(notificationItem);
-
         markAsRead(child.key);
       });
 
@@ -52,6 +55,10 @@ class _NotificationTabState extends State<NotificationTab> {
     } else {
       print("No notifications found in the main path.");
     }
+
+    setState(() {
+      loading = false;
+    });
   }
 
   void updateBookings(String? notificationId, String? userId) async {
@@ -69,6 +76,20 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference userReference = FirebaseDatabase.instance
         .ref()
         .child('users/${userId}/bookings/$notificationId');
+
+    DatabaseReference userNotificationReference =
+        FirebaseDatabase.instance.ref().child('users/${userId}/notifications');
+
+    Map<String, String> userNotifications = {
+      "title": "Booking Request Accepted",
+      "description": "Booking request accepted by the driver",
+      "icon": "tick",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
+    };
+
+    await userNotificationReference.push().set(userNotifications);
 
     await databaseReference.update({'isRead': "true", 'isActive': ''});
 
@@ -101,6 +122,20 @@ class _NotificationTabState extends State<NotificationTab> {
         .ref()
         .child('users/${userId}/bookings/$notificationId');
 
+    DatabaseReference userNotificationReference =
+        FirebaseDatabase.instance.ref().child('users/${userId}/notifications');
+
+    Map<String, String> userNotifications = {
+      "title": "Booking Request Rejected",
+      "description": "Booking request rejected by the driver",
+      "icon": "cross",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
+    };
+
+    await userNotificationReference.push().set(userNotifications);
+
     await databaseReference.update({
       'isRead': "true",
       'isActive': '',
@@ -124,9 +159,10 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference notifications = isPassenger
         ? FirebaseDatabase.instance
             .ref()
-            .child('drivers/${firebaseUser!.uid}/notifications/$notificationId')
+            .child('users/${firebaseUser!.uid}/notifications/$notificationId')
         : FirebaseDatabase.instance.ref().child(
             'drivers/${firebaseUser!.uid}/notifications/$notificationId');
+
     await notifications.update({
       'isRead': "true",
     });
@@ -146,11 +182,29 @@ class _NotificationTabState extends State<NotificationTab> {
       // Initialize async tasks
       getNotifications().then((_) {
         // After tasks are complete, dismiss the dialog
+        print("object");
         Navigator.pop(context);
       }).catchError((error) {
         Navigator.pop(context);
       });
     });
+  }
+
+  IconData getIconFromString(String iconName) {
+    switch (iconName.toLowerCase()) {
+      case 'new':
+        return Icons.label;
+      case 'cross':
+        return Icons.crop_square_sharp;
+      case 'tick':
+        return Icons.approval;
+      case 'payment':
+        return Icons.credit_card;
+      case 'call':
+        return Icons.call;
+      default:
+        return Icons.help;
+    }
   }
 
   @override
@@ -168,7 +222,12 @@ class _NotificationTabState extends State<NotificationTab> {
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    RiderNavigationMenu.id,
+                    (route) =>
+                        false, 
+                  );
                 },
               ),
               elevation: 0,
@@ -214,164 +273,184 @@ class _NotificationTabState extends State<NotificationTab> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(top: 8, bottom: 14),
-                itemCount: notificationAll.length,
-                itemBuilder: (context, index) {
-                  final notification = notificationAll[index];
-                  return Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: notification.isRead ? Colors.white : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: notification.isRead
-                            ? Colors.grey.withOpacity(0.2)
-                            : NotificationTab.mainBlue.withOpacity(0.3),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: NotificationTab.mainBlue.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 5),
+              child: notificationAll.isEmpty && !loading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Align(
+                        child: Text(
+                          "No notifications avaiable",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          leading: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
+                        alignment: Alignment.topLeft,
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(top: 8, bottom: 14),
+                      itemCount: notificationAll.length,
+                      itemBuilder: (context, index) {
+                        final notification = notificationAll[index];
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: notification.isRead
+                                ? Colors.white
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
                               color: notification.isRead
-                                  ? NotificationTab.mainBlue.withOpacity(0.1)
-                                  : NotificationTab.mainBlue,
-                              borderRadius: BorderRadius.circular(15),
+                                  ? Colors.grey.withOpacity(0.2)
+                                  : NotificationTab.mainBlue.withOpacity(0.3),
+                              width: 1,
                             ),
-                            child: Icon(
-                              Icons.new_label,
-                              color: notification.isRead
-                                  ? NotificationTab.mainBlue
-                                  : Colors.white,
-                              size: 24,
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    NotificationTab.mainBlue.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Column(
                             children: [
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Text(
-                                    notification.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                    ),
+                              ListTile(
+                                contentPadding: const EdgeInsets.all(16),
+                                leading: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: notification.isRead
+                                        ? NotificationTab.mainBlue
+                                            .withOpacity(0.1)
+                                        : NotificationTab.mainBlue,
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
-                                  const SizedBox(width: 10),
-                                  if (!notification.isRead)
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: NotificationTab.mainBlue,
-                                        shape: BoxShape.circle,
+                                  child: Icon(
+                                    getIconFromString(notification.icon),
+                                    color: notification.isRead
+                                        ? NotificationTab.mainBlue
+                                        : Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          notification.title,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        if (!notification.isRead)
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: const BoxDecoration(
+                                              color: NotificationTab.mainBlue,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      notification.description,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
                                       ),
                                     ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 8),
-                              Text(
-                                notification.description,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 14,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _formatTime(notification.date),
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _formatTime(notification.date),
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (notification.isActive.isNotEmpty &&
-                            notification.title == "Booking Request")
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: NotificationTab.mainBlue.withOpacity(0.03),
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    rejectBookings(
-                                        notification.id, notification.isActive);
-                                  },
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: NotificationTab.mainBlue,
-                                  ),
-                                  child: const Text(
-                                    'Reject',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
+                              if (notification.isActive.isNotEmpty &&
+                                  notification.title == "Booking Request")
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: NotificationTab.mainBlue
+                                        .withOpacity(0.03),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(20),
+                                      bottomRight: Radius.circular(20),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    updateBookings(
-                                        notification.id, notification.isActive);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: NotificationTab.mainBlue,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          rejectBookings(notification.id,
+                                              notification.isActive);
+                                        },
+                                        style: TextButton.styleFrom(
+                                          foregroundColor:
+                                              NotificationTab.mainBlue,
+                                        ),
+                                        child: const Text(
+                                          'Reject',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          updateBookings(notification.id,
+                                              notification.isActive);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              NotificationTab.mainBlue,
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Approve',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: const Text(
-                                    'Approve',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                      ],
+                                )
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

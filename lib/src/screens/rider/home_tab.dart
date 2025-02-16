@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/direction_details.dart';
@@ -94,7 +95,7 @@ class _HomeTabState extends State<HomeTab> {
           markerId: MarkerId("currentLocation"),
           position: position,
           icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
         ),
       );
     });
@@ -412,7 +413,7 @@ class _HomeTabState extends State<HomeTab> {
       Marker pickupMarker = Marker(
         markerId: MarkerId('pickup'),
         position: pickLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
         infoWindow: InfoWindow(title: pickup.placeName, snippet: 'My Location'),
       );
 

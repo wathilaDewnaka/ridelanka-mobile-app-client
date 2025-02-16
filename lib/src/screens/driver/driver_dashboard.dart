@@ -1,3 +1,4 @@
+import 'package:client/src/screens/rider/notifications_tab.dart';
 import 'package:flutter/material.dart';
 
 class DriverDashboard extends StatelessWidget {
@@ -7,8 +8,6 @@ class DriverDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Hello Driver"),
-    );
+    return NotificationTab();
   }
 }

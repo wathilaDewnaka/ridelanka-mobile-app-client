@@ -12,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HelperMethods {
   static Future<String> findCordinateAddress(Position position, context) async {
@@ -23,7 +24,7 @@ class HelperMethods {
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=${mapKey}';
 
     var response = await RequestHelper.getRequest(url);
-    
+
     if (response != 'failed') {
       placeAddress = response['results'][0]['formatted_address'];
       print('this is res :' + placeAddress);
@@ -134,7 +135,15 @@ class HelperMethods {
 
     try {
       DatabaseEvent event = await ref.once();
-      return event.snapshot.exists;
+
+      final prefs = await SharedPreferences.getInstance();
+      bool isPassenger =
+          prefs.getString('isPassenger') == "true" ? true : false;
+
+      if (event.snapshot.exists && isPassenger) {
+        return true;
+      }
+      return false;
     } catch (e) {
       return false;
     }
@@ -251,9 +260,12 @@ class HelperMethods {
         }
       }
 
-      if (startKm > 0 && endKm > 0) {
+      if (startKm >= 0 && endKm >= 0) {
+        
         final startPlaceName = await returnPlaceAddress(startLatLng);
         final endPlaceName = await returnPlaceAddress(endLatLng);
+
+        print('RETURN VEHICLE');
 
         return AvailableVehicles(
           startKm: startKm,

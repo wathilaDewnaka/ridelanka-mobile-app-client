@@ -24,7 +24,7 @@ RideLanka is an innovative mobile application designed to simplify school and st
 ## Installation
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/RideLanka.git
+git clone https://github.com/wathilaDewnaka/RideLanka.git
 ```
 2. Install dependencies
 ```bash

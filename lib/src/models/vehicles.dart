@@ -31,7 +31,7 @@ class Vehicle {
         vehicleNo: json['vehicleNo'] as String,
         vehicleName: json['vehicleName'] as String,
         vehiclePrice: (json['vehiclePrice'] as num).toDouble(),
-        driverName: json['driverName'] as String,
+        driverName: json['fullname'] as String,
         routeDetails: json['routeDetails'] as String,
         driverUid: uid,
         vehicleImage: json['vehicleImage'] as String,

@@ -1,6 +1,8 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/models/trip_item.dart';
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/chat_screen.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +16,7 @@ class HistoryTab extends StatefulWidget {
 class _HistoryTabState extends State<HistoryTab> {
   static const Color mainBlue = Color(0xFF0051ED);
   String selectedFilter = 'All';
+  bool loading = true;
 
   List<TripItem> trips = [];
 
@@ -37,13 +40,16 @@ class _HistoryTabState extends State<HistoryTab> {
         }
       });
 
-      if (mounted) {
-        setState(() {
-          trips = newNotifications.reversed.toList();
-        });
-      }
+      setState(() {
+        loading = false;
+        trips = newNotifications.reversed.toList();
+      });
     } else {
-      print("No notifications found in the main path.");
+      print("No trips found in the main path.");
+
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -107,7 +113,23 @@ class _HistoryTabState extends State<HistoryTab> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getTrips();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getTrips().then((_) {
+        // After tasks are complete, dismiss the dialog
+        print("object");
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
+    });
   }
 
   @override
@@ -125,7 +147,11 @@ class _HistoryTabState extends State<HistoryTab> {
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    RiderNavigationMenu.id,
+                    (route) => false,
+                  );
                 },
               ),
               elevation: 0,
@@ -155,7 +181,7 @@ class _HistoryTabState extends State<HistoryTab> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   SingleChildScrollView(
@@ -197,289 +223,325 @@ class _HistoryTabState extends State<HistoryTab> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(top: 8, bottom: 20),
-                itemCount: getFilteredTrips().length,
-                itemBuilder: (context, index) {
-                  TripItem trip = getFilteredTrips()[index];
-                  updateExpiredTrips(trip.trpId, trip.date);
-                  return Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: trip.status == "Active"
-                            ? mainBlue.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.2),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: mainBlue.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 5),
+              child: getFilteredTrips().isEmpty && !loading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Align(
+                        child: Text(
+                          "No trips avaiable",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
+                        alignment: Alignment.topLeft,
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(top: 8, bottom: 20),
+                      itemCount: getFilteredTrips().length,
+                      itemBuilder: (context, index) {
+                        TripItem trip = getFilteredTrips()[index];
+                        updateExpiredTrips(trip.trpId, trip.date);
+                        return Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: trip.status == "Active"
+                                  ? mainBlue.withOpacity(0.3)
+                                  : Colors.grey.withOpacity(0.2),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: mainBlue.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
                           child: Column(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: trip.status == "Active"
-                                              ? mainBlue.withOpacity(0.1)
-                                              : trip.status == "Pending"
-                                                  ? Colors.yellow[50]
-                                                  : Colors.grey[100],
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          trip.status == "Active"
-                                              ? 'Active'
-                                              : trip.status == "Pending"
-                                                  ? "Pending"
-                                                  : 'Inactive',
-                                          style: TextStyle(
-                                            color: trip.status == "Active"
-                                                ? mainBlue
-                                                : trip.status == "Pending"
-                                                    ? Colors.yellow[900]
-                                                    : Colors.grey[600],
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Icon(Icons.directions_car,
-                                          color: Colors.grey[600], size: 16),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        trip.vehicleNo,
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    'Rs.${trip.price.toStringAsFixed(2)}/Month',
-                                    style: const TextStyle(
-                                      color: mainBlue,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: mainBlue.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Icon(
-                                      Icons.location_on,
-                                      color: mainBlue,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          trip.source,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Container(
-                                          height: 1,
-                                          color: Colors.grey[300],
-                                        ),
-                                        const SizedBox(height: 4),
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              trip.destination,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 16,
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: trip.status == "Active"
+                                                    ? mainBlue.withOpacity(0.1)
+                                                    : trip.status == "Pending"
+                                                        ? Colors.yellow[50]
+                                                        : Colors.grey[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                trip.status == "Active"
+                                                    ? 'Active'
+                                                    : trip.status == "Pending"
+                                                        ? "Pending"
+                                                        : 'Inactive',
+                                                style: TextStyle(
+                                                  color: trip.status == "Active"
+                                                      ? mainBlue
+                                                      : trip.status == "Pending"
+                                                          ? Colors.yellow[900]
+                                                          : Colors.grey[600],
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                               ),
                                             ),
-                                            const SizedBox(width: 12),
+                                            const SizedBox(width: 8),
+                                            Icon(Icons.directions_car,
+                                                color: Colors.grey[600],
+                                                size: 16),
+                                            const SizedBox(width: 4),
                                             Text(
-                                              daysLeft(trip.date) > 0
-                                                  ? "Expires in ${daysLeft(trip.date)} days"
-                                                  : "Expired",
+                                              trip.vehicleNo,
                                               style: TextStyle(
-                                                color: daysLeft(trip.date) < 5
-                                                    ? Colors.red[600]
-                                                    : Colors.grey[500],
-                                                fontWeight:
-                                                    daysLeft(trip.date) < 5
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal,
+                                                color: Colors.grey[600],
                                                 fontSize: 14,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.drive_eta),
-                                    SizedBox(
-                                      width: 8,
-                                    ),
-                                    Text(
-                                      trip.vehicleType,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        if (trip.status == "Active")
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: mainBlue.withOpacity(0.03),
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ChatScreen(
-                                                recieverName: trip.driverName,
-                                                recieverUid: trip.id,
-                                                recieverTel: "",
-                                                isMobile: true,
-                                              )),
-                                    );
-                                  },
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 24,
-                                        backgroundColor: Colors.blue,
-                                        child: Text(
-                                          trip.driverName,
+                                        Text(
+                                          'LKR.${trip.price.toStringAsFixed(2)}/Month',
                                           style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
+                                            color: mainBlue,
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 15,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: mainBlue.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: const Icon(
+                                            Icons.location_on,
+                                            color: mainBlue,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                trip.source,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                height: 1,
+                                                color: Colors.grey[300],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    trip.destination,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Text(
+                                                    daysLeft(trip.date) > 0
+                                                        ? "Expires in ${daysLeft(trip.date)} days"
+                                                        : "Expired",
+                                                    style: TextStyle(
+                                                      color:
+                                                          daysLeft(trip.date) <
+                                                                  5
+                                                              ? Colors.red[600]
+                                                              : Colors
+                                                                  .grey[500],
+                                                      fontWeight:
+                                                          daysLeft(trip.date) <
+                                                                  5
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.drive_eta),
+                                          SizedBox(
+                                            width: 8,
+                                          ),
+                                          Text(
+                                            trip.vehicleType,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        trip.driverName.contains(" ")
-                                      ? trip.driverName.split(" ")[0] + " " + trip.driverName.split(" ")[1]
-                                      : trip.driverName[0],
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              if (trip.status == "Active")
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: mainBlue.withOpacity(0.03),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(20),
+                                      bottomRight: Radius.circular(20),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ChatScreen(
+                                                      recieverName:
+                                                          trip.driverName,
+                                                      recieverUid: trip.id,
+                                                      recieverTel: "",
+                                                      isMobile: true,
+                                                    )),
+                                          );
+                                        },
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 24,
+                                              backgroundColor: Colors.blue,
+                                              child: Text(
+                                                trip.driverName.split(" ")[1]
+                                                    [0],
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              trip.driverName.contains(" ")
+                                                  ? trip.driverName
+                                                          .split(" ")[0] +
+                                                      " " +
+                                                      trip.driverName
+                                                          .split(" ")[1]
+                                                  : trip.driverName[0],
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            onPressed: () {},
+                                            icon: const Icon(Icons.visibility,
+                                                size: 18),
+                                            label: const Text('Track Trip '),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: mainBlue,
+                                              foregroundColor: Colors.white,
+                                              elevation: 0,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 12),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                          ),
+                                          if (daysLeft(trip.date) < 5)
+                                            ElevatedButton.icon(
+                                              onPressed: () {},
+                                              icon: const Icon(
+                                                Icons.plus_one_outlined,
+                                                size: 18,
+                                              ),
+                                              label: const Text('Renew Trip'),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.red[600],
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                            )
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ElevatedButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(Icons.visibility,
-                                          size: 18),
-                                      label: const Text('Track Trip '),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: mainBlue,
-                                        foregroundColor: Colors.white,
-                                        elevation: 0,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                    ),
-                                    if (daysLeft(trip.date) < 5)
-                                      ElevatedButton.icon(
-                                        onPressed: () {},
-                                        icon: const Icon(
-                                          Icons.plus_one_outlined,
-                                          size: 18,
-                                        ),
-                                        label: const Text('Renew Trip'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red[600],
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 12),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                        ),
-                                      )
-                                  ],
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

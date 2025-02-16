@@ -261,7 +261,6 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                     )));
                       },
                       child: Card(
-
                         margin: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 10),
                         shape: RoundedRectangleBorder(

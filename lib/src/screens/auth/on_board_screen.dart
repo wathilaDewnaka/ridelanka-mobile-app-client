@@ -1,4 +1,4 @@
-import 'package:client/src/screens/auth/mobile_register_screen.dart';
+import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:flutter/material.dart';
 
 class OnBoardScreen extends StatefulWidget {
@@ -60,7 +60,7 @@ class _OnBoardLoadingScreenState extends State<OnBoardScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const MobileRegisterScreen(),
+                        builder: (context) => const MobileLoginScreen(),
                       ),
                     );
                   } else {

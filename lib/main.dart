@@ -49,11 +49,10 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: SplashScreen.id,
         routes: {
-          SplashScreen.id: (context) => const RiderNavigationMenu(),
+          SplashScreen.id: (context) => const SplashScreen(),
           MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
           MobileLoginScreen.id: (context) => const MobileLoginScreen(),
-          RiderNavigationMenu.id: (context) => const RiderNavigationMenu(),
-          // VehicleDetails.id: (context) => VehicleDetails(),
+          RiderNavigationMenu.id: (context) => const RiderNavigationMenu(selectedIndex: 0),
           DriverDashboard.id: (context) => const DriverDashboard()
         },
       ),
