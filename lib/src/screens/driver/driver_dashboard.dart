@@ -29,7 +29,7 @@ class _DriverHomeState extends State<DriverHome> {
             children: [
               Container(
                 width: double.infinity,
-                height: 300,
+                height: 340,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
@@ -39,7 +39,7 @@ class _DriverHomeState extends State<DriverHome> {
                 ),
               ),
               Positioned(
-                top: 150,
+                top: 210,
                 left: 20,
                 right: 20,
                 child: Container(
@@ -67,7 +67,7 @@ class _DriverHomeState extends State<DriverHome> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
+                      const Text(
                         "Wathila Karunathilake",
                         style: TextStyle(
                           fontSize: 20,
@@ -81,49 +81,64 @@ class _DriverHomeState extends State<DriverHome> {
               ),
             ],
           ),
-          const SizedBox(height: 50),
+          const SizedBox(height: 1),
 
           // Button Grid
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: const EdgeInsets.all(16.0),
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-              children: [
-                MenuButton(
-                  iconImage: 'assets/images/driver_dashboard_images/van.png',
-                  label: "Add",
-                  onPressed: () {
-                    print("Add pressed");
-                  },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
                 ),
-                MenuButton(
-                  iconImage:
-                      'assets/images/driver_dashboard_images/attendance.png',
-                  label: "Attendance",
-                  onPressed: () {
-                    print("Attendance pressed");
-                  },
-                ), // attendance button
-
-                MenuButton(
-                  iconImage: 'assets/images/driver_dashboard_images/view.png',
-                  label: "View",
-                  onPressed: () {
-                    print("View pressed");
-                  },
-                ), // view button
-
-                MenuButton(
-                  iconImage:
-                      'assets/images/driver_dashboard_images/profile.png',
-                  label: "Profile",
-                  onPressed: () {
-                    print("Profile pressed");
-                  },
-                ), //profile button
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
+                children: [
+                  MenuButton(
+                    iconImage:
+                        'assets/images/driver_dashboard_images/attendance.png',
+                    label: "Rides",
+                    onPressed: () {
+                      print("Rides pressed");
+                    },
+                  ),
+                  MenuButton(
+                    iconImage:
+                        'assets/images/driver_dashboard_images/notification.png',
+                    label: "View",
+                    onPressed: () {
+                      print("View pressed");
+                    },
+                  ),
+                  MenuButton(
+                    iconImage: 'assets/images/driver_dashboard_images/van.png',
+                    label: "Add",
+                    onPressed: () {
+                      print("Add pressed");
+                    },
+                  ),
+                  MenuButton(
+                    iconImage:
+                        'assets/images/driver_dashboard_images/profile.png',
+                    label: "Profile",
+                    onPressed: () {
+                      print("Profile pressed");
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
