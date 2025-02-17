@@ -1,7 +1,9 @@
 import 'package:client/global_variable.dart';
+import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExpandedView extends StatefulWidget {
@@ -82,10 +84,12 @@ class _ExpandedViewState extends State<ExpandedView> {
   void confirmSubscription() async {
     if (isButtonDisabled) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        message: "Unusual activity detected !",
+        message: "Wait atleast 5 minutes before making new booking",
         title: "Error",
         type: MessageType.error,
       ));
+      Navigator.pop(context);
+      return;
     }
 
     setState(() {
@@ -93,12 +97,24 @@ class _ExpandedViewState extends State<ExpandedView> {
       remainingTime = totalDisableTime;
     });
 
+    String? pickupLocation = Provider.of<AppData>(context, listen: false)
+        .pickupAddress
+        .placeName;
+    String? destLocation = Provider.of<AppData>(context, listen: false)
+        .destinationAddress
+        .placeName;
+
     _saveButtonState(); // Save the timestamp
 
     Map<String, String> userBookingDetails = {
+      "start": pickupLocation ?? "",
+      "end": destLocation ?? "",
+      "price": " widget.price",
+      "driverName": "",
+      "vehicleName": "",
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isActive": "false",
+      "isActive": "Pending",
     };
 
     Map<String, String> driverNotifications = {
@@ -107,7 +123,7 @@ class _ExpandedViewState extends State<ExpandedView> {
       "icon": "Icons.new",
       "date": DateTime.now().microsecondsSinceEpoch.toString(),
       "isRead": "false",
-      "isActive": "false"
+      "isActive": "${firebaseUser!.uid}"
     };
 
     try {
@@ -142,10 +158,12 @@ class _ExpandedViewState extends State<ExpandedView> {
     }
 
     Future.delayed(Duration(seconds: totalDisableTime), () {
-      setState(() {
-        isButtonDisabled = false; // Re-enable the button
-        remainingTime = 0; // Reset remaining time
-      });
+      if (mounted) {
+        setState(() {
+          isButtonDisabled = false; // Re-enable the button
+          remainingTime = 0; // Reset remaining time
+        });
+      }
 
       // Clear the saved timestamp
       SharedPreferences.getInstance().then((prefs) {
@@ -236,7 +254,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "LKR ${double.parse(widget.price).toStringAsFixed(2)} / Month",
+                      "LKR ${widget.price} / Month",
                       style: const TextStyle(
                         fontSize: 20,
                         color: Color(0xFF0051ED),
