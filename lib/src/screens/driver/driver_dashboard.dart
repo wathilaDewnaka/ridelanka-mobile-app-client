@@ -23,76 +23,37 @@ class _DriverHomeState extends State<DriverHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Column(
+      body: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                height: 340,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                        'assets/images/driver_dashboard_images/driverhomebg.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 210,
-                left: 20,
-                right: 20,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${getGreeting()},",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.blueAccent,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Text(
-                        "Wathila Karunathilake",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 1),
-
-          // Button Grid
-          Expanded(
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
             child: Container(
-              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              height: 360,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(
+                    'assets/images/driver_dashboard_images/driverhomebg.jpg',
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+
+          // Greeting Card Section
+          Positioned(
+            top: 215,
+            left: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                  topRight: Radius.circular(50),
-                ),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -101,8 +62,54 @@ class _DriverHomeState extends State<DriverHome> {
                   ),
                 ],
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${getGreeting()},",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Text(
+                    "Wathila Karunathilake", // Replace with a dynamic variable if needed
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 310,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
+              ),
               child: GridView.count(
                 crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 crossAxisSpacing: 16.0,
                 mainAxisSpacing: 16.0,
                 children: [
