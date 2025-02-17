@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
 
-class DriverHome extends StatelessWidget {
+class DriverHome extends StatefulWidget {
   const DriverHome({super.key});
+
+  @override
+  State<DriverHome> createState() => _DriverHomeState();
+}
+
+class _DriverHomeState extends State<DriverHome> {
+  String getGreeting() {
+    final int hour = DateTime.now().hour;
+    if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 18) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,15 +25,15 @@ class DriverHome extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       body: Column(
         children: [
-          // Header Section with Background Image
           Stack(
             children: [
               Container(
                 width: double.infinity,
-                height: 200,
+                height: 300,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/driverhomebg.jpg'),
+                    image: AssetImage(
+                        'assets/images/driver_dashboard_images/driverhomebg.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -40,12 +56,12 @@ class DriverHome extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Good morning,",
-                        style: TextStyle(
+                        "${getGreeting()},",
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.blueAccent,
                           fontWeight: FontWeight.w500,

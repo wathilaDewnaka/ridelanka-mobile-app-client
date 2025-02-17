@@ -2,6 +2,7 @@ import 'package:client/firebase_options.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         primarySwatch: Colors.blue, // Set a default color for the app
       ),
-      home: const RiderNavigationMenu(), // Onboarding screen
+      home: const DriverHome(), // Onboarding screen
     );
   }
 }

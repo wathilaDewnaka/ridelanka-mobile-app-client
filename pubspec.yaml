@@ -61,11 +61,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/driver_dashboard_images/van.png
-    - assets/images/driver_dashboard_images/attendance.png
-    - assets/images/driver_dashboard_images/view.png
-    - assets/images/driver_dashboard_images/profile.png
-    - assets/images/driver_dashboard_images/driverhomebg.jpg
+    - assets/images/driver_dashboard_images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
