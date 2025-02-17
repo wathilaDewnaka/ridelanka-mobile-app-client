@@ -14,14 +14,22 @@ class ExpandedView extends StatefulWidget {
       required this.routeDetails,
       required this.image,
       required this.vehicleName,
-      required this.price});
+      required this.price,
+      required this.startPl,
+      required this.endPl,
+      required this.startKm,
+      required this.endKm});
 
   final String driverUid;
   final String driverName;
   final String routeDetails;
   final String image;
   final String vehicleName;
-  final String price;
+  final double price;
+  final int startKm;
+  final int endKm;
+  final String startPl;
+  final String endPl;
 
   @override
   State<ExpandedView> createState() => _ExpandedViewState();
@@ -30,7 +38,7 @@ class ExpandedView extends StatefulWidget {
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
   int remainingTime = 0; // Remaining time in seconds
-  int totalDisableTime = 3; // Total disable time in seconds
+  int totalDisableTime = 5; // Total disable time in seconds
 
   @override
   void initState() {
@@ -319,6 +327,20 @@ class _ExpandedViewState extends State<ExpandedView> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
+                  textAlign: TextAlign.justify,
+                  "According to RideLanka this vehicle is ${widget.startKm == 0 ? "less than 1" : widget.startKm} KM near to your start location and ${widget.endKm == 0 ? "less than 1" : widget.endKm} KM near to your end location. Accordingly pickup is nearby ${widget.startPl} and drop is at ${widget.endPl}. Contact your Driver before the booking to make sure about details.",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  textAlign: TextAlign.justify,
                   widget.routeDetails,
                   style: const TextStyle(
                     fontSize: 14,
