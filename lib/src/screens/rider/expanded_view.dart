@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExpandedView extends StatefulWidget {
   const ExpandedView(
@@ -25,63 +26,132 @@ class ExpandedView extends StatefulWidget {
 }
 
 class _ExpandedViewState extends State<ExpandedView> {
+  bool isButtonDisabled = false;
+  int remainingTime = 0; // Remaining time in seconds
+  int totalDisableTime = 3; // Total disable time in seconds
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadButtonState();
+  }
+
+  void _loadButtonState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int lastDisabledTimestamp = prefs.getInt('lastDisabledTimestamp') ?? 0;
+
+    if (lastDisabledTimestamp != 0) {
+      DateTime lastDisabledTime =
+          DateTime.fromMillisecondsSinceEpoch(lastDisabledTimestamp);
+      int elapsedTime = DateTime.now().difference(lastDisabledTime).inSeconds;
+
+      if (elapsedTime < totalDisableTime) {
+        setState(() {
+          isButtonDisabled = true;
+          remainingTime = totalDisableTime - elapsedTime;
+        });
+
+        Future.delayed(Duration(seconds: (remainingTime - elapsedTime).toInt()),
+            () {
+          setState(() {
+            isButtonDisabled = false; // Re-enable the button
+            remainingTime = 0; // Reset remaining time
+          });
+
+          // Clear the saved timestamp
+          SharedPreferences.getInstance().then((prefs) {
+            prefs.remove('lastDisabledTimestamp');
+          });
+        });
+      } else {
+        setState(() {
+          isButtonDisabled = false;
+          remainingTime = 0;
+        });
+      }
+    }
+  }
+
+  void _saveButtonState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt(
+        'lastDisabledTimestamp', DateTime.now().millisecondsSinceEpoch);
+  }
+
   void confirmSubscription() async {
-    DatabaseReference driverBookingsRef = FirebaseDatabase.instance
-        .ref()
-        .child('drivers/${widget.driverUid}/bookings');
+    if (isButtonDisabled) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        message: "Unusual activity detected !",
+        title: "Error",
+        type: MessageType.error,
+      ));
+    }
 
-    // Booking details for the driver
-    Map<String, String> driverBookingDetails = {
-      "userUid": firebaseUser!.uid,
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isActive": "false",
-    };
+    setState(() {
+      isButtonDisabled = true; // Disable the button
+      remainingTime = totalDisableTime;
+    });
 
-    // Booking details for the user
+    _saveButtonState(); // Save the timestamp
+
     Map<String, String> userBookingDetails = {
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
       "isActive": "false",
     };
 
-    // Notification for the driver
     Map<String, String> driverNotifications = {
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isActive": "false",
-      "isRead": "false"
+      "title": "Booking Request",
+      "description": "New booking request for the vehicle registered",
+      "icon": "Icons.new",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": "false"
     };
 
     try {
-      // Save booking details in both user and driver nodes
-      DatabaseReference driverDetails = driverBookingsRef.push();
-      await driverDetails.set(driverBookingDetails);
-
       // References for user and driver bookings in Firebase
       DatabaseReference userBookingsRef = FirebaseDatabase.instance
           .ref()
-          .child('users/${firebaseUser!.uid}/bookings/${driverDetails.key}');
+          .child('users/${firebaseUser!.uid}/bookings');
+
+      DatabaseReference userData = userBookingsRef.push();
+      await userData.set(userBookingDetails);
 
       DatabaseReference driverNotification = FirebaseDatabase.instance
           .ref()
-          .child(
-              'drivers/${widget.driverUid}/notifications/${driverDetails.key}');
+          .child('drivers/${widget.driverUid}/notifications/${userData.key}');
 
-      await userBookingsRef.set(userBookingDetails);
       await driverNotification.set(driverNotifications);
 
+      Navigator.pop(context);
+
       // Show success message
-      createMessageBar(
-        message: "Booking request sent successfully",
-        title: "Success",
-      );
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          message: "Booking request sent successfully",
+          title: "Success",
+          type: MessageType.success));
     } catch (error) {
       // Handle errors and show an error message
-      createMessageBar(
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         message: "Something went wrong",
         title: "Error",
         type: MessageType.error,
-      );
+      ));
     }
+
+    Future.delayed(Duration(seconds: totalDisableTime), () {
+      setState(() {
+        isButtonDisabled = false; // Re-enable the button
+        remainingTime = 0; // Reset remaining time
+      });
+
+      // Clear the saved timestamp
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.remove('lastDisabledTimestamp');
+      });
+    });
   }
 
   @override
