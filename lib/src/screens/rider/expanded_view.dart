@@ -61,10 +61,12 @@ class _ExpandedViewState extends State<ExpandedView> {
       int elapsedTime = DateTime.now().difference(lastDisabledTime).inSeconds;
 
       if (elapsedTime < totalDisableTime) {
-        setState(() {
-          isButtonDisabled = true;
-          remainingTime = totalDisableTime - elapsedTime;
-        });
+        if (mounted) {
+          setState(() {
+            isButtonDisabled = true;
+            remainingTime = totalDisableTime - elapsedTime;
+          });
+        }
 
         Future.delayed(Duration(seconds: (remainingTime).toInt()), () {
           setState(() {
@@ -131,8 +133,8 @@ class _ExpandedViewState extends State<ExpandedView> {
 
     Map<String, String> driverNotifications = {
       "title": "Booking Request",
-      "description": "New booking request for the vehicle registered",
-      "icon": "Icons.new",
+      "description":  "New booking request from $pickupLocation to $destLocation",
+      "icon": "new",
       "date": DateTime.now().microsecondsSinceEpoch.toString(),
       "isRead": "false",
       "isActive": "${firebaseUser!.uid}"
@@ -153,9 +155,11 @@ class _ExpandedViewState extends State<ExpandedView> {
 
       await driverNotification.set(driverNotifications);
 
-      Navigator.pushNamedAndRemoveUntil(
+      Navigator.pushAndRemoveUntil(
         context,
-        RiderNavigationMenu.id, // The route name for the login screen
+        MaterialPageRoute(
+            builder: (context) => const RiderNavigationMenu(
+                selectedIndex: 2)), // The route name for the login screen
         (route) => false, // Remove all routes
       );
 
@@ -255,74 +259,74 @@ class _ExpandedViewState extends State<ExpandedView> {
               ),
 
               // Driver Information
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.vehicleName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(
+                        5,
+                        (index) => const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "LKR ${widget.price.toStringAsFixed(2)} / Month",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Color(0xFF0051ED),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action Button (Full Width)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: confirmSubscription,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0051ED),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Book Now',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 18),
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.vehicleName,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: List.generate(
-                                5,
-                                (index) => const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              "LKR ${widget.price.toStringAsFixed(2)} / Month",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                color: Color(0xFF0051ED),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Action Button (Full Width)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: confirmSubscription,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0051ED),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Book Now',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 18),
-
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 10.0),
@@ -363,7 +367,6 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
@@ -393,7 +396,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
