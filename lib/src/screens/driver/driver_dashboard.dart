@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'attendance_dashboard.dart';
 
 class DriverHome extends StatefulWidget {
   const DriverHome({super.key});
@@ -74,7 +75,7 @@ class _DriverHomeState extends State<DriverHome> {
                     ),
                   ),
                   const Text(
-                    "Wathila Karunathilake", // Replace with a dynamic variable if needed
+                    "Wathila Karunathilake",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -126,6 +127,11 @@ class _DriverHomeState extends State<DriverHome> {
                         'assets/images/driver_dashboard_images/notification.png',
                     label: "View",
                     onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AttendancePage()),
+                      );
                       print("View pressed");
                     },
                   ),
