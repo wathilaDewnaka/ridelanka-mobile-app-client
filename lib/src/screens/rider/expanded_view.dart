@@ -1,5 +1,7 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
+import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -18,13 +20,15 @@ class ExpandedView extends StatefulWidget {
       required this.startPl,
       required this.endPl,
       required this.startKm,
-      required this.endKm});
+      required this.endKm,
+      required this.vehicleNo});
 
   final String driverUid;
   final String driverName;
   final String routeDetails;
   final String image;
   final String vehicleName;
+  final String vehicleNo;
   final double price;
   final int startKm;
   final int endKm;
@@ -62,8 +66,7 @@ class _ExpandedViewState extends State<ExpandedView> {
           remainingTime = totalDisableTime - elapsedTime;
         });
 
-        Future.delayed(Duration(seconds: (remainingTime - elapsedTime).toInt()),
-            () {
+        Future.delayed(Duration(seconds: (remainingTime).toInt()), () {
           setState(() {
             isButtonDisabled = false; // Re-enable the button
             remainingTime = 0; // Reset remaining time
@@ -115,11 +118,12 @@ class _ExpandedViewState extends State<ExpandedView> {
     _saveButtonState(); // Save the timestamp
 
     Map<String, String> userBookingDetails = {
-      "start": pickupLocation ?? "",
-      "end": destLocation ?? "",
-      "price": " widget.price",
-      "driverName": "",
-      "vehicleName": "",
+      "start": pickupLocation,
+      "end": destLocation,
+      "price": "${widget.price}",
+      "driverName": widget.driverName,
+      "vehicleName": widget.vehicleName,
+      "vehicleNo": widget.vehicleNo,
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
       "isActive": "Pending",
@@ -149,7 +153,11 @@ class _ExpandedViewState extends State<ExpandedView> {
 
       await driverNotification.set(driverNotifications);
 
-      Navigator.pop(context);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        RiderNavigationMenu.id, // The route name for the login screen
+        (route) => false, // Remove all routes
+      );
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -213,12 +221,21 @@ class _ExpandedViewState extends State<ExpandedView> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Color(0xFF0051ED),
+      body: Container(
+        padding: EdgeInsets.only(top: 18),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          color: Colors.white,
           elevation: 6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,115 +254,143 @@ class _ExpandedViewState extends State<ExpandedView> {
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.driverName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: List.generate(
-                        5,
-                        (index) => const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 20,
+              // Driver Information
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.vehicleName,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: List.generate(
+                                5,
+                                (index) => const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              "LKR ${widget.price.toStringAsFixed(2)} / Month",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Color(0xFF0051ED),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "LKR ${widget.price} / Month",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Color(0xFF0051ED),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: confirmSubscription,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0051ED),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Book Now',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 18),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.blue,
-                      child: Text(
-                        widget.driverName[0],
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      // Action Button (Full Width)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: confirmSubscription,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0051ED),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Book Now',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      widget.driverName.split(" ")[0],
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
 
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  textAlign: TextAlign.justify,
-                  "According to RideLanka this vehicle is ${widget.startKm == 0 ? "less than 1" : widget.startKm} KM near to your start location and ${widget.endKm == 0 ? "less than 1" : widget.endKm} KM near to your end location. Accordingly pickup is nearby ${widget.startPl} and drop is at ${widget.endPl}. Contact your Driver before the booking to make sure about details.",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.5,
-                  ),
-                ),
-              ),
+                      SizedBox(height: 18),
 
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  textAlign: TextAlign.justify,
-                  widget.routeDetails,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    height: 1.5,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 10.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                        recieverName: widget.driverName,
+                                        recieverUid: widget.driverUid,
+                                        recieverTel: "",
+                                        isMobile: false)));
+                          },
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: Colors.blue,
+                                child: Text(
+                                  widget.driverName.contains(" ")
+                                      ? widget.driverName.split(" ")[1][0]
+                                      : widget.driverName[0],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                widget.driverName,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          textAlign: TextAlign.justify,
+                          "According to RideLanka this vehicle is ${widget.startKm == 0 ? "less than 1" : widget.startKm} KM near to your start location and ${widget.endKm == 0 ? "less than 1" : widget.endKm} KM near to your end location. Accordingly pickup is nearby ${widget.startPl} and drop is at ${widget.endPl}. Contact your Driver before the booking to make sure about details. Vehicle number is ${widget.vehicleNo}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+
+                      // Route Details
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          textAlign: TextAlign.justify,
+                          widget.routeDetails,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
