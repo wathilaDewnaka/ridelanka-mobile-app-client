@@ -15,6 +15,25 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HelperMethods {
+  static Future<String?> getDriverName(String uid) async {
+    try {
+      DatabaseReference ref =
+          FirebaseDatabase.instance.ref("drivers/$uid/fullname");
+
+      DataSnapshot snapshot = await ref.get();
+
+      if (snapshot.exists) {
+        return snapshot.value as String;
+      } else {
+        print("Driver fullname not found at drivers/$uid/fullname.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching driver name: $e");
+      return null;
+    }
+  }
+  
   static Future<String> findCordinateAddress(Position position, context) async {
     print("this is position ");
     print(position);

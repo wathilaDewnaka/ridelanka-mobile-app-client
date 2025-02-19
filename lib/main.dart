@@ -1,5 +1,8 @@
 import 'package:client/firebase_options.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
 import 'package:client/src/screens/auth/on_board_screen.dart';
@@ -57,7 +60,6 @@ class MyApp extends StatelessWidget {
           RiderNavigationMenu.id: (context) => const RiderNavigationMenu(selectedIndex: 0),
           DriverDashboard.id: (context) => const DriverDashboard()
         },
-      ),
     );
   }
 }
