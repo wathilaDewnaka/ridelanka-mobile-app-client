@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: VehicleAddScreen(),
+  ));
+}
+
 class VehicleAddScreen extends StatelessWidget {
   final TextEditingController driverNameController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
@@ -12,14 +19,22 @@ class VehicleAddScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Vehicle')),
+      appBar: AppBar(
+        title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blue,
+        centerTitle: true,
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
               buildCard('Add Images', [
-                ElevatedButton(onPressed: () {}, child: Icon(Icons.add_a_photo))
+                ElevatedButton(
+                  onPressed: () {},
+                  style: elevatedButtonStyle(),
+                  child: Icon(Icons.add_a_photo, color: Colors.white),
+                )
               ]),
               buildCard('Driver Information', [
                 buildTextField(driverNameController, 'Driver Name'),
@@ -39,8 +54,14 @@ class VehicleAddScreen extends StatelessWidget {
               ]),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {},
-                child: Text('Next'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen()),
+                  );
+                },
+                style: elevatedButtonStyle(),
+                child: Text('Next', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -62,7 +83,11 @@ class VehicleAddScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Vehicle')),
+      appBar: AppBar(
+        title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blue,
+        centerTitle: true,
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -72,7 +97,12 @@ class VehicleAddScreen2 extends StatelessWidget {
                 buildTextField(startLocationController, 'Start Location'),
                 buildTextField(endLocationController, 'End Location'),
                 buildTextField(priceController, 'Price'),
-                ElevatedButton(onPressed: () {}, child: Text('Predict Price')),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: elevatedButtonStyle(),
+                  child: Text('Predict Price',
+                      style: TextStyle(color: Colors.white)),
+                ),
               ]),
               buildCard('Background Details', [
                 buildTextField(experienceController, 'Work Experience'),
@@ -88,7 +118,8 @@ class VehicleAddScreen2 extends StatelessWidget {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {},
-                child: Text('Submit'),
+                style: elevatedButtonStyle(),
+                child: Text('Submit', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -131,6 +162,7 @@ Widget buildDropdown(List<String> items, String label) {
 
 Widget buildCard(String title, List<Widget> children) {
   return Card(
+    color: Colors.blue[50],
     elevation: 3,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     child: Padding(
@@ -138,11 +170,21 @@ Widget buildCard(String title, List<Widget> children) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(title,
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
           SizedBox(height: 8),
           ...children,
         ],
       ),
     ),
+  );
+}
+
+ButtonStyle elevatedButtonStyle() {
+  return ElevatedButton.styleFrom(
+    backgroundColor: Colors.blue,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
   );
 }
