@@ -1,5 +1,5 @@
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:flutter/material.dart';
-import 'attendance_dashboard.dart';
 
 class DriverHome extends StatefulWidget {
   const DriverHome({super.key});
@@ -9,6 +9,8 @@ class DriverHome extends StatefulWidget {
 }
 
 class _DriverHomeState extends State<DriverHome> {
+  String? driverName;
+
   String getGreeting() {
     final int hour = DateTime.now().hour;
     if (hour < 12) {
@@ -21,19 +23,32 @@ class _DriverHomeState extends State<DriverHome> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getName();
+  }
+
+  void getName() async {
+    String? name = await HelperMethods.getDriverName("uid");
+    setState(() {
+      driverName = name;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: Stack(
-        clipBehavior: Clip.none,
         children: [
           Positioned(
             top: 0,
             left: 0,
             right: 0,
+            bottom: 455,
             child: Container(
+              height: 1000, // Fixed height for the image container
               width: double.infinity,
-              height: 360,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(
@@ -45,9 +60,9 @@ class _DriverHomeState extends State<DriverHome> {
             ),
           ),
 
-          // Greeting Card Section
+          // Greeting Card
           Positioned(
-            top: 215,
+            top: 210,
             left: 20,
             right: 20,
             child: Container(
@@ -74,8 +89,8 @@ class _DriverHomeState extends State<DriverHome> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Text(
-                    "Wathila Karunathilake",
+                  Text(
+                    driverName ?? "Mr. NaN",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -87,70 +102,69 @@ class _DriverHomeState extends State<DriverHome> {
             ),
           ),
 
+          // Red Section - Fully dynamic
           Positioned(
-            top: 310,
+            top: 305,
             left: 0,
             right: 0,
+            bottom: 0,
             child: Container(
-              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Colors.grey[50],
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(50),
                   topRight: Radius.circular(50),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, -3),
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
                   ),
                 ],
               ),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                children: [
-                  MenuButton(
-                    iconImage:
-                        'assets/images/driver_dashboard_images/attendance.png',
-                    label: "Rides",
-                    onPressed: () {
-                      print("Rides pressed");
-                    },
-                  ),
-                  MenuButton(
-                    iconImage:
-                        'assets/images/driver_dashboard_images/notification.png',
-                    label: "View",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AttendancePage()),
-                      );
-                      print("View pressed");
-                    },
-                  ),
-                  MenuButton(
-                    iconImage: 'assets/images/driver_dashboard_images/van.png',
-                    label: "Add",
-                    onPressed: () {
-                      print("Add pressed");
-                    },
-                  ),
-                  MenuButton(
-                    iconImage:
-                        'assets/images/driver_dashboard_images/profile.png',
-                    label: "Profile",
-                    onPressed: () {
-                      print("Profile pressed");
-                    },
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 1.0, // Ensure proper button sizing
+                  children: [
+                    MenuButton(
+                      iconImage:
+                          'assets/images/driver_dashboard_images/attendance.png',
+                      label: "Rides",
+                      onPressed: () {
+                        print("Rides pressed");
+                      },
+                    ),
+                    MenuButton(
+                      iconImage:
+                          'assets/images/driver_dashboard_images/notification.png',
+                      label: "View",
+                      onPressed: () {
+                        print("View pressed");
+                      },
+                    ),
+                    MenuButton(
+                      iconImage:
+                          'assets/images/driver_dashboard_images/van.png',
+                      label: "Add",
+                      onPressed: () {
+                        print("Add pressed");
+                      },
+                    ),
+                    MenuButton(
+                      iconImage:
+                          'assets/images/driver_dashboard_images/profile.png',
+                      label: "Profile",
+                      onPressed: () {
+                        print("Profile pressed");
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -182,7 +196,7 @@ class MenuButton extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         backgroundColor: Colors.white,
         shadowColor: Colors.blueAccent.withOpacity(0.3),
-        elevation: isHighlighted ? 10 : 6, // Highlight effect
+        elevation: isHighlighted ? 10 : 6,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
