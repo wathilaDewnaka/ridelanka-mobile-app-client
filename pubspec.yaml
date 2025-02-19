@@ -83,6 +83,7 @@ flutter:
     - assets/images/maps/
     - assets/images/on_boarding_images/
     - assets/images/splash_screen/
+    - assets/images/driver_dashboard_images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
