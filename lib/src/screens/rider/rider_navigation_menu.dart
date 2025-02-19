@@ -5,7 +5,11 @@ import 'package:client/src/screens/rider/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class RiderNavigationMenu extends StatefulWidget {
-  const RiderNavigationMenu({super.key});
+  const RiderNavigationMenu({super.key, required this.selectedIndex});
+
+  final int selectedIndex;
+
+  static const String id = 'ridermainpage';
 
   @override
   State<RiderNavigationMenu> createState() => _RiderNavigationMenuState();
@@ -14,7 +18,7 @@ class RiderNavigationMenu extends StatefulWidget {
 class _RiderNavigationMenuState extends State<RiderNavigationMenu>
     with SingleTickerProviderStateMixin {
   TabController? tabController;
-  int selectedIndex = 0;
+  late int selectedIndex;
 
   void onItemClicked(int index) {
     setState(() {
@@ -25,9 +29,10 @@ class _RiderNavigationMenuState extends State<RiderNavigationMenu>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    tabController = TabController(length: 4, vsync: this);
+    selectedIndex = widget.selectedIndex;
+    tabController =
+        TabController(length: 4, vsync: this, initialIndex: selectedIndex);
   }
 
   @override
@@ -43,11 +48,11 @@ class _RiderNavigationMenuState extends State<RiderNavigationMenu>
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: tabController,
-        children: const [
-          HomeTab(),
-          HistoryTab(),
-          NotificationsTab(),
-          ProfileTab()
+        children: [
+          const HomeTab(),
+          NotificationTab(),
+          const HistoryTab(),
+          const ProfileTab()
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
