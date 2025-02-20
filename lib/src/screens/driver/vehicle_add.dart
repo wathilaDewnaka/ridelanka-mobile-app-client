@@ -21,7 +21,7 @@ class VehicleAddScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF0051ED),
         centerTitle: true,
       ),
       body: Padding(
@@ -57,7 +57,8 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => VehicleAddScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -85,7 +86,7 @@ class VehicleAddScreen2 extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF0051ED),
         centerTitle: true,
       ),
       body: Padding(
@@ -171,8 +172,8 @@ Widget buildCard(String title, List<Widget> children) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Color(0xFF0051ED))),
           SizedBox(height: 8),
           ...children,
         ],
@@ -183,7 +184,7 @@ Widget buildCard(String title, List<Widget> children) {
 
 ButtonStyle elevatedButtonStyle() {
   return ElevatedButton.styleFrom(
-    backgroundColor: Colors.blue,
+    backgroundColor: Color(0xFF0051ED),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
   );
