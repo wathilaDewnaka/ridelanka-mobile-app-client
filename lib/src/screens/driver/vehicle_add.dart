@@ -57,7 +57,7 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddVehiclePage2()),
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -71,7 +71,7 @@ class VehicleAddScreen extends StatelessWidget {
   }
 }
 
-class AddVehiclePage2 extends StatelessWidget {
+class VehicleAddScreen2 extends StatelessWidget {
   final TextEditingController startLocationController = TextEditingController();
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -120,7 +120,7 @@ class AddVehiclePage2 extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddVehiclePage3()),
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -134,7 +134,7 @@ class AddVehiclePage2 extends StatelessWidget {
   }
 }
 
-class AddVehiclePage3 extends StatelessWidget {
+class VehicleaddScreen3 extends StatelessWidget {
   final TextEditingController vehicleDetailsController =
       TextEditingController();
 
