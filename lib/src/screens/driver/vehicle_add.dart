@@ -57,8 +57,7 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => VehicleAddScreen2()),
+                    MaterialPageRoute(builder: (context) => AddVehiclePage2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -72,7 +71,7 @@ class VehicleAddScreen extends StatelessWidget {
   }
 }
 
-class VehicleAddScreen2 extends StatelessWidget {
+class AddVehiclePage2 extends StatelessWidget {
   final TextEditingController startLocationController = TextEditingController();
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -118,7 +117,52 @@ class VehicleAddScreen2 extends StatelessWidget {
               ]),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddVehiclePage3()),
+                  );
+                },
+                style: elevatedButtonStyle(),
+                child: Text('Next', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AddVehiclePage3 extends StatelessWidget {
+  final TextEditingController vehicleDetailsController =
+      TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Final Step', style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF0051ED),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              buildCard('Final Details', [
+                buildTextField(
+                    vehicleDetailsController, 'Additional Vehicle Information',
+                    maxLines: 3),
+              ]),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Implement submit logic here
+                  print("Vehicle information submitted successfully!");
+                  // Show success message or navigate elsewhere
+                },
                 style: elevatedButtonStyle(),
                 child: Text('Submit', style: TextStyle(color: Colors.white)),
               ),
