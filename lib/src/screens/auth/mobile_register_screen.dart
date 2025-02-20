@@ -24,6 +24,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   String phoneNumber = "";
+  String? title = "Mr.";
 
   void registerUser() async {
     try {
@@ -47,6 +48,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
       // Check if phone number exists
       bool phoneNum =
           await HelperMethods.checkPhoneNumberExists(phoneNumber, isPassenger);
+      String fullName = "$title $name";
 
       if (phoneNum) {
         ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -67,6 +69,12 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
             type: MessageType.error));
         return;
       } else if (name.length < 4) {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Please enter a valid name!",
+            type: MessageType.error));
+        return;
+      } else if (name.split(" ").length != 2) {
         ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
             title: "Error",
             message: "Please enter a valid name!",
@@ -95,14 +103,13 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MobileOTPScreen(
-                verificationId: verificationId,
-                fullName: name,
-                phoneNumber: phoneNumber,
-                email: email,
-                isPassenger: isPassenger,
-                isRegister: true,
-                forceResendingToken: forceResendingToken
-              ),
+                  verificationId: verificationId,
+                  fullName: fullName,
+                  phoneNumber: phoneNumber,
+                  email: email,
+                  isPassenger: isPassenger,
+                  isRegister: true,
+                  forceResendingToken: forceResendingToken),
             ),
           );
         },
@@ -142,11 +149,45 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "Full Name",
-                border: OutlineInputBorder(),
+            Container(
+              child: Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        bottomLeft: Radius.circular(8),
+                      ),
+                      border: Border.all(color: Colors.grey), // Border for
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    child: DropdownButton<String>(
+                      value: title,
+                      items: ["Mr.", "Mrs.", "Miss", "Dr.", "Prof."]
+                          .map((String value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          title = value;
+                        });
+                      },
+                      underline: const SizedBox(), // Remove default underline
+                    ),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: "Full Name",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -299,8 +340,9 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                   onTap: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const MobileLoginScreen()),
-                      (route) => false, 
+                      MaterialPageRoute(
+                          builder: (context) => const MobileLoginScreen()),
+                      (route) => false,
                     );
                   },
                   child: const Text(

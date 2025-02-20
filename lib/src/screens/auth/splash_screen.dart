@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    // _navigateBasedOnUser();
+    _navigateBasedOnUser();
   }
 
   Future<void> _navigateBasedOnUser() async {
@@ -34,15 +34,16 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       });
     } else {
-      bool isPassenger =
-          await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+      bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
       Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => isPassenger
-                ? const RiderNavigationMenu()
-                : const DriverDashboard(),
+                ? const RiderNavigationMenu(selectedIndex: 0)
+                : const DriverHome() 
+                // : const RiderNavigationMenu(selectedIndex: 0)
+                ,
           ),
         );
       });

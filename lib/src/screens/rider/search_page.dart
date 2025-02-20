@@ -1,6 +1,6 @@
+import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/data_provider/prediction.dart';
-import 'package:client/src/globle_variable.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/widgets/brand_divier.dart';
 import 'package:client/src/widgets/prediction_tile.dart';
@@ -37,7 +37,6 @@ class _SearchPageState extends State<SearchPage> {
       });
       print("this is clear");
     }
-    
 
     if (placeName.length > 0) {
       String countryCode = 'LK';
@@ -63,7 +62,6 @@ class _SearchPageState extends State<SearchPage> {
 
         setState(() {
           destinationPredictionList = thisList;
-          print("this is Destination List : ");
           print(destinationPredictionList.toString());
         });
       }
@@ -75,7 +73,7 @@ class _SearchPageState extends State<SearchPage> {
     setFocus();
 
     String address =
-        Provider.of<AppData>(context).pickupAddress.placeName ?? '';
+        Provider.of<AppData>(context).pickupAddress.placeName;
     pickupController.text = address;
 
     return Scaffold(
@@ -120,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: <Widget>[
                       Image.asset(
-                        'images/pickicon.png',
+                        'assets/images/maps/pickicon.png',
                         height: 16,
                         width: 16,
                       ),
@@ -157,7 +155,7 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: <Widget>[
                       Image.asset(
-                        'images/desticon.png',
+                        'assets/images/maps/desticon.png',
                         height: 16,
                         width: 16,
                       ),

@@ -12,7 +12,7 @@ class AppData extends ChangeNotifier {
   );
 
   Address destinationAddress = Address(
-    placeName: '',
+    placeName: 'Where are you going ?',
     latitude: 0.0,
     longituge: 0.0,
     placeId: '',

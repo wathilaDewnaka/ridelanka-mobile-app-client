@@ -39,14 +39,14 @@ dependencies:
   geolocator: ^13.0.2
   http: ^1.2.2
   provider: ^6.1.2
-  outline_material_icons: ^1.0.0
   flutter_polyline_points: ^2.1.0
   cupertino_icons: ^1.0.8
   intl_phone_field: ^3.2.0
-  pin_code_fields: ^8.0.1
   url_launcher: ^6.3.1
   flutter_launcher_icons: ^0.14.3
   encrypt: ^5.0.3
+  outline_material_icons: ^1.0.0
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +58,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_stripe: ^10.2.0
 
 flutter_icons:
   android: true
@@ -78,10 +79,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - images/
     - assets/fonts/
+    - assets/images/maps/
     - assets/images/on_boarding_images/
     - assets/images/splash_screen/
+    - assets/images/driver_dashboard_images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

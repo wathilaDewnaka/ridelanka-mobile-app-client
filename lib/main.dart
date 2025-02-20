@@ -1,7 +1,11 @@
 import 'package:client/firebase_options.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
+import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/screens/rider/home_tab.dart';
 import 'package:client/global_variable.dart';
@@ -11,6 +15,7 @@ import 'package:client/src/screens/auth/splash_screen.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
+import 'package:client/src/screens/rider/expanded_view.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/screens/rider/vehicle_details.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,15 +54,12 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: SplashScreen.id,
         routes: {
-          // SplashScreen.id: (context) => RiderNavigationMenu(),
-          SplashScreen.id: (context) => const ChatScreen(recieverName: "recieverName", recieverUid: "recieverUid", recieverTel: "+94770891499"),
+          SplashScreen.id: (context) => const SplashScreen(),
           MobileRegisterScreen.id: (context) => const MobileRegisterScreen(),
           MobileLoginScreen.id: (context) => const MobileLoginScreen(),
-          RiderNavigationMenu.id: (context) => const RiderNavigationMenu(),
-          VehicleDetails.id: (context) => VehicleDetails(),
-          DriverDashboard.id: (context) => const DriverDashboard()
+          RiderNavigationMenu.id: (context) => const RiderNavigationMenu(selectedIndex: 0),
+          DriverHome.id: (context) => const DriverHome()
         },
-      ),
-    );
+    ));
   }
 }

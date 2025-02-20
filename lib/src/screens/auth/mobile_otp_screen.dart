@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
@@ -9,6 +8,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MobileOTPScreen extends StatefulWidget {
   const MobileOTPScreen({
@@ -109,29 +109,31 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         };
 
         databaseReference.set(userMap);
-        log("Registration Completed!");
-        return;
+      } else {
+        databaseReference.once().then((DatabaseEvent event) {
+          final snapshot = event.snapshot;
+          if (snapshot.exists) {
+            return;
+          }
+        }).catchError((error) {
+          return;
+        });
       }
 
-      databaseReference.once().then((DatabaseEvent event) {
-        final snapshot = event.snapshot;
-        if (snapshot.exists) {
-          return;
-        }
-      }).catchError((error) {
-        return;
-      });
-
       if (widget.isPassenger) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('isPassenger', "true");
         Navigator.pushNamedAndRemoveUntil(
           context,
           RiderNavigationMenu.id,
           (route) => false, // Removes all previous routes
         );
       } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('isPassenger', "false");
         Navigator.pushNamedAndRemoveUntil(
           context,
-          DriverDashboard.id,
+          DriverHome.id,
           (route) => false, // Removes all previous routes
         );
       }

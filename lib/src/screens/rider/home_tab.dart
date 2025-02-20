@@ -1,8 +1,11 @@
 import 'dart:async';
+
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/direction_details.dart';
 import 'package:client/src/screens/rider/search_page.dart';
+import 'package:client/src/screens/rider/vehicle_details.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -92,7 +95,7 @@ class _HomeTabState extends State<HomeTab> {
           markerId: MarkerId("currentLocation"),
           position: position,
           icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
         ),
       );
     });
@@ -101,188 +104,232 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          GoogleMap(
-            padding: EdgeInsets.only(
-              top: 100,
-              bottom: mapBottomPadding,
-            ),
-            mapType: MapType.normal,
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            zoomGesturesEnabled: true,
-            zoomControlsEnabled: true,
-            initialCameraPosition: _initialLocation,
-            markers: _Markers,
-            polylines: _polylines,
-            circles: _Circles,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-              mapController = controller;
-
-              setState(() {
-                mapBottomPadding = 185;
-              });
-
-              _setUpPositionLocator();
-            },
+        body: Stack(
+      children: <Widget>[
+        GoogleMap(
+          padding: EdgeInsets.only(
+            top: 100,
+            bottom: mapBottomPadding,
           ),
-          Positioned(
-            top: 40,
-            left: 20,
-            right: 20,
+          mapType: MapType.normal,
+          myLocationButtonEnabled: true,
+          myLocationEnabled: true,
+          zoomGesturesEnabled: true,
+          zoomControlsEnabled: true,
+          initialCameraPosition: _initialLocation,
+          markers: _Markers,
+          polylines: _polylines,
+          circles: _Circles,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+            mapController = controller;
+
+            setState(() {
+              mapBottomPadding = 185;
+            });
+
+            _setUpPositionLocator();
+          },
+        ),
+        Positioned(
+          top: 40,
+          left: 20,
+          right: 20,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              height: 50,
+              padding: EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 5,
-                    spreadRadius: 1,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search, color: Colors.grey),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      Provider.of<AppData>(context).pickupAddress?.placeName ??
+                          "Pickup Location",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
+                  Icon(Icons.close, color: Colors.grey),
                 ],
               ),
-              child: Container(
-                height: 50,
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 15,
+          right: 15,
+          bottom: 20,
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 2,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        Provider.of<AppData>(context)
-                                .pickupAddress
-                                ?.placeName ??
-                            "Pickup Location",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 5),
+                GestureDetector(
+                  onTap: () async {
+                    var response = await Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => SearchPage()));
+
+                    if (response == 'getDirection') {
+                      print("res recieved");
+                      var latestDestination =
+                          Provider.of<AppData>(context, listen: false)
+                              .destinationAddress;
+
+                      await getDirection();
+
+                      print("this is your Destination : ${latestDestination}");
+                    }
+                    print("This is Ditector after");
+                    print("This is response");
+                    print(response);
+                    print("this is aafter res");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            Provider.of<AppData>(context)
+                                .destinationAddress
+                                .placeName,
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 16),
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        Icon(Icons.search, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          String dest =
+                              Provider.of<AppData>(context, listen: false)
+                                  .destinationAddress
+                                  .placeName;
+                          String pick =
+                              Provider.of<AppData>(context, listen: false)
+                                  .pickupAddress
+                                  .placeName;
+                          if (dest == "Where are you going ?" ||
+                              pick == "Pickup Location") {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              message: "Please select your destination",
+                              title: "Error",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          }
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      VehicleDetails(isStudent: true)));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: customBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          "School",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                    Icon(Icons.close, color: Colors.grey),
+                    SizedBox(width: 3),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          String dest =
+                              Provider.of<AppData>(context, listen: false)
+                                  .destinationAddress
+                                  .placeName;
+                          String pick =
+                              Provider.of<AppData>(context, listen: false)
+                                  .pickupAddress
+                                  .placeName;
+                          if (dest == "Where are you going ?" ||
+                              pick == "Pickup Location") {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              message: "Please select your destination",
+                              title: "Error",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          }
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      VehicleDetails(isStudent: false)));
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: customBlue),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          "Staff",
+                          style: TextStyle(color: customBlue),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-          Positioned(
-            left: 15,
-            right: 15,
-            bottom: 20,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 5),
-                  GestureDetector(
-                    onTap: () async {
-                      var response = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SearchPage()));
-
-                      if (response == 'getDirection') {
-                        print("res recieved");
-                        var latestDestination =
-                            Provider.of<AppData>(context, listen: false)
-                                .destinationAddress;
-
-                        await getDirection();
-
-                        print(
-                            "this is your Destination : ${latestDestination}");
-                      }
-                      print("This is Ditector after");
-                      print("This is response");
-                      print(response);
-                      print("this is aafter res");
-                    },
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              "Where are you going?",
-                              style: TextStyle(
-                                  color: Colors.black54, fontSize: 16),
-                            ),
-                          ),
-                          Icon(Icons.search, color: Colors.grey),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: customBlue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            "School",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 3),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: customBlue),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            "Staff",
-                            style: TextStyle(color: customBlue),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
+    ));
   }
 
   Future<void> getDirection() async {
@@ -339,7 +386,6 @@ class _HomeTabState extends State<HomeTab> {
         _polylines.add(polyline);
       });
 
-
       // make the polyline fit to the map
       LatLngBounds bounds;
 
@@ -362,21 +408,21 @@ class _HomeTabState extends State<HomeTab> {
             LatLngBounds(southwest: pickLatLng, northeast: destinationLatLng);
       }
 
-
       mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
 
       Marker pickupMarker = Marker(
         markerId: MarkerId('pickup'),
         position: pickLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
         infoWindow: InfoWindow(title: pickup.placeName, snippet: 'My Location'),
       );
 
       Marker destinationMarker = Marker(
         markerId: MarkerId('destination'),
         position: destinationLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: destination.placeName, snippet: 'Destination'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow:
+            InfoWindow(title: destination.placeName, snippet: 'Destination'),
       );
 
       setState(() {
@@ -404,7 +450,6 @@ class _HomeTabState extends State<HomeTab> {
         _Circles.add(pickupCircle);
         _Circles.add(destinationCircle);
       });
-
     }
   }
 }
