@@ -133,7 +133,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
         await prefs.setString('isPassenger', "false");
         Navigator.pushNamedAndRemoveUntil(
           context,
-          DriverDashboard.id,
+          DriverHome.id,
           (route) => false, // Removes all previous routes
         );
       }

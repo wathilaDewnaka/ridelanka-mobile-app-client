@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(
             builder: (_) => isPassenger
                 ? const RiderNavigationMenu(selectedIndex: 0)
-                : const DriverDashboard() 
+                : const DriverHome() 
                 // : const RiderNavigationMenu(selectedIndex: 0)
                 ,
           ),
