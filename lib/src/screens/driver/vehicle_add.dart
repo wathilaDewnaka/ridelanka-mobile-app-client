@@ -57,8 +57,7 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => VehicleAddScreen2()),
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -121,8 +120,7 @@ class VehicleAddScreen2 extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => VehicleAddScreen3()),
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen3()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -153,13 +151,19 @@ class VehicleAddScreen3 extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              buildCard('Additional Vehicle Details', [
+              buildCard('Additional Details', [
                 buildTextField(finalConfirmationController, ' Details'),
               ]),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Submit form or show a confirmation screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Your response was submitted successfully.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
                 },
                 style: elevatedButtonStyle(),
                 child: Text('Submit', style: TextStyle(color: Colors.white)),
