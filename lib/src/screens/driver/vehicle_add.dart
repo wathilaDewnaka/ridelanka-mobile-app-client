@@ -57,7 +57,8 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
+                    MaterialPageRoute(
+                        builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -120,7 +121,8 @@ class VehicleAddScreen2 extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
+                    MaterialPageRoute(
+                        builder: (context) => VehicleAddScreen3()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -134,15 +136,15 @@ class VehicleAddScreen2 extends StatelessWidget {
   }
 }
 
-class VehicleaddScreen3 extends StatelessWidget {
-  final TextEditingController vehicleDetailsController =
+class VehicleAddScreen3 extends StatelessWidget {
+  final TextEditingController finalConfirmationController =
       TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Final Step', style: TextStyle(color: Colors.white)),
+        title: Text('Add Vehicle', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF0051ED),
         centerTitle: true,
       ),
@@ -151,17 +153,13 @@ class VehicleaddScreen3 extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              buildCard('Final Details', [
-                buildTextField(
-                    vehicleDetailsController, 'Additional Vehicle Information',
-                    maxLines: 3),
+              buildCard('Additional Vehicle Details', [
+                buildTextField(finalConfirmationController, ' Details'),
               ]),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Implement submit logic here
-                  print("Vehicle information submitted successfully!");
-                  // Show success message or navigate elsewhere
+                  // Submit form or show a confirmation screen
                 },
                 style: elevatedButtonStyle(),
                 child: Text('Submit', style: TextStyle(color: Colors.white)),
