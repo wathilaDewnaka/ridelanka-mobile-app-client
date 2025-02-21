@@ -1,168 +1,234 @@
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ProfileTab extends StatefulWidget {
+  const ProfileTab({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfileTab> createState() => _ProfileTabState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Profile',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold)),
         backgroundColor: Color(0xFF0051ED),
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        title: Row(
+          children: [
+            Container(
+              margin: EdgeInsets.only(right: 10),
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(17),
+                child: Center(
+                  child: Text(
+                    'T',
+                    style: TextStyle(
+                      fontSize: 55,
+                      color: Color(0xFF0051ED),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hello,',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  'Thisuri Nethma',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
+        toolbarHeight: 130,
       ),
       body: ListView(
         children: [
           const SizedBox(height: 50),
-          Transform(
-            transform: Matrix4.rotationX(0.1),
-            child: Container(
-              padding: EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                color: Color(0xFFD0D8E8),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.4),
-                    offset: Offset(5, 5),
-                    blurRadius: 8,
-                  ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.6),
-                    offset: Offset(-3, -3),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.person,
-                size: 70,
-                color: Color(0xFF0051ED),
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Thisuri Nethma',
-            style: TextStyle(fontSize: 16, letterSpacing: 0.5),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 50),
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
-              'My Details',
+              'Account Information',
               style: TextStyle(
                   fontSize: 18,
                   letterSpacing: 0.5,
-                  fontWeight: FontWeight.w500),
+                  fontWeight: FontWeight.bold),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
-            padding: EdgeInsets.only(left: 15, bottom: 15),
+            padding: EdgeInsets.only(left: 13, bottom: 20, top: 20),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF99C2FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.person,
+                    color: Color(0xFF0051ED), // Icon color
+                  ),
+                ),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'username',
                       style: TextStyle(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 0.5),
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    SizedBox(height: 50),
+                    Text(
+                      'thisurinethma',
+                      style: TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
-                ),
-                Text(
-                  'thisurinethma',
-                  style: TextStyle(fontSize: 16, letterSpacing: 0.5),
                 ),
               ],
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
-            padding: EdgeInsets.only(left: 15, bottom: 15),
+            padding: EdgeInsets.only(left: 13, bottom: 20, top: 20),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF99C2FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.email,
+                    color: Color(0xFF0051ED),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'e-mail',
+                      'email',
                       style: TextStyle(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 0.5),
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    SizedBox(height: 50),
+                    Text(
+                      'thisurinethma@gmail.com',
+                      style: TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
-                ),
-                Text(
-                  'thisurinethma@gmailcom',
-                  style: TextStyle(fontSize: 16, letterSpacing: 0.5),
                 ),
               ],
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 5,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
-            padding: EdgeInsets.only(left: 15, bottom: 15),
+            padding: EdgeInsets.only(left: 13, bottom: 20, top: 20),
             margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFF99C2FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.phone,
+                    color: Color(0xFF0051ED),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'phone number',
                       style: TextStyle(
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 0.5),
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    SizedBox(height: 50),
+                    Text(
+                      '+94 *********',
+                      style: TextStyle(
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
-                ),
-                Text(
-                  '+94 *********',
-                  style: TextStyle(fontSize: 16, letterSpacing: 0.5),
                 ),
               ],
             ),
@@ -170,78 +236,37 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(height: 100),
           Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Transform(
-                    transform: Matrix4.rotationX(0.1),
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD0D8E8),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            offset: Offset(5, 5),
-                            blurRadius: 8,
-                          ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.6),
-                            offset: Offset(-3, -3),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.settings,
-                        size: 26,
-                        color: Color(0xFF0051ED),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Manage Account',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
               SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Transform(
-                    transform: Matrix4.rotationX(0.1),
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD0D8E8),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            offset: Offset(5, 5),
-                            blurRadius: 8,
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0051ED),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          size: 26,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Log Out',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
                           ),
-                          BoxShadow(
-                            color: Colors.white.withOpacity(0.6),
-                            offset: Offset(-3, -3),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.logout,
-                        size: 26,
-                        color: Color(0xFF0051ED),
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Text('Log Out'),
                 ],
-              ),
+              )
             ],
           )
         ],
