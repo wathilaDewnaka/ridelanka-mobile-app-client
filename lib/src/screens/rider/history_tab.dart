@@ -1,4 +1,5 @@
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/chat_screen.dart';
@@ -32,24 +33,32 @@ class _HistoryTabState extends State<HistoryTab> {
         if (child.value is Map<dynamic, dynamic>) {
           Map<dynamic, dynamic> notificationData =
               child.value as Map<dynamic, dynamic>;
-          newNotifications.add(TripItem.fromJson(notificationData, child.key));
+
           print(notificationData);
+          newNotifications.add(TripItem.fromJson(notificationData, child.key));
+          print(newNotifications);
         } else {
           // Handle invalid or unexpected data
           print('Invalid notification data: ${child.value}');
         }
       });
 
-      setState(() {
-        loading = false;
-        trips = newNotifications.reversed.toList();
-      });
+      print(newNotifications.toList());
+
+      if (mounted) {
+        setState(() {
+          loading = false;
+          trips = newNotifications.reversed.toList();
+        });
+      }
     } else {
       print("No trips found in the main path.");
 
-      setState(() {
-        loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
   }
 
@@ -63,6 +72,51 @@ class _HistoryTabState extends State<HistoryTab> {
       await book.update({'isActive': "Inactive"});
       getTrips();
     }
+  }
+
+  void markAttendance(String tripId) async {
+    if (tripId.isEmpty) return;
+
+    DatabaseReference book = FirebaseDatabase.instance
+        .ref()
+        .child('users/${firebaseUser!.uid}/bookings/$tripId');
+
+    DatabaseEvent event = await book.once();
+    DataSnapshot dataSnapshot = event.snapshot;
+
+    // Cast value to Map<Object?, Object?> first
+    Map<Object?, Object?> bookingData =
+        dataSnapshot.value as Map<Object?, Object?>;
+
+    // Now, safely cast to Map<String, dynamic> and access the driverUid
+    String? driverUid = bookingData['driverUid'] as String?;
+
+    await book.update({
+      'attendance': {
+        'isComming': 'not_comming',
+        'timestamp': DateTime.now().microsecondsSinceEpoch.toString(),
+      }
+    });
+
+    String? name = await HelperMethods.getPassengerFullName(firebaseUser!.uid);
+
+    Map<String, String> driverNotifications = {
+      "title": "Absent Notification !",
+      "description":
+          "User at ${dataSnapshot.child('start').value} who is $name is not comming today",
+      "icon": "user",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": firebaseUser!.uid
+    };
+
+    DatabaseReference driverNotification = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/$driverUid/notifications');
+
+    await driverNotification.push().set(driverNotifications);
+
+    getTrips();
   }
 
   List<TripItem> getFilteredTrips() {
@@ -107,6 +161,18 @@ class _HistoryTabState extends State<HistoryTab> {
     } catch (e) {
       return -2;
     }
+  }
+
+  int daysPassedCalc(String timeStamp) {
+    DateTime lastMarkedDate =
+        DateTime.fromMicrosecondsSinceEpoch(int.parse(timeStamp));
+    DateTime today = DateTime.now();
+
+    DateTime lastDateOnly =
+        DateTime(lastMarkedDate.year, lastMarkedDate.month, lastMarkedDate.day);
+    DateTime todayOnly = DateTime(today.year, today.month, today.day);
+
+    return todayOnly.difference(lastDateOnly).inDays;
   }
 
   @override
@@ -509,6 +575,35 @@ class _HistoryTabState extends State<HistoryTab> {
                                               ),
                                             ),
                                           ),
+                                          if (daysLeft(trip.date) > 0 &&
+                                                  daysPassedCalc(trip.attTime) >
+                                                      0 ||
+                                              trip.isComming == 'not_marked')
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                markAttendance(trip.trpId);
+                                              },
+                                              icon: const Icon(
+                                                Icons.person,
+                                                size: 18,
+                                              ),
+                                              label: const Text('Absenting'),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                        255, 80, 153, 232),
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                            ),
                                           if (daysLeft(trip.date) < 5)
                                             ElevatedButton.icon(
                                               onPressed: () {},

@@ -30,7 +30,7 @@ class Vehicle {
     return Vehicle(
         vehicleNo: json['vehicleNo'] as String,
         vehicleName: json['vehicleName'] as String,
-        vehiclePrice: (json['vehiclePrice'] as num).toDouble(),
+        vehiclePrice: double.tryParse(json['vehiclePrice'].toString()) ?? 0.0,
         driverName: json['fullname'] as String,
         routeDetails: json['routeDetails'] as String,
         driverUid: uid,

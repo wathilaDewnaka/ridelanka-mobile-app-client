@@ -33,7 +33,7 @@ class HelperMethods {
       return null;
     }
   }
-  
+
   static Future<String> findCordinateAddress(Position position, context) async {
     print("this is position ");
     print(position);
@@ -119,6 +119,19 @@ class HelperMethods {
     }
   }
 
+  static Future<String?> getPassengerFullName(String uid) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("users/$uid/fullname");
+
+    try {
+      DatabaseEvent event = await ref.once();
+      return event.snapshot.value as String?;
+    } catch (e) {
+      print("Error fetching fullname: $e");
+      return null;
+    }
+  }
+
   static Future<bool> checkPhoneAndEmail(
       String phoneNumber, String email, bool isPassenger) async {
     final databaseReference = (isPassenger)
@@ -198,7 +211,7 @@ class HelperMethods {
           final type = driverData['type'];
           final location = driverData['location'];
 
-          if ((isStudent && type == 'student') ||
+          if ((isStudent && type == 'school') ||
               (!isStudent && type == 'staff')) {
             if (location != null) {
               filteredDetails[uid] = {
@@ -244,6 +257,7 @@ class HelperMethods {
         vehiclesDetails.entries.map((entry) async {
       final uid = entry.key;
       final vehicleData = entry.value;
+      
 
       final LatLng start =
           LatLng(vehicleData['startLat'], vehicleData['startLng']);
@@ -279,12 +293,9 @@ class HelperMethods {
         }
       }
 
-      if (startKm >= 0 && endKm >= 0) {
-        
+      if (startKm >= 0 && endKm >= 0 && startKm < 100 && endKm < 100) {
         final startPlaceName = await returnPlaceAddress(startLatLng);
         final endPlaceName = await returnPlaceAddress(endLatLng);
-
-        print('RETURN VEHICLE');
 
         return AvailableVehicles(
           startKm: startKm,

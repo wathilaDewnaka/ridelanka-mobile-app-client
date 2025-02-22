@@ -95,7 +95,11 @@ class _NotificationTabState extends State<NotificationTab> {
 
     await userReference.update({
       'isActive': "Active",
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString()
+      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "attendance": {
+        "isComming": "not_marked",
+        "timestamp": DateTime.now().subtract(Duration(days: 1)).microsecondsSinceEpoch.toString()
+      }
     });
 
     getNotifications();
@@ -387,7 +391,7 @@ class _NotificationTabState extends State<NotificationTab> {
                                 ),
                               ),
                               if (notification.isActive.isNotEmpty &&
-                                  notification.title == "Booking Request")
+                                  (notification.title == "Booking Request" || notification.title == "Booking Renew"))
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
