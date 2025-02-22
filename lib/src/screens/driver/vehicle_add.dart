@@ -71,8 +71,7 @@ class VehicleAddScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => VehicleAddScreen2()),
+                    MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
                   );
                 },
                 style: elevatedButtonStyle(),
@@ -90,16 +89,14 @@ class VehicleAddScreen2 extends StatelessWidget {
   final TextEditingController startLocationController = TextEditingController();
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
-  final TextEditingController experienceController = TextEditingController();
-  final TextEditingController countController = TextEditingController();
-  final TextEditingController languagesController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title:
-            Text('Add Vehicle - Page 2', style: TextStyle(color: Colors.white)),
+            Text('Add Vehicle', style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF0051ED),
         centerTitle: true,
       ),
@@ -123,11 +120,10 @@ class VehicleAddScreen2 extends StatelessWidget {
                 ),
               ]),
 
-              // Work Experience & Details
-              buildCard('Driver Background Details', [
-                buildTextField(experienceController, 'Work Experience'),
-                buildTextField(countController, 'Current Count in Vehicle'),
-                buildTextField(languagesController, 'Languages'),
+              // Add Description Section
+              buildCard('Add Description', [
+                buildTextField(descriptionController, 'Write a Description here',
+                    maxLines: 4),
               ]),
 
               SizedBox(height: 16),
