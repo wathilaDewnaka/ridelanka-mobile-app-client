@@ -1,3 +1,4 @@
+import 'package:client/src/screens/rider/settings_tab.dart';
 import 'package:flutter/material.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -244,7 +245,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProfileTab()),
+                        MaterialPageRoute(builder: (context) => SettingsTab()),
                       );
                     },
                     style: ElevatedButton.styleFrom(
