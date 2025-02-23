@@ -9,6 +9,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool isUsernameExpanded = false;
+  bool showEmailField = false;
 
   @override
   Widget build(BuildContext context) {
@@ -69,21 +70,21 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     ScaffoldMessenger.of(context).showSnackBar(
-                    //       SnackBar(
-                    //         content: const Text(
-                    //           'Please enter a valid username',
-                    //           style:
-                    //               TextStyle(color: Colors.black, fontSize: 16),
-                    //         ),
-                    //         backgroundColor: Colors.red,
-                    //       ),
-                    //     );
-                    //   },
-                    //   child: const Text('Save'),
-                    // ),
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                              'Please enter a valid username',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 16),
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                      child: const Text('Save'),
+                    ),
                   ],
                 ),
               ),
@@ -94,51 +95,100 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Icon(Icons.email_outlined, color: iconColor),
               ),
               title: const Text('Change Email'),
-              trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
-              onTap: () {},
+              trailing: Icon(
+                showEmailField
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: iconColor,
+              ),
+              onTap: () {
+                setState(() {
+                  showEmailField = !showEmailField;
+                });
+              },
             ),
-            const SizedBox(height: 430),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: iconColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout, size: 26, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        'Log Out',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+            if (showEmailField)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  children: [
+                    const TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter new email',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a valid email',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 16),
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 200),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned(
+                    bottom: 80,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 70, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: iconColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout, size: 26, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text(
+                              'Log Out',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 30,
+                    left: 0,
+                    right: 0,
+                    child: const Center(
+                      child: Text(
+                        'Delete Account',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 30),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Delete Account',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            )
           ],
         ),
       ),
