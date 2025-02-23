@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -19,6 +20,7 @@ class _RidesTabState extends State<RidesTab> {
   Completer<GoogleMapController> _controller = Completer();
 
   var geoLocator = Geolocator();
+  DatabaseReference? tripRequestRef;
 
   Future<void> checkPermissions() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -78,6 +80,8 @@ class _RidesTabState extends State<RidesTab> {
 
     if (firebase_user != null) {
       firebaseUser = firebase_user;
+      print("user info");
+      print(firebaseUser);
     }
   }
 
@@ -137,5 +141,18 @@ class _RidesTabState extends State<RidesTab> {
         )
       ],
     );
+  }
+
+  void startTrip() {
+    Geofire.initialize('driversAvailable');
+    Geofire.setLocation(firebaseUser!.uid, currentPosition!.latitude,
+        currentPosition!.longitude);
+
+    tripRequestRef = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/newtrip');
+    tripRequestRef?.set('waiting');
+
+    tripRequestRef?.onValue.listen((event) {});
   }
 }
