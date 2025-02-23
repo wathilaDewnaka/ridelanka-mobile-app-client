@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:client/global_variable.dart';
+import 'package:client/src/models/driver.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
@@ -56,6 +59,34 @@ class _RidesTabState extends State<RidesTab> {
     }
   }
 
+  void getCurrentDriverInfo() async {
+    // Get the current user
+    var firebase_user = FirebaseAuth.instance.currentUser;
+
+    DatabaseReference driverRef =
+        FirebaseDatabase.instance.ref().child('drivers/${firebaseUser?.uid}');
+
+    driverRef.once().then((DatabaseEvent event) {
+      DataSnapshot snapshot = event.snapshot;
+
+      if (snapshot.value != null) {
+        currentDriverInfo = Driver.fromSnapshot(snapshot);
+        print("Driver info");
+        print(currentDriverInfo);
+      }
+    });
+
+    if (firebase_user != null) {
+      firebaseUser = firebase_user;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentDriverInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -87,9 +118,7 @@ class _RidesTabState extends State<RidesTab> {
               SizedBox(
                 width: 230,
                 child: ElevatedButton(
-                  onPressed: () {
-                    
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFd16608),
                     padding: EdgeInsets.symmetric(vertical: 12),

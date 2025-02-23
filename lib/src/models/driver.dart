@@ -19,6 +19,8 @@ class Driver {
     this.vehicalName,
   });
 
+
+
   Driver.fromSnapshot(DataSnapshot snapshot) {
     id = snapshot.key;
 
@@ -32,5 +34,11 @@ class Driver {
       vehicalType = data['vehicleType'] as String?;
       
     }
+  }
+
+  @override
+  String toString() {
+    return 'Driver(id: $id, fullName: $fullName, email: $email, phone: $phone, '
+           'vehicleType: $vehicalType, vehicleNo: $vehicalNo, vehicleName: $vehicalName)';
   }
 }

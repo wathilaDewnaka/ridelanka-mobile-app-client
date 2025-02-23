@@ -1,3 +1,4 @@
+import 'package:client/src/models/driver.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,3 +12,5 @@ final CameraPosition googlePlex = CameraPosition(
 );
 
 Position? currentPosition;
+
+Driver? currentDriverInfo;
