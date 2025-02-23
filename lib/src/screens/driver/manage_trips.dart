@@ -94,7 +94,7 @@ class _RidesTabState extends State<RidesTab> {
                     backgroundColor: Color(0xFFd16608),
                     padding: EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                   child: Text(
