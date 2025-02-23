@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 void main() {
   runApp(MaterialApp(
@@ -20,6 +22,20 @@ class _AddVehiclePage1State extends State<AddVehiclePage1> {
   final TextEditingController vehicleTypeController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController seatingController = TextEditingController();
+
+  File? _image;
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
 
   void _validateAndProceed() {
     if (_formKey.currentState!.validate()) {
@@ -59,12 +75,20 @@ class _AddVehiclePage1State extends State<AddVehiclePage1> {
                       child: IconButton(
                         icon: Icon(Icons.add_a_photo,
                             color: Color(0xFF0051ED), size: 40),
-                        onPressed: () {
-                          // Image Picker functionality
-                        },
+                        onPressed: _pickImage,
                       ),
                     ),
                   ),
+                  if (_image != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Image.file(
+                        _image!,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                 ]),
 
                 // Driver Information
