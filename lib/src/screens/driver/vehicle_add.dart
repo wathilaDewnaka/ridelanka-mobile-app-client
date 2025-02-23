@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'dart:io';
 
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: AddVehiclePage1(),
+    home: VehicleAddScreen(),
   ));
 }
 
-class AddVehiclePage1 extends StatefulWidget {
+class VehicleAddScreen extends StatefulWidget {
   @override
   _AddVehiclePage1State createState() => _AddVehiclePage1State();
 }
 
-class _AddVehiclePage1State extends State<AddVehiclePage1> {
+class _AddVehiclePage1State extends State<VehicleAddScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController driverNameController = TextEditingController();
@@ -41,7 +41,7 @@ class _AddVehiclePage1State extends State<AddVehiclePage1> {
     if (_formKey.currentState!.validate()) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => AddVehiclePage2()),
+        MaterialPageRoute(builder: (context) => VehicleAddScreen2()),
       );
     }
   }
@@ -121,12 +121,12 @@ class _AddVehiclePage1State extends State<AddVehiclePage1> {
   }
 }
 
-class AddVehiclePage2 extends StatefulWidget {
+class VehicleAddScreen2 extends StatefulWidget {
   @override
   _AddVehiclePage2State createState() => _AddVehiclePage2State();
 }
 
-class _AddVehiclePage2State extends State<AddVehiclePage2> {
+class _AddVehiclePage2State extends State<VehicleAddScreen2> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController startLocationController = TextEditingController();
