@@ -72,6 +72,40 @@ class _RidesTabState extends State<RidesTab> {
             getCurrentPosition();
           },
         ),
+        Container(
+          height: 135,
+          width: double.infinity,
+          color: Color(0xFF0e1526),
+        ),
+        Positioned(
+          top: 60,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 230,
+                child: ElevatedButton(
+                  onPressed: () {
+                    
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFd16608),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    "Start Trip",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
