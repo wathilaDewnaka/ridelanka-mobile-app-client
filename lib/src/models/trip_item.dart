@@ -9,6 +9,8 @@ class TripItem {
   final String driverName;
   final String vehicleNo;
   final String trpId;
+  final String attTime;
+  final String isComming;
 
   TripItem(
       {required this.id,
@@ -20,7 +22,9 @@ class TripItem {
       required this.date,
       required this.driverName,
       required this.trpId,
-      required this.vehicleNo});
+      required this.vehicleNo,
+      required this.attTime,
+      required this.isComming});
 
   factory TripItem.fromJson(Map<dynamic, dynamic> json, String? trpId) {
     return TripItem(
@@ -36,6 +40,8 @@ class TripItem {
         date: json['subscriptionDate'] ?? '',
         driverName: json['driverName'] ?? '',
         vehicleNo: json['vehicleNo'] ?? '',
-        trpId: trpId ?? "");
+        trpId: trpId ?? "",
+        attTime: json['isActive'] == 'Active' ? json['attendance']['timestamp'] : '',
+        isComming: json['isActive'] == 'Active' ? json['attendance']['isComming'] : '');
   }
 }

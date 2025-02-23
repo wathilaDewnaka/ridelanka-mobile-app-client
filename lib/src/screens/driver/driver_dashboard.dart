@@ -1,6 +1,7 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
-// import 'package:client/src/screens/driver/vehicle_add.dart';
+import 'package:client/src/screens/rider/notifications_tab.dart';
+import 'package:client/src/screens/rider/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class DriverHome extends StatefulWidget {
@@ -70,7 +71,7 @@ class _DriverHomeState extends State<DriverHome> {
 
           // Greeting Card
           Positioned(
-            top: 210,
+            top: 190,
             left: 20,
             right: 20,
             child: Container(
@@ -152,7 +153,7 @@ class _DriverHomeState extends State<DriverHome> {
                           'assets/images/driver_dashboard_images/notification.png',
                       label: "View",
                       onPressed: () {
-                        print("View pressed");
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationTab()));
                       },
                     ),
                     MenuButton(
@@ -171,7 +172,10 @@ class _DriverHomeState extends State<DriverHome> {
                           'assets/images/driver_dashboard_images/profile.png',
                       label: "Profile",
                       onPressed: () {
-                        print("Profile pressed");
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileTab()));
                       },
                     ),
                   ],
