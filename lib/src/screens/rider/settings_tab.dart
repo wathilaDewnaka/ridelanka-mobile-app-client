@@ -5,9 +5,12 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color iconColor = Color(0xFF0051ED);
+    const Color iconBackgroundColor = Color(0x1A0051ED);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0051ED),
+        backgroundColor: iconColor,
         title: const Text(
           'Settings',
           style: TextStyle(
@@ -29,18 +32,22 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
+              leading: CircleAvatar(
+                backgroundColor: iconBackgroundColor,
+                child: Icon(Icons.person_outline, color: iconColor),
+              ),
               title: const Text('Change Username'),
-              trailing: const Icon(Icons.settings),
+              trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
               onTap: () {},
             ),
+            const Divider(),
             ListTile(
+              leading: CircleAvatar(
+                backgroundColor: iconBackgroundColor,
+                child: Icon(Icons.email_outlined, color: iconColor),
+              ),
               title: const Text('Change Email'),
-              trailing: const Icon(Icons.settings),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Change Phone Number'),
-              trailing: const Icon(Icons.settings),
+              trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
               onTap: () {},
             ),
           ],
