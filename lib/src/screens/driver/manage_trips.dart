@@ -122,7 +122,9 @@ class _RidesTabState extends State<RidesTab> {
               SizedBox(
                 width: 230,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    startTrip();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFd16608),
                     padding: EdgeInsets.symmetric(vertical: 12),
@@ -144,15 +146,30 @@ class _RidesTabState extends State<RidesTab> {
   }
 
   void startTrip() {
+    print("this is user");
+    print(firebaseUser);
+    print("this is position");
+    print(currentPosition);
+
     Geofire.initialize('driversAvailable');
     Geofire.setLocation(firebaseUser!.uid, currentPosition!.latitude,
         currentPosition!.longitude);
 
     tripRequestRef = FirebaseDatabase.instance
         .ref()
-        .child('drivers/${firebaseUser!.uid}/newtrip');
-    tripRequestRef?.set('waiting');
+        .child('drivers/${firebaseUser!.uid}/trip');
+    tripRequestRef?.set('online');
 
     tripRequestRef?.onValue.listen((event) {});
   }
+
+  void endTrip() {
+    Geofire.removeLocation(firebaseUser!.uid);
+    tripRequestRef?.onDisconnect();
+    tripRequestRef?.remove();
+    tripRequestRef = null;
+  }
+
+ 
+
 }
