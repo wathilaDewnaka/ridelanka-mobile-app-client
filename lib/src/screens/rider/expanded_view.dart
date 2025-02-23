@@ -20,8 +20,13 @@ class ExpandedView extends StatefulWidget {
       required this.startPl,
       required this.endPl,
       required this.startKm,
+      required this.seatCap,
+      required this.exp,
+      required this.lang,
+      required this.mainPoints,
       required this.endKm,
-      required this.vehicleNo});
+      required this.vehicleNo,
+      required this.vehType});
 
   final String driverUid;
   final String driverName;
@@ -30,6 +35,11 @@ class ExpandedView extends StatefulWidget {
   final String vehicleName;
   final String vehicleNo;
   final double price;
+  final String lang;
+  final String exp;
+  final String seatCap;
+  final String mainPoints;
+  final String vehType;
   final int startKm;
   final int endKm;
   final String startPl;
@@ -38,6 +48,7 @@ class ExpandedView extends StatefulWidget {
   @override
   State<ExpandedView> createState() => _ExpandedViewState();
 }
+
 
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
@@ -369,6 +380,58 @@ class _ExpandedViewState extends State<ExpandedView> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [const Text("Vehicle Type"), Text(widget.vehType)],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Seat Capacity"),
+                                Text(widget.seatCap)
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Driver Experience"),
+                                Text("${widget.exp} Years")
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Prefered Lanuage"),
+                                Text(widget.lang)
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Main Start and End"),
+                                Text(widget.mainPoints)
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
                           textAlign: TextAlign.justify,
                           "According to RideLanka this vehicle is ${widget.startKm == 0 ? "less than 1" : widget.startKm} KM near to your start location and ${widget.endKm == 0 ? "less than 1" : widget.endKm} KM near to your end location. Accordingly pickup is nearby ${widget.startPl} and drop is at ${widget.endPl}. Contact your Driver before the booking to make sure about details. Vehicle number is ${widget.vehicleNo}",
@@ -379,7 +442,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
-
+                      
                       // Route Details
                       Padding(
                         padding: const EdgeInsets.all(16.0),
