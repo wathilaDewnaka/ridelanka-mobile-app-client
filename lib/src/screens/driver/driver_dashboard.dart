@@ -15,6 +15,7 @@ class DriverHome extends StatefulWidget {
 
 class _DriverHomeState extends State<DriverHome> {
   String? driverName;
+  bool hasVehicle = false;
 
   String getGreeting() {
     final int hour = DateTime.now().hour;
@@ -36,8 +37,11 @@ class _DriverHomeState extends State<DriverHome> {
 
   void getName() async {
     String? name = await HelperMethods.getDriverName(firebaseUser!.uid);
+    bool veh = await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
+
     setState(() {
       driverName = name;
+      hasVehicle = veh;
     });
   }
 
@@ -155,9 +159,12 @@ class _DriverHomeState extends State<DriverHome> {
                     MenuButton(
                       iconImage:
                           'assets/images/driver_dashboard_images/van.png',
-                      label: "Add",
+                      label: hasVehicle ? "Add" : "View / Edit",
                       onPressed: () {
-                        print("Add pressed");
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => VehicleAddScreen()));
                       },
                     ),
                     MenuButton(

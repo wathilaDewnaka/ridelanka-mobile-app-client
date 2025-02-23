@@ -18,7 +18,7 @@ class HelperMethods {
   static Future<String?> getDriverName(String uid) async {
     try {
       DatabaseReference ref =
-          FirebaseDatabase.instance.ref("drivers/$uid/fullname");
+          FirebaseDatabase.instance.ref("drivers/$uid/fullName");
 
       DataSnapshot snapshot = await ref.get();
 
@@ -292,7 +292,7 @@ class HelperMethods {
           endLatLng = positionOnWay;
         }
       }
-
+          
       if (startKm >= 0 && endKm >= 0 && startKm < 100 && endKm < 100) {
         final startPlaceName = await returnPlaceAddress(startLatLng);
         final endPlaceName = await returnPlaceAddress(endLatLng);
@@ -332,5 +332,17 @@ class HelperMethods {
     double distanceInKm = distanceInMeters / 1000; // Convert to kilometers
 
     return distanceInKm.round(); // Return rounded distance in kilometers
+  }
+
+  static Future<bool> checkIsVehicleExist(String uid) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("drivers/$uid/vehicleNo");
+    DataSnapshot snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
