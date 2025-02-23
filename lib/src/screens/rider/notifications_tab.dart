@@ -61,6 +61,96 @@ class _NotificationTabState extends State<NotificationTab> {
     });
   }
 
+  void renewBooking(String? notificationId, String? userIds) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
+    if (userIds == null || !userIds.contains(" ")) {
+      Navigator.pop(context);
+      return;
+    }
+
+    String userId = userIds.split(" ")[0];
+    String notiId = userIds.split(" ")[1];
+
+    DatabaseReference databaseReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
+
+    DatabaseReference userReference =
+        FirebaseDatabase.instance.ref().child('users/$userId/bookings/$notiId');
+
+    DatabaseReference userNotificationReference =
+        FirebaseDatabase.instance.ref().child('users/$userId/notifications');
+
+    Map<String, String> userNotifications = {
+      "title": "Booking Renew Accepted",
+      "description": "Subscription renewed for 30 days",
+      "icon": "tick",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
+    };
+
+    await userNotificationReference.push().set(userNotifications);
+
+    await databaseReference.update({'isRead': "true", 'isActive': ''});
+
+    String differenceInMicroseconds = "0";
+
+    DataSnapshot snapshot = await userReference.get();
+    String? microseconds =
+        snapshot.child('subscriptionDate').value as String? ?? "";
+
+    DateTime subscriptionDate =
+        DateTime.fromMicrosecondsSinceEpoch(int.tryParse(microseconds) ?? 0)
+            .add(Duration(days: 30));
+
+    differenceInMicroseconds =
+        subscriptionDate.microsecondsSinceEpoch.toString();
+
+    await userReference.update({
+      'isActive': "Active",
+      "subscriptionDate": differenceInMicroseconds,
+    });
+
+    getNotifications();
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+      message: "Booking approved successfully!",
+      title: "Success",
+      type: MessageType.success,
+    ));
+
+    Navigator.pop(context);
+  }
+
+  void rejectRenewal(String notificationId) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
+    DatabaseReference databaseReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
+    await databaseReference.update({'isRead': "true", 'isActive': ''});
+
+    getNotifications();
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+      message: "Booking rejected successfully !",
+      title: "Success",
+      type: MessageType.success,
+    ));
+    Navigator.pop(context);
+  }
+
   void updateBookings(String? notificationId, String? userId) async {
     showDialog(
       barrierDismissible: false,
@@ -95,10 +185,16 @@ class _NotificationTabState extends State<NotificationTab> {
 
     await userReference.update({
       'isActive': "Active",
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "subscriptionDate": DateTime.now()
+          .add(Duration(days: 30))
+          .microsecondsSinceEpoch
+          .toString(),
       "attendance": {
         "isComming": "not_marked",
-        "timestamp": DateTime.now().subtract(Duration(days: 1)).microsecondsSinceEpoch.toString()
+        "timestamp": DateTime.now()
+            .subtract(Duration(days: 1))
+            .microsecondsSinceEpoch
+            .toString()
       }
     });
 
@@ -229,8 +325,7 @@ class _NotificationTabState extends State<NotificationTab> {
                   Navigator.pushNamedAndRemoveUntil(
                     context,
                     RiderNavigationMenu.id,
-                    (route) =>
-                        false, 
+                    (route) => false,
                   );
                 },
               ),
@@ -391,7 +486,9 @@ class _NotificationTabState extends State<NotificationTab> {
                                 ),
                               ),
                               if (notification.isActive.isNotEmpty &&
-                                  (notification.title == "Booking Request" || notification.title == "Booking Renew"))
+                                  (notification.title == "Booking Request" ||
+                                      notification.title ==
+                                          "Booking Renewal !"))
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
@@ -409,8 +506,11 @@ class _NotificationTabState extends State<NotificationTab> {
                                     children: [
                                       TextButton(
                                         onPressed: () {
-                                          rejectBookings(notification.id,
-                                              notification.isActive);
+                                          notification.title ==
+                                                  "Booking Renewal !"
+                                              ? rejectRenewal(notification.id)
+                                              : rejectBookings(notification.id,
+                                                  notification.isActive);
                                         },
                                         style: TextButton.styleFrom(
                                           foregroundColor:
@@ -426,8 +526,12 @@ class _NotificationTabState extends State<NotificationTab> {
                                       const SizedBox(width: 8),
                                       ElevatedButton(
                                         onPressed: () {
-                                          updateBookings(notification.id,
-                                              notification.isActive);
+                                          notification.title ==
+                                                  "Booking Renewal !"
+                                              ? renewBooking(notification.id,
+                                                  notification.isActive)
+                                              : updateBookings(notification.id,
+                                                  notification.isActive);
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:

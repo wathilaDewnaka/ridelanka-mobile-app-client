@@ -29,14 +29,13 @@ class _HistoryTabState extends State<HistoryTab> {
     DataSnapshot mainNotificationsSnapshot = await notifications.get();
     if (mainNotificationsSnapshot.exists) {
       List<TripItem> newNotifications = [];
-      mainNotificationsSnapshot.children.forEach((child) {
+      mainNotificationsSnapshot.children.forEach((child) async {
         if (child.value is Map<dynamic, dynamic>) {
           Map<dynamic, dynamic> notificationData =
               child.value as Map<dynamic, dynamic>;
 
-          print(notificationData);
           newNotifications.add(TripItem.fromJson(notificationData, child.key));
-          print(newNotifications);
+          
         } else {
           // Handle invalid or unexpected data
           print('Invalid notification data: ${child.value}');
@@ -62,16 +61,52 @@ class _HistoryTabState extends State<HistoryTab> {
     }
   }
 
-  void updateExpiredTrips(String tripId, String subscriptionDate) async {
+  void updateExpiredTrips(
+      String tripId, String subscriptionDate, String status) async {
     if (tripId.isNotEmpty &&
         daysLeft(subscriptionDate) > -2 &&
-        daysLeft(subscriptionDate) < 1) {
+        daysLeft(subscriptionDate) < 1 &&
+        status == "Active") {
       DatabaseReference book = FirebaseDatabase.instance
           .ref()
           .child('users/${firebaseUser!.uid}/bookings/$tripId');
       await book.update({'isActive': "Inactive"});
       getTrips();
     }
+  }
+
+  void renewSubscription(String tripId) async {
+    if (tripId.isEmpty) return;
+
+    DatabaseReference book = FirebaseDatabase.instance
+        .ref()
+        .child('users/${firebaseUser!.uid}/bookings/$tripId');
+
+    DatabaseEvent event = await book.once();
+    DataSnapshot dataSnapshot = event.snapshot;
+
+    Map<Object?, Object?> bookingData =
+        dataSnapshot.value as Map<Object?, Object?>;
+
+    String? driverUid = bookingData['driverUid'] as String?;
+
+    DatabaseReference noti = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/$driverUid/notifications');
+    String? name = await HelperMethods.getPassengerFullName(firebaseUser!.uid);
+
+    Map<String, String> driverNotifications = {
+      "title": "Booking Renewal !",
+      "description":
+          "User at ${dataSnapshot.child('start').value} who is $name is wants to renew subscription",
+      "icon": "user",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": firebaseUser!.uid + " " + tripId
+    };
+
+    noti.push().set(driverNotifications);
+    getTrips();
   }
 
   void markAttendance(String tripId) async {
@@ -107,7 +142,7 @@ class _HistoryTabState extends State<HistoryTab> {
       "icon": "user",
       "date": DateTime.now().microsecondsSinceEpoch.toString(),
       "isRead": "false",
-      "isActive": firebaseUser!.uid
+      "isActive": ""
     };
 
     DatabaseReference driverNotification = FirebaseDatabase.instance
@@ -143,14 +178,8 @@ class _HistoryTabState extends State<HistoryTab> {
       }
 
       // Convert the integer to a DateTime object
-      DateTime subscriptionStartDate =
-          DateTime.fromMillisecondsSinceEpoch(subscriptionDateInt);
-
-      // Add 30 days to the subscription start date
       DateTime subscriptionEndDate =
-          subscriptionStartDate.add(Duration(days: 30));
-
-      // Get the current date and time
+          DateTime.fromMillisecondsSinceEpoch(subscriptionDateInt);
       DateTime currentDate = DateTime.now();
 
       // Calculate the difference in days
@@ -290,12 +319,12 @@ class _HistoryTabState extends State<HistoryTab> {
             ),
             Expanded(
               child: getFilteredTrips().isEmpty && !loading
-                  ? const Padding(
+                  ? Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Align(
                         child: Text(
-                          "No trips avaiable",
-                          style: TextStyle(
+                          "No ${selectedFilter == "All" ? "" : selectedFilter} trips available",
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20),
                         ),
                         alignment: Alignment.topLeft,
@@ -306,7 +335,7 @@ class _HistoryTabState extends State<HistoryTab> {
                       itemCount: getFilteredTrips().length,
                       itemBuilder: (context, index) {
                         TripItem trip = getFilteredTrips()[index];
-                        updateExpiredTrips(trip.trpId, trip.date);
+                        updateExpiredTrips(trip.trpId, trip.date, trip.status);
                         return Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
@@ -444,26 +473,25 @@ class _HistoryTabState extends State<HistoryTab> {
                                                     ),
                                                   ),
                                                   const SizedBox(width: 12),
-                                                  Text(
-                                                    daysLeft(trip.date) > 0
-                                                        ? "Expires in ${daysLeft(trip.date)} days"
-                                                        : "Expired",
-                                                    style: TextStyle(
-                                                      color:
-                                                          daysLeft(trip.date) <
-                                                                  5
-                                                              ? Colors.red[600]
-                                                              : Colors
-                                                                  .grey[500],
-                                                      fontWeight:
-                                                          daysLeft(trip.date) <
-                                                                  5
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                      fontSize: 14,
+                                                  if (trip.status == "Active")
+                                                    Text(
+                                                      daysLeft(trip.date) > 0
+                                                          ? "Expires in ${daysLeft(trip.date)} days"
+                                                          : "Expired",
+                                                      style: TextStyle(
+                                                        color: daysLeft(
+                                                                    trip.date) <
+                                                                5
+                                                            ? Colors.red[600]
+                                                            : Colors.grey[500],
+                                                        fontWeight: daysLeft(
+                                                                    trip.date) <
+                                                                5
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                        fontSize: 14,
+                                                      ),
                                                     ),
-                                                  ),
                                                 ],
                                               ),
                                             ],
@@ -604,9 +632,11 @@ class _HistoryTabState extends State<HistoryTab> {
                                                 ),
                                               ),
                                             ),
-                                          if (daysLeft(trip.date) < 5)
+                                          if (daysLeft(trip.date) < 10)
                                             ElevatedButton.icon(
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                renewSubscription(trip.trpId);
+                                              },
                                               icon: const Icon(
                                                 Icons.plus_one_outlined,
                                                 size: 18,
