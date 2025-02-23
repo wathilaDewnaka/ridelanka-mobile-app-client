@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool isUsernameExpanded = false;
 
   @override
   Widget build(BuildContext context) {
     const Color iconColor = Color(0xFF0051ED);
-    const Color iconBackgroundColor = Color(0x1A0051ED); // Light opacity (10%)
+    const Color iconBackgroundColor = Color(0x1A0051ED);
 
     return Scaffold(
       appBar: AppBar(
@@ -37,9 +44,49 @@ class SettingsPage extends StatelessWidget {
                 child: Icon(Icons.person_outline, color: iconColor),
               ),
               title: const Text('Change Username'),
-              trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
-              onTap: () {},
+              trailing: Icon(
+                isUsernameExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: iconColor,
+              ),
+              onTap: () {
+                setState(() {
+                  isUsernameExpanded = !isUsernameExpanded;
+                });
+              },
             ),
+            if (isUsernameExpanded)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Column(
+                  children: [
+                    const TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Enter new username',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     ScaffoldMessenger.of(context).showSnackBar(
+                    //       SnackBar(
+                    //         content: const Text(
+                    //           'Please enter a valid username',
+                    //           style:
+                    //               TextStyle(color: Colors.black, fontSize: 16),
+                    //         ),
+                    //         backgroundColor: Colors.red,
+                    //       ),
+                    //     );
+                    //   },
+                    //   child: const Text('Save'),
+                    // ),
+                  ],
+                ),
+              ),
             const Divider(),
             ListTile(
               leading: CircleAvatar(
@@ -50,24 +97,21 @@ class SettingsPage extends StatelessWidget {
               trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
               onTap: () {},
             ),
-            SizedBox(height: 430),
+            const SizedBox(height: 430),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 70, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Color(0xFF0051ED),
+                    color: iconColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.logout,
-                        size: 26,
-                        color: Colors.white,
-                      ),
+                      Icon(Icons.logout, size: 26, color: Colors.white),
                       SizedBox(width: 8),
                       Text(
                         'Log Out',
@@ -81,15 +125,18 @@ class SettingsPage extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 30),
-            Row(
+            const SizedBox(height: 30),
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Delete Account',
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  'Delete Account',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             )
           ],
