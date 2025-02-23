@@ -18,9 +18,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
-  final TextEditingController countController = TextEditingController();
-  final TextEditingController languagesController = TextEditingController();
-  final TextEditingController refereeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -291,10 +288,14 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      TextField(
-                        controller: languagesController,
+                      DropdownButtonFormField(
+                        items: ['English', 'Sinhala', 'Tamil']
+                            .map((value) => DropdownMenuItem(
+                                value: value, child: Text(value)))
+                            .toList(),
+                        onChanged: (value) {},
                         decoration: InputDecoration(
-                          labelText: 'Languages',
+                          labelText: 'Prefered Lanuage',
                           border: OutlineInputBorder(),
                         ),
                       ),
