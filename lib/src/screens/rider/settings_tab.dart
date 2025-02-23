@@ -6,7 +6,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color iconColor = Color(0xFF0051ED);
-    const Color iconBackgroundColor = Color(0x1A0051ED);
+    const Color iconBackgroundColor = Color(0x1A0051ED); // Light opacity (10%)
 
     return Scaffold(
       appBar: AppBar(
@@ -50,6 +50,48 @@ class SettingsPage extends StatelessWidget {
               trailing: const Icon(Icons.keyboard_arrow_down, color: iconColor),
               onTap: () {},
             ),
+            SizedBox(height: 430),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF0051ED),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.logout,
+                        size: 26,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Log Out',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Delete Account',
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold)),
+              ],
+            )
           ],
         ),
       ),
