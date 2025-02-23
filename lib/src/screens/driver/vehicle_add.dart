@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class VehicleAddScreen extends StatefulWidget {
@@ -8,7 +9,7 @@ class VehicleAddScreen extends StatefulWidget {
 class _VehicleAddScreenState extends State<VehicleAddScreen> {
   int _currentStep = 0;
 
-  final TextEditingController licenseController = TextEditingController();
+  final TextEditingController vehicleNoController = TextEditingController();
   final TextEditingController vehicleTypeController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController seatingController = TextEditingController();
@@ -18,6 +19,22 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
+
+  void addVehicle() async {
+    DatabaseReference driverData =
+        FirebaseDatabase.instance.ref().child("drivers/1234");
+
+    Map<String, String> vehicleData = {
+      "vehicleName": modelController.text,
+      "vehicleNo": vehicleNoController.text,
+      "vehiclePrice": priceController.text,
+      "seatCapacity": seatingController.text,
+      "expereience": experienceController.text,
+      "routeDetails": descriptionController.text
+    };
+
+    driverData.set(driverData);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,10 +81,10 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
           child: Theme(
             data: ThemeData(
               colorScheme: const ColorScheme.light(
-                primary: Color(0xFF0051ED),
-                surface: Colors.white,
-                shadow: Colors.transparent,
-              ),
+                  primary: Color(0xFF0051ED),
+                  surface: Colors.white,
+                  shadow: Colors.transparent,
+                  secondary: Colors.black87),
             ),
             child: Stepper(
               type: StepperType.horizontal,
@@ -76,8 +93,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                 if (_currentStep < 1) {
                   setState(() => _currentStep += 1);
                 } else {
-                  // Submit data
-                  print("Submit all data");
+                  addVehicle();
                 }
               },
               onStepCancel: () {
@@ -87,7 +103,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
               },
               controlsBuilder: (BuildContext context, ControlsDetails details) {
                 return Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 0.0),
                   child: Column(
                     children: [
                       ElevatedButton(
@@ -99,8 +115,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                         ),
-                        child: const Text(
-                          "Next",
+                        child: Text(
+                          _currentStep < 1 ? "Next" : "Add Vehicle",
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -131,15 +147,25 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
               },
               steps: [
                 Step(
-                  title: Text(_currentStep == 0 ? 'Step 1: Vehicle Info' : ""),
+                  title: Text(
+                    _currentStep == 0 ? 'Step 1: Vehicle Info' : "",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   isActive: _currentStep >= 0,
                   state:
                       _currentStep > 0 ? StepState.complete : StepState.indexed,
                   content: Column(
                     children: [
                       Container(
-                        color: Colors.grey[50],
                         width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          border: Border.all(
+                            color: Colors.black,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         child: Card(
                           elevation: 3,
                           color: Colors.grey[50],
@@ -197,9 +223,9 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       ),
                       SizedBox(height: 16),
                       TextField(
-                        controller: licenseController,
+                        controller: vehicleNoController,
                         decoration: InputDecoration(
-                          labelText: 'Driving License Number',
+                          labelText: 'Vehicle Number',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -221,8 +247,9 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
 
                 // Step 2: Pricing and Background
                 Step(
-                  title: Text(
-                      _currentStep == 1 ? 'Step 2: Pricing & Background' : ''),
+                  title: Text(_currentStep == 1 ? 'Step 2: Pricing Info' : '',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   isActive: _currentStep >= 1,
                   state: _currentStep == 1
                       ? StepState.indexed
@@ -299,7 +326,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 22),
                       TextField(
                         controller: descriptionController,
                         maxLines: 3,
