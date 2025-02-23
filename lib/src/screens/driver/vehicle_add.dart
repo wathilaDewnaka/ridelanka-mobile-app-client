@@ -109,7 +109,9 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       ElevatedButton(
                         onPressed: details.onStepCancel,
                         style: ElevatedButton.styleFrom(
@@ -138,6 +140,33 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       _currentStep > 0 ? StepState.complete : StepState.indexed,
                   content: Column(
                     children: [
+                      Container(
+                        color: Colors.grey[50],
+                        width: double.infinity,
+                        child: Card(
+                          elevation: 3,
+                          color: Colors.grey[50],
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(0)),
+                          child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Upload Image",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                SizedBox(height: 8),
+                                ElevatedButton(
+                                    onPressed: () {},
+                                    child: Icon(Icons.add_a_photo))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
                       DropdownButtonFormField(
                         items: ['School', 'Staff']
                             .map((value) => DropdownMenuItem(
@@ -219,19 +248,39 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      TextField(
-                        controller: priceController,
-                        decoration: InputDecoration(
-                          labelText: 'Price',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Predict price logic
-                        },
-                        child: Text('Predict Price'),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 7,
+                            child: TextField(
+                              controller: priceController,
+                              decoration: InputDecoration(
+                                labelText: 'Price',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 55),
+                                backgroundColor: const Color(0xFF0051ED),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(0)),
+                                ),
+                              ),
+                              child: const Text(
+                                "Predict",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 16),
                       TextField(
@@ -249,7 +298,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      SizedBox(height: 20),
                       TextField(
                         controller: descriptionController,
                         maxLines: 3,
