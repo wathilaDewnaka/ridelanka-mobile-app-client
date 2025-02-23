@@ -1,10 +1,13 @@
+import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/rider/notifications_tab.dart';
+import 'package:client/src/screens/rider/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class DriverHome extends StatefulWidget {
   const DriverHome({super.key});
 
-   static const String id = 'drivermainpage';
+  static const String id = 'drivermainpage';
 
   @override
   State<DriverHome> createState() => _DriverHomeState();
@@ -12,6 +15,7 @@ class DriverHome extends StatefulWidget {
 
 class _DriverHomeState extends State<DriverHome> {
   String? driverName;
+  bool hasVehicle = false;
 
   String getGreeting() {
     final int hour = DateTime.now().hour;
@@ -32,9 +36,12 @@ class _DriverHomeState extends State<DriverHome> {
   }
 
   void getName() async {
-    String? name = await HelperMethods.getDriverName("uid");
+    String? name = await HelperMethods.getDriverName(firebaseUser!.uid);
+    bool veh = await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
+
     setState(() {
       driverName = name;
+      hasVehicle = veh;
     });
   }
 
@@ -64,7 +71,7 @@ class _DriverHomeState extends State<DriverHome> {
 
           // Greeting Card
           Positioned(
-            top: 210,
+            top: 190,
             left: 20,
             right: 20,
             child: Container(
@@ -146,15 +153,18 @@ class _DriverHomeState extends State<DriverHome> {
                           'assets/images/driver_dashboard_images/notification.png',
                       label: "View",
                       onPressed: () {
-                        print("View pressed");
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationTab()));
                       },
                     ),
                     MenuButton(
                       iconImage:
                           'assets/images/driver_dashboard_images/van.png',
-                      label: "Add",
+                      label: hasVehicle ? "Add" : "View / Edit",
                       onPressed: () {
-                        print("Add pressed");
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => VehicleAddScreen()));
                       },
                     ),
                     MenuButton(
@@ -162,7 +172,10 @@ class _DriverHomeState extends State<DriverHome> {
                           'assets/images/driver_dashboard_images/profile.png',
                       label: "Profile",
                       onPressed: () {
-                        print("Profile pressed");
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileTab()));
                       },
                     ),
                   ],

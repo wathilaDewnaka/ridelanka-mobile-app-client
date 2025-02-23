@@ -41,7 +41,7 @@ class _SearchPageState extends State<SearchPage> {
     if (placeName.length > 0) {
       String countryCode = 'LK';
       String url =
-          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&types=geocode&components=country:$countryCode&key=$mapKey';
+          'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$placeName&components=country:$countryCode&key=$mapKey';
 
       var response = await RequestHelper.getRequest(url);
       print("res ok");

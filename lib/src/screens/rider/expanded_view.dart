@@ -122,12 +122,8 @@ class _ExpandedViewState extends State<ExpandedView> {
     Map<String, String> userBookingDetails = {
       "start": pickupLocation,
       "end": destLocation,
-      "price": "${widget.price}",
-      "driverName": widget.driverName,
-      "vehicleName": widget.vehicleName,
-      "vehicleNo": widget.vehicleNo,
       "driverUid": widget.driverUid,
-      "subscriptionDate": DateTime.now().microsecondsSinceEpoch.toString(),
+      "subscriptionDate": DateTime.now().add(const Duration(days: 30)).microsecondsSinceEpoch.toString(),
       "isActive": "Pending",
     };
 
