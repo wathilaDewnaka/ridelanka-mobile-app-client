@@ -321,12 +321,18 @@ class _NotificationTabState extends State<NotificationTab> {
               leading: IconButton(
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    RiderNavigationMenu.id,
-                    (route) => false,
-                  );
+                onPressed: () async {
+                  bool isPass =
+                      await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+                  if (isPass) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RiderNavigationMenu.id,
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.pop(context);
+                  }
                 },
               ),
               elevation: 0,

@@ -18,7 +18,7 @@ class HelperMethods {
   static Future<String?> getDriverName(String uid) async {
     try {
       DatabaseReference ref =
-          FirebaseDatabase.instance.ref("drivers/$uid/fullName");
+          FirebaseDatabase.instance.ref("drivers/$uid/fullname");
 
       DataSnapshot snapshot = await ref.get();
 

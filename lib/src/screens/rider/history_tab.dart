@@ -29,18 +29,34 @@ class _HistoryTabState extends State<HistoryTab> {
     DataSnapshot mainNotificationsSnapshot = await notifications.get();
     if (mainNotificationsSnapshot.exists) {
       List<TripItem> newNotifications = [];
-      mainNotificationsSnapshot.children.forEach((child) async {
+      for (var child in mainNotificationsSnapshot.children) {
         if (child.value is Map<dynamic, dynamic>) {
           Map<dynamic, dynamic> notificationData =
               child.value as Map<dynamic, dynamic>;
+          print(notificationData);
 
-          newNotifications.add(TripItem.fromJson(notificationData, child.key));
-          
-        } else {
-          // Handle invalid or unexpected data
-          print('Invalid notification data: ${child.value}');
+          String? driverUid = notificationData['driverUid'] as String?;
+
+          DatabaseReference driverRef =
+              FirebaseDatabase.instance.ref().child('drivers/$driverUid');
+          DataSnapshot snapshot = await driverRef.get();
+
+          Map<dynamic, dynamic> driverData =
+              snapshot.value as Map<dynamic, dynamic>;
+
+          double vehiclePrice = driverData['vehiclePrice'] is double
+              ? driverData['vehiclePrice']
+              : double.tryParse(driverData['vehiclePrice'].toString()) ?? 0.0;
+
+          newNotifications.add(TripItem.fromJson(
+              notificationData,
+              child.key,
+              vehiclePrice,
+              driverData['fullname'] ?? "",
+              driverData['vehicleName'] ?? "",
+              driverData['vehicleNo'] ?? ""));
         }
-      });
+      }
 
       print(newNotifications.toList());
 
