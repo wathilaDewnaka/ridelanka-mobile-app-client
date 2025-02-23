@@ -12,7 +12,6 @@ class RidesTab extends StatefulWidget {
 }
 
 class _RidesTabState extends State<RidesTab> {
-
   GoogleMapController? mapController;
   Completer<GoogleMapController> _controller = Completer();
 
@@ -36,7 +35,6 @@ class _RidesTabState extends State<RidesTab> {
     }
   }
 
-
   void getCurrentPosition() async {
     await checkPermissions();
 
@@ -56,15 +54,25 @@ class _RidesTabState extends State<RidesTab> {
     } catch (e) {
       print('Error while getting location: $e');
     }
-
-    //String address =
-    //await HelperMethods.findCordinateAddress(currentPosition, context);
-    //  print("this is before address");
-    //  print("\n\n\n\n\n\n\n" + address + "\n\n\n\n\n\n\n");
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return 
-  // }
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        GoogleMap(
+          padding: EdgeInsets.only(top: 135),
+          myLocationEnabled: true,
+          myLocationButtonEnabled: true,
+          mapType: MapType.normal,
+          initialCameraPosition: googlePlex,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+            mapController = controller;
+            getCurrentPosition();
+          },
+        ),
+      ],
+    );
+  }
 }
