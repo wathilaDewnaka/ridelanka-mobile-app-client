@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:client/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,10 +36,35 @@ class _RidesTabState extends State<RidesTab> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      
-    )
+
+  void getCurrentPosition() async {
+    await checkPermissions();
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+
+      currentPosition = position;
+
+      LatLng pos = LatLng(position.latitude, position.longitude);
+      CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 18);
+
+      mapController!
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      print('Current Position: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      print('Error while getting location: $e');
+    }
+
+    //String address =
+    //await HelperMethods.findCordinateAddress(currentPosition, context);
+    //  print("this is before address");
+    //  print("\n\n\n\n\n\n\n" + address + "\n\n\n\n\n\n\n");
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return 
+  // }
 }
