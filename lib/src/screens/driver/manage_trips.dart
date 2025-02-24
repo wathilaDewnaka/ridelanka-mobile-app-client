@@ -140,6 +140,7 @@ class _RidesTabState extends State<RidesTab> {
                         onPressed: () {
                           if (!isAvailable) {
                             startTrip();
+                            getLocationUpdate();
                             Navigator.pop(context);
 
                             setState(() {
@@ -204,5 +205,35 @@ class _RidesTabState extends State<RidesTab> {
     tripRequestRef?.onDisconnect();
     tripRequestRef?.remove();
     tripRequestRef = null;
+  }
+
+  void getLocationUpdate() {
+    //StreamSubscription<Position> homeTabPositionStream;
+
+    homeTabPositionStream = Geolocator.getPositionStream(
+      locationSettings: LocationSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+        distanceFilter: 4,
+      ),
+    ).listen((Position position) {
+      // Handle location updates
+      if (position != null) {
+        //print('Updated Position: ${position.latitude}, ${position.longitude}');
+        setState(() {
+          currentPosition = position;
+
+          if (isAvailable) {
+            Geofire.setLocation(
+                firebaseUser!.uid, position.latitude, position.longitude);
+          }
+
+          LatLng pos = LatLng(position.latitude, position.longitude);
+          CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 18);
+
+          mapController!
+              .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+        });
+      }
+    });
   }
 }
