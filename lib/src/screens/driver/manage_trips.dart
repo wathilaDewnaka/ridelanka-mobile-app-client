@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:client/global_variable.dart';
 import 'package:client/src/models/driver.dart';
+import 'package:client/src/widgets/confirm_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -122,9 +123,7 @@ class _RidesTabState extends State<RidesTab> {
               SizedBox(
                 width: 230,
                 child: ElevatedButton(
-                  onPressed: () {
-                    startTrip();
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFd16608),
                     padding: EdgeInsets.symmetric(vertical: 12),
@@ -169,7 +168,4 @@ class _RidesTabState extends State<RidesTab> {
     tripRequestRef?.remove();
     tripRequestRef = null;
   }
-
- 
-
 }
