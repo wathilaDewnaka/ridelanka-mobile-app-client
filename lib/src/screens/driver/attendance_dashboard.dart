@@ -29,6 +29,11 @@ class _AttendancePageState extends State<AttendancePage> {
     {'name': 'Denise Scott', 'rollNo': 'Nalanda College', 'status': 'A'},
     {'name': 'Aaron Brown', 'rollNo': 'Nalanda College', 'status': 'A'},
     {'name': 'Oliver Wallace', 'rollNo': 'Royal College', 'status': 'A'},
+    {'name': 'Angela Spader', 'rollNo': 'Devi Balika College', 'status': 'A'},
+    {'name': 'David Peters', 'rollNo': 'Mahanama College', 'status': 'A'},
+    {'name': 'Jim Rogers', 'rollNo': 'Ananada College', 'status': 'A'},
+    {'name': 'Megan Long', 'rollNo': 'Isipathana College', 'status': 'A'},
+    
   ];
 
   void _toggleAttendance(int index, String status) {
@@ -41,34 +46,111 @@ class _AttendancePageState extends State<AttendancePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Attendance'),
+        backgroundColor: Colors.blue,
+        title: const Text(
+          'Attendance',
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Row(
-            children: const [
-              Text('Student Name'),
-              Spacer(),
-              Text('Present / Absent'),
-            ],
+          // Batch title
+
+          // Table headers
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            color: Colors.grey.shade300,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  'Student Name',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Spacer(), // Pushes the next text to the right
+                Text(
+                  'Present / Absent',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.right, // Ensures text is right-aligned
+                ),
+              ],
+            ),
           ),
+
+          // Student list
           Expanded(
             child: ListView.builder(
               itemCount: _students.length,
               itemBuilder: (context, index) {
-                return Row(
-                  children: [
-                    Text(_students[index]['name']),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: () => _toggleAttendance(index, 'P'),
-                      child: const Text('P'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _toggleAttendance(index, 'A'),
-                      child: const Text('A'),
-                    ),
-                  ],
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    border:
+                        Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person, color: Colors.blue),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _students[index]['name'],
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              _students[index]['rollNo'],
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _students[index]['status'] == 'P'
+                                  ? Colors.green
+                                  : Colors.grey.shade300,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                            ),
+                            onPressed: () => _toggleAttendance(index, 'P'),
+                            child: const Text('P',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 5),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _students[index]['status'] == 'A'
+                                  ? Colors.red
+                                  : Colors.grey.shade300,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                            ),
+                            onPressed: () => _toggleAttendance(index, 'A'),
+                            child: const Text('A',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
