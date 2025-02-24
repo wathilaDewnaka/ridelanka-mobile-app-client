@@ -163,6 +163,10 @@ class _NotificationTabState extends State<NotificationTab> {
         .ref()
         .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
 
+    DatabaseReference driverBookingReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/bookings');
+
     DatabaseReference userReference = FirebaseDatabase.instance
         .ref()
         .child('users/${userId}/bookings/$notificationId');
@@ -179,6 +183,12 @@ class _NotificationTabState extends State<NotificationTab> {
       "isActive": ""
     };
 
+    Map<String, String> bookingReference = {
+      "uId": userId ?? "",
+      "marked": "false"
+    };
+
+    await driverBookingReference.push().set(bookingReference);
     await userNotificationReference.push().set(userNotifications);
 
     await databaseReference.update({'isRead': "true", 'isActive': ''});
@@ -199,6 +209,7 @@ class _NotificationTabState extends State<NotificationTab> {
     });
 
     getNotifications();
+
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking approved successfully !",
       title: "Success",
