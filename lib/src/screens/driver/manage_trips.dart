@@ -23,6 +23,11 @@ class _RidesTabState extends State<RidesTab> {
   var geoLocator = Geolocator();
   DatabaseReference? tripRequestRef;
 
+  String availabilityTitle = 'START TRIP';
+  Color availabilityColor = Color(0xFFd16608);
+
+  bool isAvailable = false;
+
   Future<void> checkPermissions() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -123,16 +128,48 @@ class _RidesTabState extends State<RidesTab> {
               SizedBox(
                 width: 230,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showModalBottomSheet(
+                      isDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) => Confirmsheet(
+                        title: (!isAvailable) ? 'START TRIP' : 'END TRIP',
+                        subtitle: (!isAvailable)
+                            ? 'You are about to became available be online'
+                            : 'You will stop being online',
+                        onPressed: () {
+                          if (!isAvailable) {
+                            startTrip();
+                            Navigator.pop(context);
+
+                            setState(() {
+                              availabilityColor = Color(0xFF40cf89);
+                              availabilityTitle = 'END TRIP';
+                              isAvailable = true;
+                            });
+                          } else {
+                            endTrip();
+                            Navigator.pop(context);
+
+                            setState(() {
+                              availabilityColor = Color(0xFFd16608);
+                              availabilityTitle = 'START TRIP';
+                              isAvailable = false;
+                            });
+                          }
+                        },
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFd16608),
+                    backgroundColor: availabilityColor,
                     padding: EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                   child: Text(
-                    "Start Trip",
+                    (!isAvailable) ? 'START TRIP' : 'END TRIP',
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ),

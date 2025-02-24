@@ -77,11 +77,9 @@ class Confirmsheet extends StatelessWidget {
                 ),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-
-                    },
+                    onPressed: onPressed,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF40cf89),
+                      backgroundColor: (title=='START TRIP') ? Color(0xFF40cf89) : Colors.red,
                       padding: EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
