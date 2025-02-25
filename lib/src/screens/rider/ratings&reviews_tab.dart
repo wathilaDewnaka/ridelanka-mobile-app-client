@@ -1,4 +1,5 @@
 import 'package:client/src/widgets/overall_progress_indicator.dart';
+import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:flutter/material.dart';
 
 class ReviewsRatings extends StatefulWidget {
@@ -39,7 +40,8 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
               Text(
                   'Ratings and reviews are verified and are from people who use the same type of device that you use'),
               SizedBox(height: 10),
-              OverallVehicleRating()
+              OverallVehicleRating(),
+              VehicleRatingBarIndicator(),
             ],
           ),
         ),
