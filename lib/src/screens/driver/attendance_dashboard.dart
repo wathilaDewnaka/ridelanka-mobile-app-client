@@ -1,20 +1,7 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/models/attendance_mark.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const AttendanceApp());
-}
-
-class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AttendancePage(),
-    );
-  }
-}
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -24,16 +11,60 @@ class AttendancePage extends StatefulWidget {
 }
 
 class _AttendancePageState extends State<AttendancePage> {
-  final List<Map<String, dynamic>> _students = [
-    {'name': 'Blake Johnson', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Denise Scott', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Aaron Brown', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Oliver Wallace', 'rollNo': 'Royal College', 'status': 'A'},
-    {'name': 'Angela Spader', 'rollNo': 'Devi Balika College', 'status': 'A'},
-    {'name': 'David Peters', 'rollNo': 'Mahanama College', 'status': 'A'},
-    {'name': 'Jim Rogers', 'rollNo': 'Ananada College', 'status': 'A'},
-    {'name': 'Megan Long', 'rollNo': 'Isipathana College', 'status': 'A'},
-  ];
+  List<AttendanceMark> _students = [];
+  bool loading = true;
+
+  Future<void> getAttendance() async {
+    DatabaseReference attendance = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/bookings');
+
+    try {
+      DataSnapshot mainAttendanceSnap = await attendance.get();
+
+      if (mainAttendanceSnap.exists && mainAttendanceSnap.value != null) {
+        List<AttendanceMark> newNotifications = [];
+
+        for (var child in mainAttendanceSnap.children) {
+          if (child.value is Map<dynamic, dynamic>) {
+            Map<dynamic, dynamic> notificationData =
+                child.value as Map<dynamic, dynamic>;
+            print("object333");
+            print(child.value);
+
+            String? uid = notificationData['uId'] as String?;
+
+            DatabaseReference driverRef =
+                FirebaseDatabase.instance.ref().child('users/$uid');
+            DataSnapshot snapshot = await driverRef.get();
+
+            Map<dynamic, dynamic> userData =
+                snapshot.value as Map<dynamic, dynamic>;
+
+            AttendanceMark notificationItem = AttendanceMark.fromJson(
+                notificationData, child.key, userData["fullname"]);
+            newNotifications.add(notificationItem);
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _students = newNotifications.toList();
+          });
+        }
+      } else {
+        print("No notifications found in the main path.");
+      }
+    } catch (e) {
+      print("Error fetching attendance: $e");
+    }
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
 
   void _toggleAttendance(int index, String status) {
     setState(() {
@@ -156,32 +187,6 @@ class _AttendancePageState extends State<AttendancePage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class AttendanceMark {
-  final String id;
-  final String name;
-  final String timestamp;
-  final String marked;
-  final String userId;
-
-  AttendanceMark(
-      {required this.id,
-      required this.name,
-      required this.timestamp,
-      required this.marked,
-      required this.userId});
-
-  factory AttendanceMark.fromJson(
-      Map<dynamic, dynamic> json, String? trpId, String name) {
-    return AttendanceMark(
-      id: trpId ?? "",
-      userId: json['userId'],
-      name: name,
-      timestamp: json['timestamp'],
-      marked: json['marked'],
     );
   }
 }
