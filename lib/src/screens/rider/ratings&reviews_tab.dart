@@ -11,6 +11,37 @@ class ReviewsRatings extends StatefulWidget {
 }
 
 class _ReviewsRatingsState extends State<ReviewsRatings> {
+  void _showReviewDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Write a Review"),
+          content: TextField(
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: "Share your experience...",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                // Handle review submission logic here
+                Navigator.pop(context);
+              },
+              child: Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,9 +77,15 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
               Text('12,111', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 19),
               const UserReviewCard(userName: "Thisuri Nethma"),
+              const UserReviewCard(userName: "Thisuri Nethma"),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showReviewDialog,
+        backgroundColor: Color(0xFF0051ED),
+        child: Icon(Icons.edit, color: Colors.white),
       ),
     );
   }
