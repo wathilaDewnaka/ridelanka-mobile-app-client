@@ -33,7 +33,6 @@ class _AttendancePageState extends State<AttendancePage> {
     {'name': 'David Peters', 'rollNo': 'Mahanama College', 'status': 'A'},
     {'name': 'Jim Rogers', 'rollNo': 'Ananada College', 'status': 'A'},
     {'name': 'Megan Long', 'rollNo': 'Isipathana College', 'status': 'A'},
-    
   ];
 
   void _toggleAttendance(int index, String status) {
@@ -157,6 +156,32 @@ class _AttendancePageState extends State<AttendancePage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class AttendanceMark {
+  final String id;
+  final String name;
+  final String timestamp;
+  final String marked;
+  final String userId;
+
+  AttendanceMark(
+      {required this.id,
+      required this.name,
+      required this.timestamp,
+      required this.marked,
+      required this.userId});
+
+  factory AttendanceMark.fromJson(
+      Map<dynamic, dynamic> json, String? trpId, String name) {
+    return AttendanceMark(
+      id: trpId ?? "",
+      userId: json['userId'],
+      name: name,
+      timestamp: json['timestamp'],
+      marked: json['marked'],
     );
   }
 }
