@@ -13,6 +13,7 @@ class UserReviewCard extends StatelessWidget {
 
     return Column(
       children: [
+        SizedBox(height: 10),
         Row(
           children: [
             CircleAvatar(
@@ -30,7 +31,7 @@ class UserReviewCard extends StatelessWidget {
             SizedBox(width: 10),
             Text(
               userName,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),

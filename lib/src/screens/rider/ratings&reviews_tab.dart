@@ -16,9 +16,9 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Write a Review"),
+          title: Text("Write a Review", style: TextStyle(fontSize: 18)),
           content: TextField(
-            maxLines: 4,
+            maxLines: 10,
             decoration: InputDecoration(
               hintText: "Share your experience...",
               border: OutlineInputBorder(),
