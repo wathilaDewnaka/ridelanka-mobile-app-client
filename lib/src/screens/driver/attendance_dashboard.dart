@@ -66,6 +66,24 @@ class _AttendancePageState extends State<AttendancePage> {
     }
   }
 
+  // Reset att
+  //void initalizeTheAttendance() async {
+  //   DatabaseReference bookingsRef = FirebaseDatabase.instance
+  //       .ref()
+  //       .child("drivers/${firebaseUser!.uid}/bookings");
+
+  //   bookingsRef.once().then((snapshot) {
+  //     if (snapshot.snapshot.value != null) {
+  //       Map<dynamic, dynamic> bookings =
+  //           snapshot.snapshot.value as Map<dynamic, dynamic>;
+
+  //       bookings.forEach((uid, bookingData) {
+  //         bookingsRef.child(uid).update({"marked": "not_marked"});
+  //       });
+  //     }
+  //   });
+  // }
+
   void _toggleAttendance(int index, String status) async {
     AttendanceMark attendanceMark = _students[index];
     DatabaseReference att = FirebaseDatabase.instance
