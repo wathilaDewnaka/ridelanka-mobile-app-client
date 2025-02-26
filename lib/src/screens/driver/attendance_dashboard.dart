@@ -66,10 +66,28 @@ class _AttendancePageState extends State<AttendancePage> {
     }
   }
 
-  void _toggleAttendance(int index, String status) {
-    setState(() {
-      _students[index]['status'] = status;
-    });
+  void _toggleAttendance(int index, String status) async {
+    AttendanceMark attendanceMark = _students[index];
+    DatabaseReference att = FirebaseDatabase.instance
+        .ref()
+        .child("drivers/${firebaseUser!.uid}/bookings/${attendanceMark.id}");
+
+    DatabaseReference noti = FirebaseDatabase.instance
+        .ref()
+        .child("users/${attendanceMark.userId}/notifications");
+
+    await att.update({"marked": status});
+
+    Map<String, String> userNotifications = {
+      "title": "User has been picked up",
+      "description": "User has been picked up by the driver",
+      "icon": "tick",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
+    };
+
+    await noti.push().set(userNotifications);
   }
 
   @override
@@ -135,12 +153,12 @@ class _AttendancePageState extends State<AttendancePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _students[index]['name'],
+                              _students[index].name,
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              _students[index]['rollNo'],
+                              _students[index].name,
                               style: const TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -150,7 +168,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         children: [
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _students[index]['status'] == 'P'
+                              backgroundColor: _students[index].marked == 'P'
                                   ? Colors.green
                                   : Colors.grey.shade300,
                               padding:
@@ -165,7 +183,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           const SizedBox(width: 5),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _students[index]['status'] == 'A'
+                              backgroundColor: _students[index].marked == 'A'
                                   ? Colors.red
                                   : Colors.grey.shade300,
                               padding:

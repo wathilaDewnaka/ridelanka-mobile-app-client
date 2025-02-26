@@ -149,7 +149,7 @@ class _DriverHomeState extends State<DriverHome> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AttendanceApp(),
+                            builder: (context) => const AttendancePage(),
                           ),
                         );
                         print("Attendance pressed");
