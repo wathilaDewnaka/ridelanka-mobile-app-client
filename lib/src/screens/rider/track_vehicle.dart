@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:client/global_variable.dart';
 import 'package:client/src/widgets/brand_divier.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -17,6 +20,8 @@ class _TrackVehicleState extends State<TrackVehicle> {
   Position? currentPosition;
 
   Set<Marker> _Markers = {};
+
+  StreamSubscription<DatabaseEvent>? _driverLocationSubscription;
 
   String driverRideStatus = "Driver is Comming";
 
@@ -183,4 +188,31 @@ class _TrackVehicleState extends State<TrackVehicle> {
       ],
     );
   }
+
+
+  void listenToDriverLocation(String driverId) {
+    DatabaseReference driverRef = FirebaseDatabase.instance
+        .ref()
+        .child('driversAvailable')
+        .child(driverId)
+        .child('l');
+
+    _driverLocationSubscription = driverRef.onValue.listen((event) {
+      if (event.snapshot.value != null) {
+        List<dynamic> location = event.snapshot.value as List<dynamic>;
+        double latitude = location[0];
+        double longitude = location[1];
+
+        print(
+            'Driver $driverId location updated: Lat: $latitude, Lng: $longitude');
+
+        // Create LatLng object for driver location
+        LatLng driverLocation = LatLng(latitude, longitude);
+
+      }
+    });
+  }
+
+
+
 }
