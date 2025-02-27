@@ -22,8 +22,11 @@ class _AttendancePageState extends State<AttendancePage> {
     try {
       DataSnapshot mainAttendanceSnap = await attendance.get();
 
-      if (mainAttendanceSnap.exists && mainAttendanceSnap.value != null) {
+      print(mainAttendanceSnap.exists);
+
+      if (mainAttendanceSnap.exists) {
         List<AttendanceMark> newNotifications = [];
+        print(mainAttendanceSnap.children);
 
         for (var child in mainAttendanceSnap.children) {
           if (child.value is Map<dynamic, dynamic>) {
@@ -64,6 +67,13 @@ class _AttendancePageState extends State<AttendancePage> {
         loading = false;
       });
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAttendance();
   }
 
   // Reset att
@@ -111,117 +121,140 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: const Text(
-          'Attendance',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Batch title
-
-          // Table headers
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            color: Colors.grey.shade300,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
-                  'Student Name',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Spacer(), // Pushes the next text to the right
-                Text(
-                  'Present / Absent',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right, // Ensures text is right-aligned
-                ),
-              ],
+      backgroundColor: Color(0xFF0051ED),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () async {},
+              ),
+              elevation: 0,
             ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Attendance",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
           ),
-
-          // Student list
-          Expanded(
-            child: ListView.builder(
-              itemCount: _students.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    border:
-                        Border(bottom: BorderSide(color: Colors.grey.shade300)),
+        ),
+        child: Column(
+          children: [
+            // Table headers
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              color: const Color.fromARGB(255, 255, 255, 255),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    'Student Name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.person, color: Colors.blue),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  Spacer(), // Pushes the next text to the right
+                  Text(
+                    'Present / Absent',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.right, // Ensures text is right-aligned
+                  ),
+                ],
+              ),
+            ),
+
+            // Student list
+            Expanded(
+              child: ListView.builder(
+                itemCount: _students.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade300)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.person, color: Colors.blue),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _students[index].name,
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                _students[index].name,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
                           children: [
-                            Text(
-                              _students[index].name,
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _students[index].marked == 'P'
+                                    ? Colors.green
+                                    : Colors.grey.shade300,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                              ),
+                              onPressed: () => _toggleAttendance(index, 'P'),
+                              child: const Text('P',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
                             ),
-                            Text(
-                              _students[index].name,
-                              style: const TextStyle(color: Colors.grey),
+                            const SizedBox(width: 5),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _students[index].marked == 'A'
+                                    ? Colors.red
+                                    : Colors.grey.shade300,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                              ),
+                              onPressed: () => _toggleAttendance(index, 'A'),
+                              child: const Text('A',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _students[index].marked == 'P'
-                                  ? Colors.green
-                                  : Colors.grey.shade300,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15),
-                            ),
-                            onPressed: () => _toggleAttendance(index, 'P'),
-                            child: const Text('P',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                          const SizedBox(width: 5),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _students[index].marked == 'A'
-                                  ? Colors.red
-                                  : Colors.grey.shade300,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15),
-                            ),
-                            onPressed: () => _toggleAttendance(index, 'A'),
-                            child: const Text('A',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
