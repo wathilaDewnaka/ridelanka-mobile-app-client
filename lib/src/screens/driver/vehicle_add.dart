@@ -1,5 +1,12 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/data_provider/app_data.dart';
+import 'package:client/src/data_provider/prediction.dart';
+import 'package:client/src/methods/request_helper.dart';
+import 'package:client/src/models/address.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class VehicleAddScreen extends StatefulWidget {
   @override
@@ -10,7 +17,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   int _currentStep = 0;
 
   final TextEditingController vehicleNoController = TextEditingController();
-  final TextEditingController vehicleTypeController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController seatingController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -19,6 +25,15 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
+  String lanuageType = "";
+
+  String type = "";
+  String vehicleType = "";
+  String airCondition = "";
+
+  List<Prediction> _filteredPlaces = [];
+  bool _showDropdown = false;
+  bool isStart = false;
 
   void addVehicle() async {
     DatabaseReference driverData =
@@ -34,6 +49,45 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     };
 
     driverData.set(driverData);
+  }
+
+  void getPlacedDetails(String placeId, bool isStartLocation) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: "Please wait..."));
+
+    String url =
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey';
+
+    var response = await RequestHelper.getRequest(url);
+
+    Navigator.pop(context);
+
+    if (response == 'failed') {
+      return;
+    }
+
+    if (response['status'] == 'OK') {
+      Address thisPlace = Address(
+          placeId: placeId,
+          latitude: response['result']['geometry']['location']['lat'],
+          longituge: response['result']['geometry']['location']['lng'],
+          placeName: response['result']['name'],
+          placeFormattedAddress: '');
+
+      if (isStartLocation) {
+        Provider.of<AppData>(context, listen: false)
+            .updateStartAddress(thisPlace);
+      } else {
+        Provider.of<AppData>(context, listen: false)
+            .updateEndAddress(thisPlace);
+      }
+      setState(() {
+        _showDropdown = false;
+      });
+    }
   }
 
   @override
@@ -195,7 +249,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             .map((value) => DropdownMenuItem(
                                 value: value, child: Text(value)))
                             .toList(),
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            type = value!.toLowerCase();
+                          });
+                        },
                         decoration: InputDecoration(
                           labelText: 'Service Type',
                           border: OutlineInputBorder(),
@@ -207,7 +265,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             .map((value) => DropdownMenuItem(
                                 value: value, child: Text(value)))
                             .toList(),
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            vehicleType = value!;
+                          });
+                        },
                         decoration: InputDecoration(
                           labelText: 'Vehicle Type',
                           border: OutlineInputBorder(),
@@ -235,7 +297,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             .map((value) => DropdownMenuItem(
                                 value: value, child: Text(value)))
                             .toList(),
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          setState(() {
+                            airCondition = value!;
+                          });
+                        },
                         decoration: InputDecoration(
                           labelText: 'Air Conditioning Availability',
                           border: OutlineInputBorder(),
@@ -244,97 +310,127 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                     ],
                   ),
                 ),
-
-                // Step 2: Pricing and Background
                 Step(
-                  title: Text(_currentStep == 1 ? 'Step 2: Pricing Info' : '',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  title: Text(
+                    _currentStep == 1 ? 'Step 2: Pricing Info' : '',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                   isActive: _currentStep >= 1,
                   state: _currentStep == 1
                       ? StepState.indexed
                       : StepState.complete,
-                  content: Column(
+                  content: Stack(
+                    clipBehavior: Clip.none, // Allow widgets to overflow
                     children: [
-                      TextField(
-                        controller: startLocationController,
-                        decoration: InputDecoration(
-                          labelText: 'Start Location',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: endLocationController,
-                        decoration: InputDecoration(
-                          labelText: 'End Location',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            flex: 7,
-                            child: TextField(
-                              controller: priceController,
-                              decoration: InputDecoration(
-                                labelText: 'Price',
-                                border: OutlineInputBorder(),
+                          // Start Location TextField
+                          TextField(
+                            controller: startLocationController,
+                            decoration: InputDecoration(
+                              labelText: 'Start Location',
+                              border: OutlineInputBorder(),
+                            ),
+                            focusNode: _startLocationFocusNode,
+                            onChanged: (value) {
+                              searchPlace(value, isStartLocation: true);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // End Location TextField
+                          TextField(
+                            controller: endLocationController,
+                            decoration: const InputDecoration(
+                              labelText: 'End Location',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              searchPlace(value, isStartLocation: false);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Price and Predict Button Row
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 7,
+                                child: TextField(
+                                  controller: priceController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Price',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                ),
                               ),
+                              Expanded(
+                                flex: 3,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // Predict action
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        const Size(double.infinity, 55),
+                                    backgroundColor: const Color(0xFF0051ED),
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(0)),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Predict",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Work Experience TextField
+                          TextField(
+                            controller: experienceController,
+                            decoration: const InputDecoration(
+                              labelText: 'Work Experience',
+                              border: OutlineInputBorder(),
                             ),
                           ),
-                          Expanded(
-                            flex: 3,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size(double.infinity, 55),
-                                backgroundColor: const Color(0xFF0051ED),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(0)),
-                                ),
-                              ),
-                              child: const Text(
-                                "Predict",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
+                          const SizedBox(height: 16),
+
+                          // Preferred Language Dropdown
+                          DropdownButtonFormField(
+                            items: ['English', 'Sinhala', 'Tamil']
+                                .map((value) => DropdownMenuItem(
+                                    value: value, child: Text(value)))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                lanuageType = value!;
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              labelText: 'Preferred Language',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+
+                          // Route Details TextField
+                          TextField(
+                            controller: descriptionController,
+                            maxLines: 3,
+                            decoration: const InputDecoration(
+                              labelText: 'Route details of the vehicle',
+                              border: OutlineInputBorder(),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: experienceController,
-                        decoration: InputDecoration(
-                          labelText: 'Work Experience',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField(
-                        items: ['English', 'Sinhala', 'Tamil']
-                            .map((value) => DropdownMenuItem(
-                                value: value, child: Text(value)))
-                            .toList(),
-                        onChanged: (value) {},
-                        decoration: InputDecoration(
-                          labelText: 'Prefered Lanuage',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 22),
-                      TextField(
-                        controller: descriptionController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          labelText: 'Route details of the vehicle',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
+                      
+        
                     ],
                   ),
                 ),
