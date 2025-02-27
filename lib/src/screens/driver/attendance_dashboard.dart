@@ -1,5 +1,7 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/models/attendance_mark.dart';
+import 'package:client/src/widgets/chat_screen.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -33,12 +35,12 @@ class _AttendancePageState extends State<AttendancePage> {
             Map<dynamic, dynamic> notificationData =
                 child.value as Map<dynamic, dynamic>;
             print("object333");
-            print(child.value);
 
             String? uid = notificationData['uId'] as String?;
 
             DatabaseReference driverRef =
                 FirebaseDatabase.instance.ref().child('users/$uid');
+            print(notificationData);
             DataSnapshot snapshot = await driverRef.get();
 
             Map<dynamic, dynamic> userData =
@@ -73,7 +75,21 @@ class _AttendancePageState extends State<AttendancePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getAttendance();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getAttendance().then((_) {
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
+    });
   }
 
   // Reset att
@@ -95,6 +111,13 @@ class _AttendancePageState extends State<AttendancePage> {
   // }
 
   void _toggleAttendance(int index, String status) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
     AttendanceMark attendanceMark = _students[index];
     DatabaseReference att = FirebaseDatabase.instance
         .ref()
@@ -116,6 +139,8 @@ class _AttendancePageState extends State<AttendancePage> {
     };
 
     await noti.push().set(userNotifications);
+    getAttendance();
+    Navigator.pop(context);
   }
 
   @override
@@ -165,9 +190,9 @@ class _AttendancePageState extends State<AttendancePage> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               color: const Color.fromARGB(255, 255, 255, 255),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
                     'Student Name',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -202,10 +227,26 @@ class _AttendancePageState extends State<AttendancePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                _students[index].name,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                              recieverName:
+                                                  _students[index].name,
+                                              recieverUid:
+                                                  _students[index].userId,
+                                              recieverTel:
+                                                  _students[index].name,
+                                              isMobile: true)));
+                                },
+                                child: Text(
+                                  _students[index].name,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                               Text(
                                 _students[index].name,
