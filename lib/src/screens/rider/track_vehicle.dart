@@ -34,6 +34,18 @@ class _TrackVehicleState extends State<TrackVehicle> {
     }
   }
 
+  void _setMapMarker(LatLng position) {
+    setState(() {
+      _Markers.add(
+        Marker(
+          markerId: MarkerId("currentLocation"),
+          position: position,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+        ),
+      );
+    });
+  }
+
   
 
   @override
