@@ -20,6 +20,8 @@ class TrackVehicle extends StatefulWidget {
 class _TrackVehicleState extends State<TrackVehicle> {
 
   GoogleMapController? mapController;
+  Completer<GoogleMapController> _controller = Completer();
+
   Position? currentPosition;
 
   List<LatLng> polylineCoordinates = [];
@@ -100,10 +102,14 @@ class _TrackVehicleState extends State<TrackVehicle> {
           myLocationButtonEnabled: true,
           mapType: MapType.normal,
           markers: _Markers, 
+          polylines: _polylines,
+          circles: _Circles,
           initialCameraPosition: googlePlex,
           onMapCreated: (GoogleMapController controller) async {
+            _controller.complete(controller);
             mapController = controller;
             await getCurrentPosition();
+            listenToDriverLocation(driverId);
           },
         ),
         Positioned(

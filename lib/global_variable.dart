@@ -18,3 +18,6 @@ StreamSubscription<Position>? homeTabPositionStream;
 Position? currentPosition;
 
 Driver? currentDriverInfo;
+
+String driverId = 'E8AfWjrmhhR6iRPfAqGlLrRit5C3';
+
