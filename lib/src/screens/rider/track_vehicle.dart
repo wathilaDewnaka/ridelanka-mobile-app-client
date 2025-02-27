@@ -46,7 +46,29 @@ class _TrackVehicleState extends State<TrackVehicle> {
     });
   }
 
-  
+  Future<void> getCurrentPosition() async {
+    await checkPermissions();
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+
+      currentPosition = position;
+
+      LatLng pos = LatLng(position.latitude, position.longitude);
+      CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 18);
+
+      mapController!
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      print('Current Position: ${position.latitude}, ${position.longitude}');
+
+      // Set marker for current location
+      _setMapMarker(pos);
+    } catch (e) {
+      print('Error while getting location: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
