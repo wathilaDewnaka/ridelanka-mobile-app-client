@@ -12,7 +12,8 @@ class ProfileTab extends StatefulWidget {
 
     await _auth.signOut();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("isPassenger"); // Removes the value associated with the given key
+    await prefs.remove(
+        "isPassenger"); // Removes the value associated with the given key
     // Navigate to the login page or perform other actions after logout
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
@@ -260,7 +261,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SettingsTab()),
+                        MaterialPageRoute(builder: (context) => SettingsPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(

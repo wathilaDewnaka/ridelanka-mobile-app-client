@@ -1,3 +1,4 @@
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -73,15 +74,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     ElevatedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                              'Please enter a valid username',
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 16),
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                            createMessageBar(
+                                title: "Error",
+                                message: "Inavlid email address",
+                                type: MessageType.error));
                       },
                       child: const Text('Save'),
                     ),
@@ -123,15 +119,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     ElevatedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please enter a valid email',
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 16),
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                            createMessageBar(
+                                title: "Error",
+                                message: "Inavlid email address",
+                                type: MessageType.error));
                       },
                       child: const Text('Save'),
                     ),
