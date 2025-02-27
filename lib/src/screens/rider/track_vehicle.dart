@@ -1,3 +1,4 @@
+import 'package:client/global_variable.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -72,6 +73,24 @@ class _TrackVehicleState extends State<TrackVehicle> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Stack(
+      children: <Widget>[
+        GoogleMap(
+          padding: EdgeInsets.only(
+            top: 10,
+            bottom: 210,
+          ),
+          myLocationEnabled: true,
+          myLocationButtonEnabled: true,
+          mapType: MapType.normal,
+          markers: _Markers, 
+          initialCameraPosition: googlePlex,
+          onMapCreated: (GoogleMapController controller) async {
+            mapController = controller;
+            await getCurrentPosition();
+          },
+        )
+      ],
+    );
   }
 }
