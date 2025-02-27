@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/models/direction_details.dart';
 import 'package:client/src/widgets/brand_divier.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -19,11 +22,16 @@ class _TrackVehicleState extends State<TrackVehicle> {
   GoogleMapController? mapController;
   Position? currentPosition;
 
+  List<LatLng> polylineCoordinates = [];
+  Set<Polyline> _polylines = {};
   Set<Marker> _Markers = {};
+  Set<Circle> _Circles = {};
 
   StreamSubscription<DatabaseEvent>? _driverLocationSubscription;
 
   String driverRideStatus = "Driver is Comming";
+
+  DirectionDetails? tripDirectionDetails;
 
   Future<void> checkPermissions() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -203,14 +211,158 @@ class _TrackVehicleState extends State<TrackVehicle> {
         double latitude = location[0];
         double longitude = location[1];
 
-        print(
-            'Driver $driverId location updated: Lat: $latitude, Lng: $longitude');
+        print('Driver $driverId location updated: Lat: $latitude, Lng: $longitude');
 
         // Create LatLng object for driver location
         LatLng driverLocation = LatLng(latitude, longitude);
 
+        drawPolyline(driverLocation);
       }
     });
+  }
+
+
+  void drawPolyline(LatLng driverLocation) async {
+    // Use current position as destination (if available)
+    print("draw line");
+    if (currentPosition == null) {
+      print('Current position not available yet');
+      //await Future.delayed(Duration(milliseconds: 500));
+      return;
+    }
+
+    print("not return");
+    LatLng currentLocationLatLng =
+        LatLng(currentPosition!.latitude, currentPosition!.longitude);
+
+    // Clear previous polylines
+    _polylines.clear();
+
+    // showDialog(
+    //     barrierDismissible: false,
+    //     context: context,
+    //     builder: (BuildContext context) =>
+    //         ProgressDialog(status: 'Please wait...'));
+
+    var thisDetails = await HelperMethods.getDirectionDetails(
+        driverLocation, currentLocationLatLng);
+
+    setState(() {
+      tripDirectionDetails = thisDetails;
+    });
+
+    //Navigator.pop(context);
+
+    print("print details");
+    print(thisDetails?.encodedPoints);
+
+    if (thisDetails != null) {
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> results =
+          polylinePoints.decodePolyline(thisDetails.encodedPoints);
+
+      polylineCoordinates.clear();
+
+      if (results.isNotEmpty) {
+        results.forEach((PointLatLng point) =>
+            {polylineCoordinates.add(LatLng(point.latitude, point.longitude))});
+      }
+
+      // Create a list of coordinates for the polyline
+      //polylineCoordinates = [driverLocation, currentLocationLatLng];
+
+      setState(() {
+        Polyline polyline = Polyline(
+          polylineId: PolylineId('polyid'),
+          color: Color(0xFF0051ED),
+          points: polylineCoordinates,
+          jointType: JointType.round,
+          width: 4,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          geodesic: true,
+        );
+
+        _polylines.add(polyline);
+      });
+
+      // Calculate bounds to fit the polyline on map
+      LatLngBounds bounds;
+      if (driverLocation.latitude > currentLocationLatLng.latitude &&
+          driverLocation.longitude > currentLocationLatLng.longitude) {
+        bounds = LatLngBounds(
+            southwest: currentLocationLatLng, northeast: driverLocation);
+      } else if (driverLocation.longitude > currentLocationLatLng.longitude) {
+        bounds = LatLngBounds(
+          southwest:
+              LatLng(driverLocation.latitude, currentLocationLatLng.longitude),
+          northeast:
+              LatLng(currentLocationLatLng.latitude, driverLocation.longitude),
+        );
+      } else if (driverLocation.latitude > currentLocationLatLng.latitude) {
+        bounds = LatLngBounds(
+          southwest:
+              LatLng(currentLocationLatLng.latitude, driverLocation.longitude),
+          northeast:
+              LatLng(driverLocation.latitude, currentLocationLatLng.longitude),
+        );
+      } else {
+        bounds = LatLngBounds(
+            southwest: driverLocation, northeast: currentLocationLatLng);
+      }
+
+      // Animate camera to show the complete route
+      mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
+
+      // Add markers for driver and current location
+      setState(() {
+        // Clear existing markers if needed
+        _Markers.removeWhere((marker) =>
+            marker.markerId.value == "driverLocation" ||
+            marker.markerId.value == "currentLocation");
+
+        // Add driver location marker
+        _Markers.add(Marker(
+          markerId: MarkerId('driverLocation'),
+          position: driverLocation,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          infoWindow:
+              InfoWindow(title: "Driver Location", snippet: 'Driver is here'),
+        ));
+
+        // Add current location marker
+        _Markers.add(Marker(
+          markerId: MarkerId('currentLocation'),
+          position: currentLocationLatLng,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+          infoWindow:
+              InfoWindow(title: "Your Location", snippet: 'You are here'),
+        ));
+      });
+
+      // Add circles for driver and current location
+      setState(() {
+        _Circles.clear();
+
+        _Circles.add(Circle(
+          circleId: CircleId('driverLocation'),
+          strokeColor: Colors.blue,
+          strokeWidth: 3,
+          radius: 12,
+          center: driverLocation,
+          fillColor: Colors.blue.withOpacity(0.5),
+        ));
+
+        _Circles.add(Circle(
+          circleId: CircleId('currentLocation'),
+          strokeColor: Colors.green,
+          strokeWidth: 3,
+          radius: 12,
+          center: currentLocationLatLng,
+          fillColor: Color(0xFF40cf89),
+        ));
+      });
+    }
   }
 
 
