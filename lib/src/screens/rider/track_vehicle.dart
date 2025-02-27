@@ -223,6 +223,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
         LatLng driverLocation = LatLng(latitude, longitude);
 
         drawPolyline(driverLocation);
+        updateArrivalTimeToUserPickupLocation(driverLocation);
       }
     });
   }
@@ -369,6 +370,32 @@ class _TrackVehicleState extends State<TrackVehicle> {
         ));
       });
     }
+  }
+
+  void updateArrivalTimeToUserPickupLocation(
+      driverCurrentPositionLatLng) async {
+    LatLng userPickupPosition =
+        LatLng(currentPosition!.latitude, currentPosition!.longitude);
+
+    var directionDetailsInfo = await HelperMethods.getDirectionDetails(
+        driverCurrentPositionLatLng, userPickupPosition);
+
+    if (directionDetailsInfo == null) {
+      return;
+    }
+
+    double distance = directionDetailsInfo.distanceValue.toDouble();
+    if (distance < 100) {
+      setState(() {
+        driverRideStatus = "Driver has arrived";
+      });
+      return;
+    }
+
+    setState(() {
+      driverRideStatus =
+          "Driver is coming :: " + directionDetailsInfo.durationText.toString();
+    });
   }
 
 
