@@ -429,8 +429,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           ),
                         ],
                       ),
-                      
-        
                     ],
                   ),
                 ),
