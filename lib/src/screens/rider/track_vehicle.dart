@@ -28,6 +28,8 @@ class _TrackVehicleState extends State<TrackVehicle> {
   Set<Marker> _Markers = {};
   Set<Circle> _Circles = {};
 
+  BitmapDescriptor? vehicleIcon;
+
   StreamSubscription<DatabaseEvent>? _driverLocationSubscription;
 
   String driverRideStatus = "Driver is Comming";
@@ -95,6 +97,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
   void initState() {
     super.initState();
     getDriverDetails();
+    createMarker();
   }
 
   @override
@@ -339,7 +342,8 @@ class _TrackVehicleState extends State<TrackVehicle> {
         _Markers.add(Marker(
           markerId: MarkerId('driverLocation'),
           position: driverLocation,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: vehicleIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           infoWindow:
               InfoWindow(title: "Driver Location", snippet: 'Driver is here'),
         ));
@@ -378,6 +382,29 @@ class _TrackVehicleState extends State<TrackVehicle> {
       });
     }
   }
+
+  Future<void> createMarker() async {
+    if (vehicleIcon == null) {
+      ImageConfiguration imageConfiguration = ImageConfiguration();
+
+      try {
+        BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(
+            imageConfiguration, 'assets/images/vehicle_icon/van-icon.png');
+
+        await Future.delayed(
+            Duration(seconds: 1)); // Optional delay for debugging
+
+        setState(() {
+          vehicleIcon = icon;
+          print('icon is set');
+        });
+      } catch (e) {
+        print("Error loading marker icon: $e");
+      }
+    }
+  }
+
+  
 
   void updateArrivalTimeToUserPickupLocation(
       driverCurrentPositionLatLng) async {
@@ -426,7 +453,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
         print("Vehicle Type: $vehicleType");
 
         setState(() {
-          _driverName = driverName ;
+          _driverName = driverName;
           _vehicleDescription = vehicleName + ', ' + vehicleType;
         });
       } else {
