@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                             createMessageBar(
                                 title: "Error",
-                                message: "Inavlid email address",
+                                message: "Inavlid username",
                                 type: MessageType.error));
                       },
                       child: const Text('Save'),
