@@ -334,7 +334,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             ),
                             focusNode: _startLocationFocusNode,
                             onChanged: (value) {
-                              (value, isStartLocation: true);
+                              searchPlace(value, isStartLocation: true);
                             },
                           ),
                           const SizedBox(height: 16),
@@ -347,7 +347,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (value) {
-                              (value, isStartLocation: false);
+                              searchPlace(value, isStartLocation: false);
                             },
                           ),
                           const SizedBox(height: 16),
@@ -429,6 +429,52 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           ),
                         ],
                       ),
+                      if (_showDropdown)
+                        Positioned(
+                          top:
+                              isStart ? 55 : 155, // Adjust position dynamically
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: _filteredPlaces.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(
+                                    _filteredPlaces[index].mainText +
+                                        " " +
+                                        _filteredPlaces[index].secondaryText,
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      if (isStart) {
+                                        startLocationController.text =
+                                            _filteredPlaces[index].mainText;
+                                        getPlacedDetails(
+                                            _filteredPlaces[index].placeId,
+                                            true);
+                                      } else {
+                                        endLocationController.text =
+                                            _filteredPlaces[index].mainText;
+                                        getPlacedDetails(
+                                            _filteredPlaces[index].placeId,
+                                            false);
+                                      }
+                                      _showDropdown = false;
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
