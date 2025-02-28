@@ -1,6 +1,9 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/rider/settings_tab.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +15,10 @@ class ProfileTab extends StatefulWidget {
 }
 
 class _ProfileTabState extends State<ProfileTab> {
+  late String fullName;
+  late String email;
+  late String phone;
+
   Future<void> _logout(BuildContext context) async {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -23,6 +30,37 @@ class _ProfileTabState extends State<ProfileTab> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
+  }
+
+  void getUserDetails() async {
+    bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+
+    DatabaseReference databaseReference = isPassenger
+        ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
+        : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
+
+    DatabaseEvent event = await databaseReference.once();
+    DataSnapshot snapshot = event.snapshot;
+
+    if (snapshot.exists) {
+      Map<String, dynamic> userData =
+          Map<String, dynamic>.from(snapshot.value as Map);
+
+      setState(() {
+        email = userData['email'] ?? '';
+        fullName = userData['fullname'] ?? '';
+        phone = userData['phone'] ?? '';
+      });
+    } else {
+      print("User data not found");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserDetails();
   }
 
   @override
@@ -44,7 +82,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 padding: EdgeInsets.all(17),
                 child: Center(
                   child: Text(
-                    'T',
+                    fullName.split(" ")[1][0],
                     style: TextStyle(
                       fontSize: 55,
                       color: Color(0xFF0051ED),
@@ -54,25 +92,30 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello,',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello,',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                Text(
-                  'Thisuri Nethma',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    fullName,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -132,7 +175,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                     ),
                     Text(
-                      'thisurinethma',
+                      fullName.split(" ")[1] + " " + fullName.split(" ")[2],
                       style: TextStyle(
                         fontSize: 16,
                         letterSpacing: 0.5,
@@ -185,7 +228,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                     ),
                     Text(
-                      'thisurinethma@gmail.com',
+                      email,
                       style: TextStyle(
                         fontSize: 16,
                         letterSpacing: 0.5,
@@ -238,7 +281,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                     ),
                     Text(
-                      '+94 *********',
+                      phone,
                       style: TextStyle(
                         fontSize: 16,
                         letterSpacing: 0.5,
@@ -250,32 +293,36 @@ class _ProfileTabState extends State<ProfileTab> {
               ],
             ),
           ),
-          SizedBox(height: 100),
+          const SizedBox(height: 40),
           Column(
             children: [
-              SizedBox(height: 30),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0051ED), // Button color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SettingsPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF0051ED),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        icon:
+                            Icon(Icons.settings, color: Colors.white, size: 26),
+                        label: Text(
+                          'Settings',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                    ),
-                    icon: Icon(Icons.settings, color: Colors.white, size: 26),
-                    label: Text(
-                      'Settings',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ],
@@ -285,36 +332,40 @@ class _ProfileTabState extends State<ProfileTab> {
                 onTap: () {
                   _logout(context);
                 },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0051ED),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.logout,
-                            size: 26,
-                            color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0051ED),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Log Out',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.logout,
+                                size: 26,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Log Out',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               )
             ],
