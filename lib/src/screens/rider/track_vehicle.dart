@@ -18,7 +18,6 @@ class TrackVehicle extends StatefulWidget {
 }
 
 class _TrackVehicleState extends State<TrackVehicle> {
-
   GoogleMapController? mapController;
   Completer<GoogleMapController> _controller = Completer();
 
@@ -34,6 +33,9 @@ class _TrackVehicleState extends State<TrackVehicle> {
   String driverRideStatus = "Driver is Comming";
 
   DirectionDetails? tripDirectionDetails;
+
+  String? _driverName;
+  String? _vehicleDescription;
 
   Future<void> checkPermissions() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -90,6 +92,12 @@ class _TrackVehicleState extends State<TrackVehicle> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    getDriverDetails();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
@@ -101,7 +109,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
           myLocationEnabled: true,
           myLocationButtonEnabled: true,
           mapType: MapType.normal,
-          markers: _Markers, 
+          markers: _Markers,
           polylines: _polylines,
           circles: _Circles,
           initialCameraPosition: googlePlex,
@@ -163,7 +171,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "School Van",
+                      _vehicleDescription ?? 'n/a',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: const TextStyle(
@@ -178,7 +186,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Nimshan Munasinhe",
+                      _driverName ?? 'n/a',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: const TextStyle(
@@ -203,7 +211,6 @@ class _TrackVehicleState extends State<TrackVehicle> {
     );
   }
 
-
   void listenToDriverLocation(String driverId) {
     DatabaseReference driverRef = FirebaseDatabase.instance
         .ref()
@@ -217,7 +224,8 @@ class _TrackVehicleState extends State<TrackVehicle> {
         double latitude = location[0];
         double longitude = location[1];
 
-        print('Driver $driverId location updated: Lat: $latitude, Lng: $longitude');
+        print(
+            'Driver $driverId location updated: Lat: $latitude, Lng: $longitude');
 
         // Create LatLng object for driver location
         LatLng driverLocation = LatLng(latitude, longitude);
@@ -227,7 +235,6 @@ class _TrackVehicleState extends State<TrackVehicle> {
       }
     });
   }
-
 
   void drawPolyline(LatLng driverLocation) async {
     // Use current position as destination (if available)
@@ -398,6 +405,35 @@ class _TrackVehicleState extends State<TrackVehicle> {
     });
   }
 
+  Future<void> getDriverDetails() async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref().child('drivers').child(driverId);
 
+    try {
+      DatabaseEvent event = await ref.once();
+      DataSnapshot snapshot = event.snapshot;
 
+      if (snapshot.value != null && snapshot.value is Map) {
+        Map<dynamic, dynamic> driverData =
+            snapshot.value as Map<dynamic, dynamic>;
+
+        String driverName = driverData['fullname'] ?? 'Unknown';
+        String vehicleName = driverData['vehicleName'] ?? 'Unknown';
+        String vehicleType = driverData['vehicleType'] ?? 'Unknown';
+
+        print("Driver Name: $driverName");
+        print("Vehicle Name: $vehicleName");
+        print("Vehicle Type: $vehicleType");
+
+        setState(() {
+          _driverName = driverName ;
+          _vehicleDescription = vehicleName + ', ' + vehicleType;
+        });
+      } else {
+        print("Driver not found.");
+      }
+    } catch (e) {
+      print("Error fetching driver details: $e");
+    }
+  }
 }
