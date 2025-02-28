@@ -3,6 +3,7 @@ import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
+import 'package:client/src/widgets/star_view.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -456,6 +457,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
+                      StarView(rating: 5)
                     ],
                   ),
                 ),
