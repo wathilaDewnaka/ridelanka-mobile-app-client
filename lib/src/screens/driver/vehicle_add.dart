@@ -15,52 +15,44 @@ class VehicleAddScreen extends StatefulWidget {
 
 class _VehicleAddScreenState extends State<VehicleAddScreen> {
   int _currentStep = 0;
-
   final TextEditingController vehicleNoController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController seatingController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-
   final TextEditingController startLocationController = TextEditingController();
   final TextEditingController endLocationController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
-  String lanuageType = "";
 
+  String languageType = "";
   String type = "";
   String vehicleType = "";
   String airCondition = "";
-
   List<Prediction> _filteredPlaces = [];
   bool _showDropdown = false;
   bool isStart = false;
+  FocusNode _startLocationFocusNode = FocusNode();
 
   void addVehicle() async {
-    DatabaseReference driverData =
-        FirebaseDatabase.instance.ref().child("drivers/1234");
-
+    DatabaseReference driverData = FirebaseDatabase.instance.ref().child("drivers/1234");
     Map<String, String> vehicleData = {
       "vehicleName": modelController.text,
       "vehicleNo": vehicleNoController.text,
       "vehiclePrice": priceController.text,
       "seatCapacity": seatingController.text,
-      "expereience": experienceController.text,
+      "experience": experienceController.text,
       "routeDetails": descriptionController.text
     };
-
-    driverData.set(driverData);
+    await driverData.set(vehicleData);
   }
 
-  void getPlacedDetails(String placeId, bool isStartLocation) async {
+  void getPlaceDetails(String placeId, bool isStartLocation) async {
     showDialog(
         barrierDismissible: false,
         context: context,
-        builder: (BuildContext context) =>
-            ProgressDialog(status: "Please wait..."));
+        builder: (BuildContext context) => ProgressDialog(status: "Please wait..."));
 
-    String url =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey';
-
+    String url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey';
     var response = await RequestHelper.getRequest(url);
 
     Navigator.pop(context);
@@ -73,16 +65,14 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       Address thisPlace = Address(
           placeId: placeId,
           latitude: response['result']['geometry']['location']['lat'],
-          longituge: response['result']['geometry']['location']['lng'],
+          longitude: response['result']['geometry']['location']['lng'],
           placeName: response['result']['name'],
           placeFormattedAddress: '');
 
       if (isStartLocation) {
-        Provider.of<AppData>(context, listen: false)
-            .updateStartAddress(thisPlace);
+        Provider.of<AppData>(context, listen: false).updateStartAddress(thisPlace);
       } else {
-        Provider.of<AppData>(context, listen: false)
-            .updateEndAddress(thisPlace);
+        Provider.of<AppData>(context, listen: false).updateEndAddress(thisPlace);
       }
       setState(() {
         _showDropdown = false;
@@ -93,395 +83,51 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0051ED),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            AppBar(
-              backgroundColor: const Color(0xFF0051ED),
-              leading: IconButton(
-                icon:
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-                onPressed: () {},
-              ),
-              elevation: 0,
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 17.0),
-              child: Text(
-                "Add Vehicle",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0051ED),
+        title: const Text("Add Vehicle", style: TextStyle(color: Colors.white)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 25),
-          child: Theme(
-            data: ThemeData(
-              colorScheme: const ColorScheme.light(
-                  primary: Color(0xFF0051ED),
-                  surface: Colors.white,
-                  shadow: Colors.transparent,
-                  secondary: Colors.black87),
-            ),
-            child: Stepper(
-              type: StepperType.horizontal,
-              currentStep: _currentStep,
-              onStepContinue: () {
-                if (_currentStep < 1) {
-                  setState(() => _currentStep += 1);
-                } else {
-                  addVehicle();
-                }
-              },
-              onStepCancel: () {
-                if (_currentStep > 0) {
-                  setState(() => _currentStep -= 1);
-                }
-              },
-              controlsBuilder: (BuildContext context, ControlsDetails details) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 10.0, bottom: 0.0),
-                  child: Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: details.onStepContinue,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          backgroundColor: const Color(0xFF0051ED),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        child: Text(
-                          _currentStep < 1 ? "Next" : "Add Vehicle",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      ElevatedButton(
-                        onPressed: details.onStepCancel,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          backgroundColor: const Color(0xFF0051ED),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        child: const Text(
-                          "Back",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              steps: [
-                Step(
-                  title: Text(
-                    _currentStep == 0 ? 'Step 1: Vehicle Info' : "",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  isActive: _currentStep >= 0,
-                  state:
-                      _currentStep > 0 ? StepState.complete : StepState.indexed,
-                  content: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Card(
-                          elevation: 3,
-                          color: Colors.grey[50],
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(0)),
-                          child: Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("Upload Image",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(height: 8),
-                                ElevatedButton(
-                                    onPressed: () {},
-                                    child: Icon(Icons.add_a_photo))
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField(
-                        items: ['School', 'Staff']
-                            .map((value) => DropdownMenuItem(
-                                value: value, child: Text(value)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            type = value!.toLowerCase();
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Service Type',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField(
-                        items: ['Van', 'Bus']
-                            .map((value) => DropdownMenuItem(
-                                value: value, child: Text(value)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            vehicleType = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Vehicle Type',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: modelController,
-                        decoration: InputDecoration(
-                          labelText: 'Vehicle Model and Year',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: vehicleNoController,
-                        decoration: InputDecoration(
-                          labelText: 'Vehicle Number',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField(
-                        items: ['Yes', 'No']
-                            .map((value) => DropdownMenuItem(
-                                value: value, child: Text(value)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            airCondition = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: 'Air Conditioning Availability',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Step(
-                  title: Text(
-                    _currentStep == 1 ? 'Step 2: Pricing Info' : '',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  isActive: _currentStep >= 1,
-                  state: _currentStep == 1
-                      ? StepState.indexed
-                      : StepState.complete,
-                  content: Stack(
-                    clipBehavior: Clip.none, // Allow widgets to overflow
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Start Location TextField
-                          TextField(
-                            controller: startLocationController,
-                            decoration: InputDecoration(
-                              labelText: 'Start Location',
-                              border: OutlineInputBorder(),
-                            ),
-                            focusNode: _startLocationFocusNode,
-                            onChanged: (value) {
-                              searchPlace(value, isStartLocation: true);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // End Location TextField
-                          TextField(
-                            controller: endLocationController,
-                            decoration: const InputDecoration(
-                              labelText: 'End Location',
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (value) {
-                              searchPlace(value, isStartLocation: false);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Price and Predict Button Row
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 7,
-                                child: TextField(
-                                  controller: priceController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Price',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    // Predict action
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    minimumSize:
-                                        const Size(double.infinity, 55),
-                                    backgroundColor: const Color(0xFF0051ED),
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(0)),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    "Predict",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Work Experience TextField
-                          TextField(
-                            controller: experienceController,
-                            decoration: const InputDecoration(
-                              labelText: 'Work Experience',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Preferred Language Dropdown
-                          DropdownButtonFormField(
-                            items: ['English', 'Sinhala', 'Tamil']
-                                .map((value) => DropdownMenuItem(
-                                    value: value, child: Text(value)))
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                lanuageType = value!;
-                              });
-                            },
-                            decoration: const InputDecoration(
-                              labelText: 'Preferred Language',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-
-                          // Route Details TextField
-                          TextField(
-                            controller: descriptionController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Route details of the vehicle',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_showDropdown)
-                        Positioned(
-                          top:
-                              isStart ? 55 : 155, // Adjust position dynamically
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: _filteredPlaces.length,
-                              itemBuilder: (context, index) {
-                                return ListTile(
-                                  title: Text(
-                                    _filteredPlaces[index].mainText +
-                                        " " +
-                                        _filteredPlaces[index].secondaryText,
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      if (isStart) {
-                                        startLocationController.text =
-                                            _filteredPlaces[index].mainText;
-                                        getPlacedDetails(
-                                            _filteredPlaces[index].placeId,
-                                            true);
-                                      } else {
-                                        endLocationController.text =
-                                            _filteredPlaces[index].mainText;
-                                        getPlacedDetails(
-                                            _filteredPlaces[index].placeId,
-                                            false);
-                                      }
-                                      _showDropdown = false;
-                                    });
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+      body: Stepper(
+        type: StepperType.horizontal,
+        currentStep: _currentStep,
+        onStepContinue: () {
+          if (_currentStep < 1) {
+            setState(() => _currentStep += 1);
+          } else {
+            addVehicle();
+          }
+        },
+        onStepCancel: () {
+          if (_currentStep > 0) {
+            setState(() => _currentStep -= 1);
+          }
+        },
+        steps: [
+          Step(
+            title: const Text('Vehicle Info'),
+            content: Column(
+              children: [
+                TextField(controller: modelController, decoration: InputDecoration(labelText: 'Vehicle Model and Year')),
+                TextField(controller: vehicleNoController, decoration: InputDecoration(labelText: 'Vehicle Number')),
               ],
             ),
+            isActive: _currentStep >= 0,
           ),
-        ),
+          Step(
+            title: const Text('Pricing Info'),
+            content: Column(
+              children: [
+                TextField(controller: startLocationController, decoration: InputDecoration(labelText: 'Start Location')),
+                TextField(controller: endLocationController, decoration: InputDecoration(labelText: 'End Location')),
+              ],
+            ),
+            isActive: _currentStep >= 1,
+          ),
+        ],
       ),
     );
   }
