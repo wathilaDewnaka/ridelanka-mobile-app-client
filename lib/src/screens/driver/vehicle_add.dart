@@ -334,7 +334,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             ),
                             focusNode: _startLocationFocusNode,
                             onChanged: (value) {
-                              searchPlace(value, isStartLocation: true);
+                              (value, isStartLocation: true);
                             },
                           ),
                           const SizedBox(height: 16),
@@ -347,7 +347,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                               border: OutlineInputBorder(),
                             ),
                             onChanged: (value) {
-                              searchPlace(value, isStartLocation: false);
+                              (value, isStartLocation: false);
                             },
                           ),
                           const SizedBox(height: 16),
