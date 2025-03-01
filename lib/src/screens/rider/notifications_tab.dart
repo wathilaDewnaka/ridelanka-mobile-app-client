@@ -163,6 +163,10 @@ class _NotificationTabState extends State<NotificationTab> {
         .ref()
         .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
 
+    DatabaseReference driverBookingReference = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/bookings');
+
     DatabaseReference userReference = FirebaseDatabase.instance
         .ref()
         .child('users/${userId}/bookings/$notificationId');
@@ -179,6 +183,12 @@ class _NotificationTabState extends State<NotificationTab> {
       "isActive": ""
     };
 
+    Map<String, String> bookingReference = {
+      "uId": userId ?? "",
+      "marked": "false"
+    };
+
+    await driverBookingReference.push().set(bookingReference);
     await userNotificationReference.push().set(userNotifications);
 
     await databaseReference.update({'isRead': "true", 'isActive': ''});
@@ -199,6 +209,7 @@ class _NotificationTabState extends State<NotificationTab> {
     });
 
     getNotifications();
+
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking approved successfully !",
       title: "Success",
@@ -321,12 +332,18 @@ class _NotificationTabState extends State<NotificationTab> {
               leading: IconButton(
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    RiderNavigationMenu.id,
-                    (route) => false,
-                  );
+                onPressed: () async {
+                  bool isPass =
+                      await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+                  if (isPass) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RiderNavigationMenu.id,
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.pop(context);
+                  }
                 },
               ),
               elevation: 0,

@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/driver/manage_trips.dart';
 import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
 import 'package:client/src/screens/rider/profile_tab.dart';
@@ -145,14 +146,12 @@ class _DriverHomeState extends State<DriverHome> {
                       iconImage:
                           'assets/images/driver_dashboard_images/attendance.png',
                       label: "Rides",
-                      onPressed: () {
+                      onPressed: () 
+                        print("Rides pressed");
                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AttendancePage(),
-                          ),
-                        );
-                        print("Attendance pressed");
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RidesTab()));
                       },
                     ),
                     MenuButton(

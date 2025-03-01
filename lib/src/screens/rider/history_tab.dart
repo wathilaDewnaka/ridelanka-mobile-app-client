@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
+import 'package:client/src/screens/rider/track_vehicle.dart';
 import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -29,18 +30,34 @@ class _HistoryTabState extends State<HistoryTab> {
     DataSnapshot mainNotificationsSnapshot = await notifications.get();
     if (mainNotificationsSnapshot.exists) {
       List<TripItem> newNotifications = [];
-      mainNotificationsSnapshot.children.forEach((child) async {
+      for (var child in mainNotificationsSnapshot.children) {
         if (child.value is Map<dynamic, dynamic>) {
           Map<dynamic, dynamic> notificationData =
               child.value as Map<dynamic, dynamic>;
+          print(notificationData);
 
-          newNotifications.add(TripItem.fromJson(notificationData, child.key));
-          
-        } else {
-          // Handle invalid or unexpected data
-          print('Invalid notification data: ${child.value}');
+          String? driverUid = notificationData['driverUid'] as String?;
+
+          DatabaseReference driverRef =
+              FirebaseDatabase.instance.ref().child('drivers/$driverUid');
+          DataSnapshot snapshot = await driverRef.get();
+
+          Map<dynamic, dynamic> driverData =
+              snapshot.value as Map<dynamic, dynamic>;
+
+          double vehiclePrice = driverData['vehiclePrice'] is double
+              ? driverData['vehiclePrice']
+              : double.tryParse(driverData['vehiclePrice'].toString()) ?? 0.0;
+
+          newNotifications.add(TripItem.fromJson(
+              notificationData,
+              child.key,
+              vehiclePrice,
+              driverData['fullname'] ?? "",
+              driverData['vehicleName'] ?? "",
+              driverData['vehicleNo'] ?? ""));
         }
-      });
+      }
 
       print(newNotifications.toList());
 
@@ -585,7 +602,12 @@ class _HistoryTabState extends State<HistoryTab> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           ElevatedButton.icon(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => TrackVehicle()));
+                                            },
                                             icon: const Icon(Icons.visibility,
                                                 size: 18),
                                             label: const Text('Track Trip '),
