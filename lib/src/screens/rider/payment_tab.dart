@@ -52,6 +52,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 });
               },
             ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Checkbox(
+                  value: saveCard,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      saveCard = value!;
+                    });
+                  },
+                ),
+                Text("Save card for future payments"),
+              ],
+            ),
           ],
         ),
       ),
