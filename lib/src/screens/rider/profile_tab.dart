@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/rider/settings_tab.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -31,6 +32,12 @@ class _ProfileTabState extends State<ProfileTab> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "User logged out successfully !",
+        type: MessageType.success));
+    return;
   }
 
   Future<void> getUserDetails() async {
