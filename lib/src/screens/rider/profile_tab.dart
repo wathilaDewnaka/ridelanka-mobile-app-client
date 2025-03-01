@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/rider/settings_tab.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
-  void getUserDetails() async {
+  Future<void> getUserDetails() async {
     bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
     DatabaseReference databaseReference = isPassenger
@@ -63,7 +64,23 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   void initState() {
     super.initState();
-    getUserDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getUserDetails().then((_) {
+        // After tasks are complete, dismiss the dialog
+        print("object");
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
+    });
   }
 
   @override
@@ -127,9 +144,7 @@ class _ProfileTabState extends State<ProfileTab> {
         toolbarHeight: 130,
       ),
       body: isLoading
-          ? Center(
-              child:
-                  CircularProgressIndicator()) // Show loader while fetching data
+          ? Container()
           : ListView(
               children: [
                 const SizedBox(height: 50),
