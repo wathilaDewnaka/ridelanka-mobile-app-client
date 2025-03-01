@@ -7,6 +7,7 @@ import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/auth/mobile_register_screen.dart';
 import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:client/src/screens/auth/splash_screen.dart';
+import 'package:client/src/screens/driver/vehicle_add.dart';
 import 'package:client/src/screens/rider/home_tab.dart';
 import 'package:client/global_variable.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';

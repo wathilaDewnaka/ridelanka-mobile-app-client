@@ -1,21 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const AttendanceApp());
-}
-
-class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AttendancePage(),
-    );
-  }
-}
-
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
 
