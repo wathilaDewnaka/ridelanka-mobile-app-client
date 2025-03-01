@@ -1,3 +1,7 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -14,6 +18,20 @@ class _SettingsPageState extends State<SettingsPage> {
   String? title = "Mr.";
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+
+  void _updateUsername(String fullname) async {
+    bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+    DatabaseReference databaseReference = isPassenger
+        ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
+        : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
+
+    await databaseReference.update({"fullname": fullname});
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Name updated successfully !",
+        type: MessageType.success));
+  }
 
   @override
   Widget build(BuildContext context) {
