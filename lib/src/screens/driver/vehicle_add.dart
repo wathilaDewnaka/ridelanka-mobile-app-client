@@ -8,12 +8,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class VehicleAddScreen extends StatefulWidget {
+class VehicleAddScreen1 extends StatefulWidget {
   @override
   _VehicleAddScreenState createState() => _VehicleAddScreenState();
 }
 
-class _VehicleAddScreenState extends State<VehicleAddScreen> {
+class _VehicleAddScreenState extends State<VehicleAddScreen1> {
   int _currentStep = 0;
 
   final TextEditingController vehicleNoController = TextEditingController();
@@ -36,11 +36,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   bool isStart = false;
 
   @override
-  void dispose() {
-    _startLocationFocusNode.dispose();
-    _endLocationFocusNode.dispose();
-    super.dispose();
-  }
+  
 
   void searchPlace(String placeName, {required bool isStartLocation}) async {
     if (placeName.isEmpty) {
