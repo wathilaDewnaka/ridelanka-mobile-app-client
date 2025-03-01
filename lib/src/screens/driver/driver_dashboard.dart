@@ -146,7 +146,7 @@ class _DriverHomeState extends State<DriverHome> {
                       iconImage:
                           'assets/images/driver_dashboard_images/attendance.png',
                       label: "Rides",
-                      onPressed: () {
+                      onPressed: () 
                         print("Rides pressed");
                         Navigator.push(
                             context,
