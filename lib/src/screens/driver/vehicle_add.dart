@@ -8,12 +8,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class VehicleAddScreen1 extends StatefulWidget {
+class VehicleAddScreen extends StatefulWidget {
   @override
   _VehicleAddScreenState createState() => _VehicleAddScreenState();
 }
 
-class _VehicleAddScreenState extends State<VehicleAddScreen1> {
+class _VehicleAddScreenState extends State<VehicleAddScreen> {
   int _currentStep = 0;
 
   final TextEditingController vehicleNoController = TextEditingController();
@@ -35,8 +35,38 @@ class _VehicleAddScreenState extends State<VehicleAddScreen1> {
   bool _showDropdown = false;
   bool isStart = false;
 
+  // Create FocusNodes for both location fields
+  final FocusNode _startLocationFocusNode = FocusNode();
+  final FocusNode _endLocationFocusNode = FocusNode();
+
   @override
-  
+  void initState() {
+    super.initState();
+
+    // Add listeners for both FocusNodes
+    _startLocationFocusNode.addListener(() {
+      if (!_startLocationFocusNode.hasFocus) {
+        setState(() {
+          _showDropdown = false;
+        });
+      }
+    });
+
+    _endLocationFocusNode.addListener(() {
+      if (!_endLocationFocusNode.hasFocus) {
+        setState(() {
+          _showDropdown = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _startLocationFocusNode.dispose();
+    _endLocationFocusNode.dispose();
+    super.dispose();
+  }
 
   void searchPlace(String placeName, {required bool isStartLocation}) async {
     if (placeName.isEmpty) {
