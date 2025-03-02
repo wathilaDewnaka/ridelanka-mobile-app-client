@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/data_provider/prediction.dart';
@@ -6,7 +8,9 @@ import 'package:client/src/models/address.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class VehicleAddScreen extends StatefulWidget {
@@ -30,15 +34,44 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
 
   String type = "";
   String vehicleType = "";
-  String airCondition = "";
 
   List<Prediction> _filteredPlaces = [];
   bool _showDropdown = false;
   bool isStart = false;
 
-  // Create FocusNodes for both location fields
   final FocusNode _startLocationFocusNode = FocusNode();
   final FocusNode _endLocationFocusNode = FocusNode();
+
+  File? _image;
+  final picker = ImagePicker();
+  final FirebaseStorage storage = FirebaseStorage.instance;
+
+  Future _pickImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future _uploadImage() async {
+    if (_image == null) return;
+
+    try {
+      String fileName = _image!.path + DateTime.now().toString();
+      Reference ref = storage.ref().child('uploads/$fileName');
+      UploadTask uploadTask = ref.putFile(_image!);
+
+      await uploadTask.whenComplete(() => print('File Uploaded'));
+      String downloadURL = await ref.getDownloadURL();
+
+      print(
+          'Download URL: $downloadURL'); // Use this URL to store in your database or display the image
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
+  }
 
   @override
   void initState() {
@@ -105,47 +138,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void addVehicle() async {
-    if (modelController.text.isEmpty || modelController.text.length < 5) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Vehicle name should have at least 5 characters",
-        type: MessageType.error,
-      ));
-      return;
-    } else if (seatingController.text.isEmpty ||
-        int.tryParse(seatingController.text) == null) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Seating capacity should be a valid number",
-        type: MessageType.error,
-      ));
-      return;
-    } else if (priceController.text.isEmpty ||
-        double.tryParse(priceController.text) == null) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Price should be a valid number",
-        type: MessageType.error,
-      ));
-      return;
-    } else if (descriptionController.text.isEmpty ||
-        descriptionController.text.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Route details should have at least 10 characters",
-        type: MessageType.error,
-      ));
-      return;
-    } else if (experienceController.text.isEmpty ||
-        int.tryParse(experienceController.text) == null) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Error",
-        message: "Experience should be a valid number",
-        type: MessageType.error,
-      ));
-      return;
-    }
-
+    await _uploadImage();
     DatabaseReference driverData =
         FirebaseDatabase.instance.ref().child("drivers/${firebaseUser!.uid}");
 
@@ -294,7 +287,15 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       ElevatedButton(
                         onPressed: () {
                           if (_currentStep == 0) {
-                            if (type.isEmpty) {
+                            if (_image == null) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select vehicle image",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (type.isEmpty) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(createMessageBar(
                                 title: "Error",
@@ -302,29 +303,101 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                 type: MessageType.error,
                               ));
                               return;
-                            }
-                          } else if (vehicleType.isEmpty) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(createMessageBar(
-                              title: "Error",
-                              message: "Please select vehicle type",
-                              type: MessageType.error,
-                            ));
-                            return;
-                          } else if (vehicleNoController.text.isEmpty) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(createMessageBar(
-                              title: "Error",
-                              message: "Vehicle number cannot be empty",
-                              type: MessageType.error,
-                            ));
-                            return;
-                          } else if (airCondition.isEmpty) {
-                            if (vehicleNoController.text.isEmpty) {
+                            } else if (vehicleType.isEmpty) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(createMessageBar(
                                 title: "Error",
-                                message: "Please select air conditioned or not",
+                                message: "Please select vehicle type",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (modelController.text.isEmpty ||
+                                modelController.text.length < 5) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message:
+                                    "Vehicle name should have at least 5 characters",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (vehicleNoController.text.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Vehicle number cannot be empty",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (seatingController.text.isEmpty ||
+                                int.tryParse(seatingController.text) == null) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message:
+                                    "Seating capacity should be a valid number",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            }
+                          } else {
+                            if (Provider.of<AppData>(context, listen: false)
+                                    .driverStartAddress
+                                    .latitude ==
+                                0.0) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select start location",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (Provider.of<AppData>(context,
+                                        listen: false)
+                                    .driverEndAddress
+                                    .latitude ==
+                                0.0) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select end location",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (priceController.text.isEmpty ||
+                                double.tryParse(priceController.text) == null) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Price should be a valid number",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (experienceController.text.isEmpty ||
+                                int.tryParse(experienceController.text) ==
+                                    null) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Experience should be a valid number",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (lanuageType.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Lanuage should be selected",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            } else if (descriptionController.text.isEmpty ||
+                                descriptionController.text.length < 10) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message:
+                                    "Route details should have at least 10 characters",
                                 type: MessageType.error,
                               ));
                               return;
@@ -383,36 +456,47 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       _currentStep > 0 ? StepState.complete : StepState.indexed,
                   content: Column(
                     children: [
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[50],
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Card(
-                          elevation: 3,
-                          color: Colors.grey[50],
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(0)),
-                          child: Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("Upload Image",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(height: 8),
-                                ElevatedButton(
-                                    onPressed: () {},
-                                    child: Icon(Icons.add_a_photo))
-                              ],
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1,
                             ),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Card(
+                            elevation: 3,
+                            color: Colors.grey[50],
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0)),
+                            child: _image == null
+                                ? Padding(
+                                    padding: EdgeInsets.all(15.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text("Upload Image",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        SizedBox(height: 8),
+                                        Icon(Icons.add_a_photo)
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    child: Image.file(
+                                      _image!,
+                                    ),
+                                    height: 100,
+                                    width: double.infinity,
+                                  ),
                           ),
                         ),
                       ),
@@ -465,18 +549,10 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      DropdownButtonFormField(
-                        items: ['Yes', 'No']
-                            .map((value) => DropdownMenuItem(
-                                value: value, child: Text(value)))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            airCondition = value!;
-                          });
-                        },
+                      TextField(
+                        controller: seatingController,
                         decoration: InputDecoration(
-                          labelText: 'Air Conditioning Availability',
+                          labelText: 'Seating Capacity',
                           border: OutlineInputBorder(),
                         ),
                       ),
