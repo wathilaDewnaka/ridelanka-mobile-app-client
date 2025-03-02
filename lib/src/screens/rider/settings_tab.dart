@@ -23,6 +23,75 @@ class _SettingsPageState extends State<SettingsPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
+  String capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
+  void _confirmDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Delete Account"),
+          content: const Text(
+              "Are you sure you want to delete your account? This action cannot be undone."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteAccount();
+              },
+              child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      bool isPassenger =
+          await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+
+      DatabaseReference databaseReference = isPassenger
+          ? FirebaseDatabase.instance.ref().child('users/${firebaseUser!.uid}')
+          : FirebaseDatabase.instance
+              .ref()
+              .child('drivers/${firebaseUser!.uid}');
+
+      await databaseReference.remove();
+      final FirebaseAuth _auth = FirebaseAuth.instance;
+      await _auth.signOut();
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove("isPassenger");
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MobileLoginScreen()),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Account Deleted",
+        message: "Your account has been successfully deleted.",
+        type: MessageType.success,
+      ));
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Failed to delete account. Please try again.",
+        type: MessageType.error,
+      ));
+    }
+  }
+
   void _updateUsername(String fullname) async {
     if (fullname.isEmpty || fullname.split(" ").length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -37,18 +106,23 @@ class _SettingsPageState extends State<SettingsPage> {
         ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
         : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
 
-    await databaseReference.update({"fullname": (title! + " " + fullname)});
-
-    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Success",
-        message: "Name updated successfully !",
-        type: MessageType.success));
+    await databaseReference.update({
+      "fullname": (title! +
+          " " +
+          capitalize(fullname.split(" ")[0]) +
+          " " +
+          capitalize(fullname.split(" ")[1]))
+    });
 
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
         (route) => false);
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Name updated successfully !",
+        type: MessageType.success));
   }
 
   void _updateEmail(String email) async {
@@ -69,15 +143,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
     await databaseReference.update({"email": email});
 
-    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-        title: "Success",
-        message: "Email updated successfully !",
-        type: MessageType.success));
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
         (route) => false);
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Email updated successfully !",
+        type: MessageType.success));
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -90,6 +164,12 @@ class _SettingsPageState extends State<SettingsPage> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "User logged out successfully !",
+        type: MessageType.success));
+    return;
   }
 
   @override
@@ -142,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Column(
             children: [
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: iconBackgroundColor,
                   child: Icon(Icons.person_outline, color: iconColor),
                 ),
@@ -220,13 +300,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF0051ED),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
-                          icon: Icon(Icons.save_as,
+                          icon: const Icon(Icons.save_as,
                               color: Colors.white, size: 26),
-                          label: Text(
+                          label: const Text(
                             'Save',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
@@ -237,7 +317,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               const Divider(),
               ListTile(
-                leading: CircleAvatar(
+                leading: const CircleAvatar(
                   backgroundColor: iconBackgroundColor,
                   child: Icon(Icons.email_outlined, color: iconColor),
                 ),
@@ -262,7 +342,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       TextField(
                         controller: emailController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Enter new email',
                           border: OutlineInputBorder(),
                         ),
@@ -278,13 +358,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF0051ED),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
-                          icon: Icon(Icons.save_as,
+                          icon: const Icon(Icons.save_as,
                               color: Colors.white, size: 26),
-                          label: Text(
+                          label: const Text(
                             'Save',
                             style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
@@ -330,13 +410,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       bottom: 30,
                       left: 0,
                       right: 0,
-                      child: const Center(
-                        child: Text(
-                          'Delete Account',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            _confirmDeleteAccount();
+                          },
+                          child: const Text(
+                            'Delete Account',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
