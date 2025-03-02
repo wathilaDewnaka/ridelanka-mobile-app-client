@@ -14,6 +14,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class VehicleAddScreen extends StatefulWidget {
+  VehicleAddScreen({super.key, required this.isAdd});
+
+  final bool isAdd;
+
   @override
   _VehicleAddScreenState createState() => _VehicleAddScreenState();
 }
@@ -34,6 +38,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
 
   String type = "";
   String vehicleType = "";
+  String imageUrl = "";
 
   List<Prediction> _filteredPlaces = [];
   bool _showDropdown = false;
@@ -92,6 +97,10 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         });
       }
     });
+
+    if (!widget.isAdd) {
+      loadDetailsFromDB();
+    }
   }
 
   @override
@@ -99,6 +108,37 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     _startLocationFocusNode.dispose();
     _endLocationFocusNode.dispose();
     super.dispose();
+  }
+
+  void loadDetailsFromDB() async {
+    DatabaseReference vehDetails =
+        FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
+
+    try {
+      DatabaseEvent event = await vehDetails.once();
+      if (event.snapshot.value != null) {
+        Map<String, dynamic> details =
+            Map<String, dynamic>.from(event.snapshot.value as Map);
+        vehicleNoController.text = details["vehicleNo"];
+        modelController.text = details['vehicleName'];
+        seatingController.text = details['seatCapacity'];
+        priceController.text = details['vehiclePrice'];
+        descriptionController.text = details['routeDetails'];
+        experienceController.text = details['experience'];
+
+        startLocationController.text = details['startPlaceName'];
+        endLocationController.text = details['endPlaceName'];
+
+        setState(() {
+          vehicleType = details['vehicleType'];
+          type = details['type'];
+          lanuageType = details['lanuage'];
+          imageUrl = details['vehicleImage'];
+        });
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
 
   void searchPlace(String placeName, {required bool isStartLocation}) async {
@@ -158,6 +198,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       "vehicleImage": img,
       "vehicleType": vehicleType,
       "lanuage": lanuageType,
+      "startPlaceName": startLocationController.text, 
+      "endPlaceName": endLocationController.text,
       "location": {
         "startLat": Provider.of<AppData>(context, listen: false)
             .driverStartAddress
@@ -178,7 +220,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       await driverData.update(vehicleData); // Save the vehicle data
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
-        message: "Vehicle added successfully",
+        message: widget.isAdd ? "Vehicle added successfully" : "Vehicle edited successfully",
         type: MessageType.success,
       ));
 
@@ -186,7 +228,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
-        message: "Failed to add vehicle",
+        message: widget.isAdd ? "Failed to add vehicle" : "Failed to edit vehicle",
         type: MessageType.error,
       ));
     }
@@ -254,11 +296,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
               ),
               elevation: 0,
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 17.0),
               child: Text(
-                "Add Vehicle",
-                style: TextStyle(
+                widget.isAdd ? "Add Vehicle" : "Edit Vehicle",
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -309,7 +351,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       ElevatedButton(
                         onPressed: () {
                           if (_currentStep == 0) {
-                            if (_image == null) {
+                            if (_image == null && imageUrl.isEmpty) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(createMessageBar(
                                 title: "Error",
@@ -458,7 +500,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           ),
                         ),
                         child: Text(
-                          _currentStep < 1 ? "Next" : "Add Vehicle",
+                          _currentStep < 1
+                              ? "Next"
+                              : widget.isAdd
+                                  ? "Add Vehicle"
+                                  : "Edit Vehicle",
                           style: const TextStyle(
                             color: Colors.white,
                           ),
@@ -516,7 +562,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             color: Colors.grey[50],
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0)),
-                            child: _image == null
+                            child: _image == null && imageUrl.isEmpty
                                 ? const Padding(
                                     padding: EdgeInsets.all(15.0),
                                     child: Column(
@@ -534,9 +580,11 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                     ),
                                   )
                                 : Container(
-                                    child: Image.file(
-                                      _image!,
-                                    ),
+                                    child: imageUrl.isEmpty
+                                        ? Image.file(
+                                            _image!,
+                                          )
+                                        : Image.network(imageUrl),
                                     height: 100,
                                     width: double.infinity,
                                   ),
@@ -554,6 +602,10 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             type = value!.toLowerCase();
                           });
                         },
+                        value: type.isNotEmpty
+                            ? type.substring(0, 1).toUpperCase() +
+                                type.substring(1).toLowerCase()
+                            : null,
                         decoration: const InputDecoration(
                           labelText: 'Service Type',
                           border: OutlineInputBorder(),
@@ -565,6 +617,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             .map((value) => DropdownMenuItem(
                                 value: value, child: Text(value)))
                             .toList(),
+                        value: vehicleType.isNotEmpty ? vehicleType : null,
                         onChanged: (value) {
                           setState(() {
                             vehicleType = value!;
@@ -707,6 +760,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                               labelText: 'Preferred Language',
                               border: OutlineInputBorder(),
                             ),
+                            value: lanuageType.isNotEmpty ? lanuageType : null,
                           ),
                           const SizedBox(height: 22),
 
