@@ -102,12 +102,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void searchPlace(String placeName, {required bool isStartLocation}) async {
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) =>
-            ProgressDialog(status: "Please wait..."));
-
     if (placeName.isEmpty) {
       setState(() {
         _filteredPlaces.clear();
@@ -143,6 +137,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void addVehicle() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: "Please wait..."));
+
     String img = await _uploadImage();
     DatabaseReference driverData =
         FirebaseDatabase.instance.ref().child("drivers/${firebaseUser!.uid}");
@@ -175,7 +175,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     };
 
     try {
-      await driverData.set(vehicleData); // Save the vehicle data
+      await driverData.update(vehicleData); // Save the vehicle data
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
         message: "Vehicle added successfully",
@@ -192,10 +192,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     }
 
     Navigator.pop(context);
-    
   }
 
   void getPlacedDetails(String placeId, bool isStartLocation) async {
+    setState(() {
+      _filteredPlaces.clear();
+    });
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -206,6 +208,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey';
 
     var response = await RequestHelper.getRequest(url);
+
+    Navigator.pop(context);
 
     if (response == 'failed') {
       return;
@@ -229,8 +233,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       setState(() {
         _showDropdown = false;
       });
-
-      Navigator.pop(context);
     }
   }
 
