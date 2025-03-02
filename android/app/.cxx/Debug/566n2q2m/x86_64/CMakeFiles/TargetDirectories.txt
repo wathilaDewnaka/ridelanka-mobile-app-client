@@ -1,0 +1,2 @@
+C:/Users/Senanga Kapuge/Desktop/RideLankaApp/Merged/ridelanka-mobile-app-client/android/app/.cxx/Debug/566n2q2m/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Senanga Kapuge/Desktop/RideLankaApp/Merged/ridelanka-mobile-app-client/android/app/.cxx/Debug/566n2q2m/x86_64/CMakeFiles/rebuild_cache.dir

@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/driver/manage_trips.dart';
 import 'package:client/src/screens/driver/attendance_dashboard.dart';
+import 'package:client/src/screens/driver/vehicle_add.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
 import 'package:client/src/screens/rider/profile_tab.dart';
 import 'package:flutter/material.dart';
@@ -170,10 +171,10 @@ class _DriverHomeState extends State<DriverHome> {
                           'assets/images/driver_dashboard_images/van.png',
                       label: hasVehicle ? "Add" : "View / Edit",
                       onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) => VehicleAddScreen()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => VehicleAddScreen()));
                       },
                     ),
                     MenuButton(
