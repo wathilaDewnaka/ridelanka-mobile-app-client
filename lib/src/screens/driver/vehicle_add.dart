@@ -66,8 +66,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       await uploadTask.whenComplete(() => print('File Uploaded'));
       String downloadURL = await ref.getDownloadURL();
 
-      print(
-          'Download URL: $downloadURL'); // Use this URL to store in your database or display the image
+      return downloadURL;
     } catch (e) {
       print("Error uploading image: $e");
     }
@@ -103,6 +102,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void searchPlace(String placeName, {required bool isStartLocation}) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: "Please wait..."));
+
     if (placeName.isEmpty) {
       setState(() {
         _filteredPlaces.clear();
@@ -138,7 +143,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void addVehicle() async {
-    await _uploadImage();
+    String img = await _uploadImage();
     DatabaseReference driverData =
         FirebaseDatabase.instance.ref().child("drivers/${firebaseUser!.uid}");
 
@@ -150,12 +155,22 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       "experience": experienceController.text,
       "routeDetails": descriptionController.text,
       "type": type,
+      "vehicleImage": img,
       "vehicleType": vehicleType,
+      "lanuage": lanuageType,
       "location": {
-        "startLat": Provider.of<AppData>(context).driverStartAddress.latitude,
-        "startLng": Provider.of<AppData>(context).driverStartAddress.longituge,
-        "endLat": Provider.of<AppData>(context).driverEndAddress.latitude,
-        "endLng": Provider.of<AppData>(context).driverEndAddress.longituge
+        "startLat": Provider.of<AppData>(context, listen: false)
+            .driverStartAddress
+            .latitude,
+        "startLng": Provider.of<AppData>(context, listen: false)
+            .driverStartAddress
+            .longituge,
+        "endLat": Provider.of<AppData>(context, listen: false)
+            .driverEndAddress
+            .latitude,
+        "endLng": Provider.of<AppData>(context, listen: false)
+            .driverEndAddress
+            .longituge
       }
     };
 
@@ -169,10 +184,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
-        message: "Failed to add vehicle: $error",
+        message: "Failed to add vehicle",
         type: MessageType.error,
       ));
     }
+
+    Navigator.pop(context);
   }
 
   void getPlacedDetails(String placeId, bool isStartLocation) async {
@@ -364,6 +381,26 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                 type: MessageType.error,
                               ));
                               return;
+                            } else if (Provider.of<AppData>(context,
+                                            listen: false)
+                                        .driverEndAddress
+                                        .latitude ==
+                                    Provider.of<AppData>(context, listen: false)
+                                        .driverStartAddress
+                                        .latitude &&
+                                Provider.of<AppData>(context, listen: false)
+                                        .driverEndAddress
+                                        .longituge ==
+                                    Provider.of<AppData>(context, listen: false)
+                                        .driverStartAddress
+                                        .longituge) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select correct locations",
+                                type: MessageType.error,
+                              ));
+                              return;
                             } else if (priceController.text.isEmpty ||
                                 double.tryParse(priceController.text) == null) {
                               ScaffoldMessenger.of(context)
@@ -459,6 +496,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       GestureDetector(
                         onTap: _pickImage,
                         child: Container(
+                          height: 100,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.grey[50],
