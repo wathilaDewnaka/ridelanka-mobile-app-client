@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:client/global_variable.dart';
 import 'package:client/src/models/driver.dart';
+import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/widgets/confirm_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -90,6 +91,23 @@ class _RidesTabState extends State<RidesTab> {
     }
   }
 
+  void initalizeTheAttendance() async {
+    DatabaseReference bookingsRef = FirebaseDatabase.instance
+        .ref()
+        .child("drivers/${firebaseUser!.uid}/bookings");
+
+    bookingsRef.once().then((snapshot) {
+      if (snapshot.snapshot.value != null) {
+        Map<dynamic, dynamic> bookings =
+            snapshot.snapshot.value as Map<dynamic, dynamic>;
+
+        bookings.forEach((uid, bookingData) {
+          bookingsRef.child(uid).update({"marked": "not_marked"});
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -132,7 +150,9 @@ class _RidesTabState extends State<RidesTab> {
       body: Stack(
         children: <Widget>[
           GoogleMap(
-            padding: isAvailable ? EdgeInsets.only(top: 250) : EdgeInsets.only(top: 135),
+            padding: isAvailable
+                ? EdgeInsets.only(top: 250)
+                : EdgeInsets.only(top: 135),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             mapType: MapType.normal,
@@ -169,10 +189,11 @@ class _RidesTabState extends State<RidesTab> {
                               : 'You will stop being online',
                           onPressed: () {
                             if (!isAvailable) {
+                              initalizeTheAttendance();
                               startTrip();
                               getLocationUpdate();
                               Navigator.pop(context);
-      
+
                               setState(() {
                                 availabilityColor = Color(0xFF40cf89);
                                 availabilityTitle = 'END TRIP';
@@ -181,7 +202,7 @@ class _RidesTabState extends State<RidesTab> {
                             } else {
                               endTrip();
                               Navigator.pop(context);
-      
+
                               setState(() {
                                 availabilityColor = Color(0xFFd16608);
                                 availabilityTitle = 'START TRIP';
@@ -208,8 +229,7 @@ class _RidesTabState extends State<RidesTab> {
               ],
             ),
           ),
-      
-          if (isAvailable) 
+          if (isAvailable)
             Positioned(
               top: 120,
               left: 0,
@@ -221,7 +241,10 @@ class _RidesTabState extends State<RidesTab> {
                     width: 230,
                     child: ElevatedButton(
                       onPressed: () {
-      
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AttendancePage()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: availabilityColor,
@@ -245,11 +268,6 @@ class _RidesTabState extends State<RidesTab> {
   }
 
   void startTrip() {
-    print("this is user");
-    print(firebaseUser);
-    print("this is position");
-    print(currentPosition);
-
     Geofire.initialize('driversAvailable');
     Geofire.setLocation(firebaseUser!.uid, currentPosition!.latitude,
         currentPosition!.longitude);
@@ -270,8 +288,6 @@ class _RidesTabState extends State<RidesTab> {
   }
 
   void getLocationUpdate() {
-    //StreamSubscription<Position> homeTabPositionStream;
-
     homeTabPositionStream = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: LocationAccuracy.bestForNavigation,
@@ -280,7 +296,6 @@ class _RidesTabState extends State<RidesTab> {
     ).listen((Position position) {
       // Handle location updates
       if (position != null) {
-        //print('Updated Position: ${position.latitude}, ${position.longitude}');
         setState(() {
           currentPosition = position;
 

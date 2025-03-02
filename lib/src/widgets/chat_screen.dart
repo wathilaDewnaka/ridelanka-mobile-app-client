@@ -1,4 +1,3 @@
-import 'package:client/global_variable.dart';
 import 'package:client/src/methods/encrypt_methods.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +9,13 @@ class ChatScreen extends StatefulWidget {
       required this.recieverName,
       required this.recieverUid,
       required this.recieverTel,
-      required this.isMobile});
+      required this.isMobile,
+      required this.senderId});
 
   final String recieverName;
   final String recieverUid;
   final String recieverTel;
+  final String senderId;
   final bool isMobile;
 
   @override
@@ -34,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     receiverId = widget.recieverUid;
     receiverName = widget.recieverName;
-    senderId = firebaseUser!.uid;
+    senderId = widget.senderId;
   }
 
   void _makePhoneCall() async {
@@ -55,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final messageData = {
         'text': EncryptMethods.encryptText(_messageController.text),
         'sender': EncryptMethods.encryptText(senderId),
-        'receiver': EncryptMethods.encryptText(receiverId),
+        'receiver': EncryptMethods.encryptText(senderId.split(" ")[0] == "drivers" ? "users " : "drivers " + receiverId),
         'timestamp': ServerValue.timestamp,
       };
 
@@ -122,9 +123,14 @@ class _ChatScreenState extends State<ChatScreen> {
                               entry.value['receiver']),
                           'timestamp': entry.value['timestamp'] ?? 0,
                         })
-                    .where((message) => (message['sender'] == senderId &&
-                        message['receiver'] == receiverId))
                     .toList();
+
+                messages = messages.where((message) {
+                  return (message['sender'] == senderId &&
+                          message['receiver'] == receiverId) ||
+                      (message['sender'] == receiverId &&
+                          message['receiver'] == senderId);
+                }).toList();
 
                 messages
                     .sort((a, b) => b['timestamp'].compareTo(a['timestamp']));

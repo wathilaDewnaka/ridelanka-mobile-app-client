@@ -16,9 +16,9 @@ class AttendanceMark {
       Map<dynamic, dynamic> json, String? trpId, String name) {
     return AttendanceMark(
       id: trpId ?? "",
-      userId: json['userId'],
+      userId: json['uId'],
       name: name,
-      timestamp: json['timestamp'],
+      timestamp: json['timestamp'].toString(),
       marked: json['marked'],
     );
   }

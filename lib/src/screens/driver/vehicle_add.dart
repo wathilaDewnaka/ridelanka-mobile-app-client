@@ -198,7 +198,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       "vehicleImage": img,
       "vehicleType": vehicleType,
       "lanuage": lanuageType,
-      "startPlaceName": startLocationController.text, 
+      "startPlaceName": startLocationController.text,
       "endPlaceName": endLocationController.text,
       "location": {
         "startLat": Provider.of<AppData>(context, listen: false)
@@ -220,7 +220,9 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       await driverData.update(vehicleData); // Save the vehicle data
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
-        message: widget.isAdd ? "Vehicle added successfully" : "Vehicle edited successfully",
+        message: widget.isAdd
+            ? "Vehicle added successfully"
+            : "Vehicle edited successfully",
         type: MessageType.success,
       ));
 
@@ -228,7 +230,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
-        message: widget.isAdd ? "Failed to add vehicle" : "Failed to edit vehicle",
+        message:
+            widget.isAdd ? "Failed to add vehicle" : "Failed to edit vehicle",
         type: MessageType.error,
       ));
     }
@@ -292,7 +295,9 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
               leading: IconButton(
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
               elevation: 0,
             ),
@@ -514,7 +519,14 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                         height: 10,
                       ),
                       ElevatedButton(
-                        onPressed: details.onStepCancel,
+                        onPressed: () {
+                          if (_currentStep == 0) {
+                            Navigator.pop(context);
+                          } else {
+                            details.onStepCancel!();
+                          }
+                        
+                        },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color(0xFF0051ED),

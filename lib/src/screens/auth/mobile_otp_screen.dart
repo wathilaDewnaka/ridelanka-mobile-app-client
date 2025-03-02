@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
@@ -131,6 +133,11 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
       } else {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('isPassenger', "false");
+
+        isVehicleExist =
+            await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
+        driverName = await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
+
         Navigator.pushNamedAndRemoveUntil(
           context,
           DriverHome.id,
