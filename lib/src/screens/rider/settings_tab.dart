@@ -1,8 +1,12 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/screens/auth/mobile_login_screen.dart';
+import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -20,17 +24,31 @@ class _SettingsPageState extends State<SettingsPage> {
   TextEditingController emailController = TextEditingController();
 
   void _updateUsername(String fullname) async {
+    if (fullname.isEmpty || fullname.split(" ").length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "Invalid username !",
+          type: MessageType.error));
+      return;
+    }
+
     bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
     DatabaseReference databaseReference = isPassenger
         ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
         : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
 
-    await databaseReference.update({"fullname": fullname});
+    await databaseReference.update({"fullname": (title! + " " + fullname)});
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
         message: "Name updated successfully !",
         type: MessageType.success));
+
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
+        (route) => false);
   }
 
   void _updateEmail(String email) async {
@@ -55,6 +73,23 @@ class _SettingsPageState extends State<SettingsPage> {
         title: "Success",
         message: "Email updated successfully !",
         type: MessageType.success));
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
+        (route) => false);
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    await _auth.signOut();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove("isPassenger");
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => MobileLoginScreen()),
+    );
   }
 
   @override
@@ -180,11 +215,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         height: 55, // Fixed height
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SettingsPage()),
-                            );
+                            _updateUsername(nameController.text.trim());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF0051ED),
@@ -242,11 +273,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         height: 55, // Fixed height
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SettingsPage()),
-                            );
+                            _updateEmail(emailController.text.trim());
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF0051ED),
