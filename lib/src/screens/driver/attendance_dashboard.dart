@@ -1,20 +1,9 @@
+import 'package:client/global_variable.dart';
+import 'package:client/src/models/attendance_mark.dart';
+import 'package:client/src/widgets/chat_screen.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const AttendanceApp());
-}
-
-class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AttendancePage(),
-    );
-  }
-}
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -24,56 +13,289 @@ class AttendancePage extends StatefulWidget {
 }
 
 class _AttendancePageState extends State<AttendancePage> {
-  final List<Map<String, dynamic>> _students = [
-    {'name': 'Blake Johnson', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Denise Scott', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Aaron Brown', 'rollNo': 'Nalanda College', 'status': 'A'},
-    {'name': 'Oliver Wallace', 'rollNo': 'Royal College', 'status': 'A'},
-  ];
+  List<AttendanceMark> _students = [];
+  bool loading = true;
 
-  void _toggleAttendance(int index, String status) {
-    setState(() {
-      _students[index]['status'] = status;
+  Future<void> getAttendance() async {
+    DatabaseReference attendance = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${firebaseUser!.uid}/bookings');
+
+    try {
+      DataSnapshot mainAttendanceSnap = await attendance.get();
+
+      print(mainAttendanceSnap.exists);
+
+      if (mainAttendanceSnap.exists) {
+        List<AttendanceMark> newNotifications = [];
+        print(mainAttendanceSnap.children);
+
+        for (var child in mainAttendanceSnap.children) {
+          if (child.value is Map<dynamic, dynamic>) {
+            Map<dynamic, dynamic> notificationData =
+                child.value as Map<dynamic, dynamic>;
+            print("object333");
+
+            String? uid = notificationData['uId'] as String?;
+
+            DatabaseReference driverRef =
+                FirebaseDatabase.instance.ref().child('users/$uid');
+            print(notificationData);
+            DataSnapshot snapshot = await driverRef.get();
+
+            Map<dynamic, dynamic> userData =
+                snapshot.value as Map<dynamic, dynamic>;
+
+            AttendanceMark notificationItem = AttendanceMark.fromJson(
+                notificationData, child.key, userData["fullname"]);
+            newNotifications.add(notificationItem);
+          }
+        }
+
+        if (mounted) {
+          setState(() {
+            _students = newNotifications.toList();
+          });
+        }
+      } else {
+        print("No notifications found in the main path.");
+      }
+    } catch (e) {
+      print("Error fetching attendance: $e");
+    }
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getAttendance().then((_) {
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
     });
+  }
+
+  // Reset att
+  //void initalizeTheAttendance() async {
+  //   DatabaseReference bookingsRef = FirebaseDatabase.instance
+  //       .ref()
+  //       .child("drivers/${firebaseUser!.uid}/bookings");
+
+  //   bookingsRef.once().then((snapshot) {
+  //     if (snapshot.snapshot.value != null) {
+  //       Map<dynamic, dynamic> bookings =
+  //           snapshot.snapshot.value as Map<dynamic, dynamic>;
+
+  //       bookings.forEach((uid, bookingData) {
+  //         bookingsRef.child(uid).update({"marked": "not_marked"});
+  //       });
+  //     }
+  //   });
+  // }
+
+  void _toggleAttendance(int index, String status) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
+    AttendanceMark attendanceMark = _students[index];
+    DatabaseReference att = FirebaseDatabase.instance
+        .ref()
+        .child("drivers/${firebaseUser!.uid}/bookings/${attendanceMark.id}");
+
+    DatabaseReference noti = FirebaseDatabase.instance
+        .ref()
+        .child("users/${attendanceMark.userId}/notifications");
+
+    await att.update({"marked": status});
+
+    Map<String, String> userNotifications = {
+      "title": "User has been picked up",
+      "description": "User has been picked up by the driver",
+      "icon": "tick",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
+    };
+
+    await noti.push().set(userNotifications);
+    getAttendance();
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Attendance'),
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: const [
-              Text('Student Name'),
-              Spacer(),
-              Text('Present / Absent'),
-            ],
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _students.length,
-              itemBuilder: (context, index) {
-                return Row(
-                  children: [
-                    Text(_students[index]['name']),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: () => _toggleAttendance(index, 'P'),
-                      child: const Text('P'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _toggleAttendance(index, 'A'),
-                      child: const Text('A'),
-                    ),
-                  ],
-                );
-              },
+      backgroundColor: Color(0xFF0051ED),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () async {},
+              ),
+              elevation: 0,
             ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Attendance",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
           ),
-        ],
+        ),
+        child: Column(
+          children: [
+            // Table headers
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              color: const Color.fromARGB(255, 255, 255, 255),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Student Name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Spacer(), // Pushes the next text to the right
+                  Text(
+                    'Present / Absent',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.right, // Ensures text is right-aligned
+                  ),
+                ],
+              ),
+            ),
+
+            // Student list
+            Expanded(
+              child: ListView.builder(
+                itemCount: _students.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade300)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.person, color: Colors.blue),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                              recieverName:
+                                                  _students[index].name,
+                                              recieverUid:
+                                                  _students[index].userId,
+                                              recieverTel:
+                                                  _students[index].name,
+                                              isMobile: true)));
+                                },
+                                child: Text(
+                                  _students[index].name,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Text(
+                                _students[index].name,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _students[index].marked == 'P'
+                                    ? Colors.green
+                                    : Colors.grey.shade300,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                              ),
+                              onPressed: () => _toggleAttendance(index, 'P'),
+                              child: const Text('P',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                            const SizedBox(width: 5),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _students[index].marked == 'A'
+                                    ? Colors.red
+                                    : Colors.grey.shade300,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 15),
+                              ),
+                              onPressed: () => _toggleAttendance(index, 'A'),
+                              child: const Text('A',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
