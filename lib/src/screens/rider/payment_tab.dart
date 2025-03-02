@@ -16,6 +16,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String cvvCode = '';
   bool isCvvFocused = false;
   bool saveCard = false;
+  bool isProcessing = false;
+
+  void showPaymentResult(bool success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success ? "Payment Successful!" : "Payment Failed!"),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +77,42 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Text("Save card for future payments"),
               ],
             ),
+            SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    setState(() {
+                      isProcessing = true;
+                    });
+
+                    // Simulate payment processing
+                    await Future.delayed(Duration(seconds: 2));
+
+                    setState(() {
+                      isProcessing = false;
+                    });
+
+                    showPaymentResult(true); // or false for failure
+                  } else {
+                    print("Invalid Card Details");
+                  }
+                },
+                child: isProcessing
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "Pay \$97.42",
+                        style: TextStyle(
+                          color: Colors.blue, // Change this to any color you want
+                          fontSize: 18, // Optional: Adjust font size
+                          fontWeight: FontWeight.bold, // Optional: Add bold font weight
+                        ),
+                      ),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                ),
+              ),
+            ],
           ],
         ),
       ),
