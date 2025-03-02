@@ -8,12 +8,12 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class VehicleAddScreen1 extends StatefulWidget {
+class VehicleAddScreen extends StatefulWidget {
   @override
   _VehicleAddScreenState createState() => _VehicleAddScreenState();
 }
 
-class _VehicleAddScreenState extends State<VehicleAddScreen1> {
+class _VehicleAddScreenState extends State<VehicleAddScreen> {
   int _currentStep = 0;
 
   final TextEditingController vehicleNoController = TextEditingController();
@@ -145,13 +145,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen1> {
           placeName: response['result']['name'],
           placeFormattedAddress: '');
 
-      if (isStartLocation) {
-        Provider.of<AppData>(context, listen: false)
-            .updateStartAddress(thisPlace);
-      } else {
-        Provider.of<AppData>(context, listen: false)
-            .updateEndAddress(thisPlace);
-      }
       setState(() {
         _showDropdown = false;
       });
