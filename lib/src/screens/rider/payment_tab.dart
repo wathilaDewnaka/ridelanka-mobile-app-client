@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 
-
 class PaymentScreen extends StatefulWidget {
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
@@ -30,9 +29,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Card Payment")),
-      body: SingleChildScrollView(
-        child: Column(
+        appBar: AppBar(title: Text("Card Payment")),
+        body: SingleChildScrollView(
+            child: Column(
           children: [
             // Credit Card UI Preview
             CreditCardWidget(
@@ -78,44 +77,42 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ],
             ),
             SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  if (formKey.currentState!.validate()) {
-                    setState(() {
-                      isProcessing = true;
-                    });
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  setState(() {
+                    isProcessing = true;
+                  });
 
-                    // Simulate payment processing
-                    await Future.delayed(Duration(seconds: 2));
+                  // Simulate payment processing
+                  await Future.delayed(Duration(seconds: 2));
 
-                    setState(() {
-                      isProcessing = false;
-                    });
+                  setState(() {
+                    isProcessing = false;
+                  });
 
-                    showPaymentResult(true); // or false for failure
-                  } else {
-                    print("Invalid Card Details");
-                  }
-                },
-                child: isProcessing
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        "Pay \$97.42",
-                        style: TextStyle(
-                          color: Colors.blue, // Change this to any color you want
-                          fontSize: 18, // Optional: Adjust font size
-                          fontWeight: FontWeight.bold, // Optional: Add bold font weight
-                        ),
+                  showPaymentResult(true); // or false for failure
+                } else {
+                  print("Invalid Card Details");
+                }
+              },
+              child: isProcessing
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text(
+                      "Pay \$97.42",
+                      style: TextStyle(
+                        color: Colors.blue, // Change this to any color you want
+                        fontSize: 18, // Optional: Adjust font size
+                        fontWeight:
+                            FontWeight.bold, // Optional: Add bold font weight
                       ),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: TextStyle(fontSize: 18),
-                ),
+                    ),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                textStyle: TextStyle(fontSize: 18),
               ),
-            ],
+            ),
           ],
-        ),
-      ),
-    );
+        )));
   }
 }

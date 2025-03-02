@@ -6,7 +6,6 @@ import 'package:client/src/widgets/confirm_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -99,86 +98,149 @@ class _RidesTabState extends State<RidesTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        GoogleMap(
-          padding: EdgeInsets.only(top: 135),
-          myLocationEnabled: true,
-          myLocationButtonEnabled: true,
-          mapType: MapType.normal,
-          initialCameraPosition: googlePlex,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-            mapController = controller;
-            getCurrentPosition();
-          },
-        ),
-        Container(
-          height: 135,
-          width: double.infinity,
-          color: Color(0xFF0e1526),
-        ),
-        Positioned(
-          top: 60,
-          left: 0,
-          right: 0,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 230,
-                child: ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      isDismissible: false,
-                      context: context,
-                      builder: (BuildContext context) => Confirmsheet(
-                        title: (!isAvailable) ? 'START TRIP' : 'END TRIP',
-                        subtitle: (!isAvailable)
-                            ? 'You are about to became available be online'
-                            : 'You will stop being online',
-                        onPressed: () {
-                          if (!isAvailable) {
-                            startTrip();
-                            getLocationUpdate();
-                            Navigator.pop(context);
-
-                            setState(() {
-                              availabilityColor = Color(0xFF40cf89);
-                              availabilityTitle = 'END TRIP';
-                              isAvailable = true;
-                            });
-                          } else {
-                            endTrip();
-                            Navigator.pop(context);
-
-                            setState(() {
-                              availabilityColor = Color(0xFFd16608);
-                              availabilityTitle = 'START TRIP';
-                              isAvailable = false;
-                            });
-                          }
-                        },
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: availabilityColor,
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: Text(
-                    (!isAvailable) ? 'START TRIP' : 'END TRIP',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              elevation: 0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Manage Trip",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          GoogleMap(
+            padding: isAvailable ? EdgeInsets.only(top: 250) : EdgeInsets.only(top: 135),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            mapType: MapType.normal,
+            initialCameraPosition: googlePlex,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+              mapController = controller;
+              getCurrentPosition();
+            },
           ),
-        )
-      ],
+          Container(
+            height: isAvailable ? 235 : 135,
+            width: double.infinity,
+            color: Color(0xFF0e1526),
+          ),
+          Positioned(
+            top: 35,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 230,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        isDismissible: false,
+                        context: context,
+                        builder: (BuildContext context) => Confirmsheet(
+                          title: (!isAvailable) ? 'START TRIP' : 'END TRIP',
+                          subtitle: (!isAvailable)
+                              ? 'You are about to became available be online'
+                              : 'You will stop being online',
+                          onPressed: () {
+                            if (!isAvailable) {
+                              startTrip();
+                              getLocationUpdate();
+                              Navigator.pop(context);
+      
+                              setState(() {
+                                availabilityColor = Color(0xFF40cf89);
+                                availabilityTitle = 'END TRIP';
+                                isAvailable = true;
+                              });
+                            } else {
+                              endTrip();
+                              Navigator.pop(context);
+      
+                              setState(() {
+                                availabilityColor = Color(0xFFd16608);
+                                availabilityTitle = 'START TRIP';
+                                isAvailable = false;
+                              });
+                            }
+                          },
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: availabilityColor,
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: Text(
+                      (!isAvailable) ? 'START TRIP' : 'END TRIP',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      
+          if (isAvailable) 
+            Positioned(
+              top: 120,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 230,
+                    child: ElevatedButton(
+                      onPressed: () {
+      
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: availabilityColor,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        "Mark Attendance",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+        ],
+      ),
     );
   }
 

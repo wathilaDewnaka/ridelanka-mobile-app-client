@@ -1,4 +1,3 @@
-import 'package:client/src/screens/rider/settings_tab.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,23 +6,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
 
+  @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
   Future<void> _logout(BuildContext context) async {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
     await _auth.signOut();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("isPassenger"); // Removes the value associated with the given key
+    await prefs.remove(
+        "isPassenger"); // Removes the value associated with the given key
     // Navigate to the login page or perform other actions after logout
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
   }
 
-  @override
-  State<ProfileTab> createState() => _ProfileTabState();
-}
-
-class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -258,10 +258,10 @@ class _ProfileTabState extends State<ProfileTab> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsTab()),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => SettingsTab()),
+                      // );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF0051ED), // Button color
@@ -280,35 +280,41 @@ class _ProfileTabState extends State<ProfileTab> {
                 ],
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0051ED),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.logout,
-                          size: 26,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Log Out',
-                          style: TextStyle(
+              GestureDetector(
+                onTap: () {
+                  _logout(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0051ED),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.logout,
+                            size: 26,
                             color: Colors.white,
-                            fontSize: 16,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 8),
+                          Text(
+                            'Log Out',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               )
             ],
           )

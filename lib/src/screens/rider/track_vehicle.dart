@@ -32,7 +32,7 @@ class _TrackVehicleState extends State<TrackVehicle> {
 
   StreamSubscription<DatabaseEvent>? _driverLocationSubscription;
 
-  String driverRideStatus = "Driver is Comming";
+  String driverRideStatus = "Driver not started trip yet";
 
   DirectionDetails? tripDirectionDetails;
 
@@ -102,115 +102,149 @@ class _TrackVehicleState extends State<TrackVehicle> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        GoogleMap(
-          padding: EdgeInsets.only(
-            top: 10,
-            bottom: 210,
-          ),
-          myLocationEnabled: true,
-          myLocationButtonEnabled: true,
-          mapType: MapType.normal,
-          markers: _Markers,
-          polylines: _polylines,
-          circles: _Circles,
-          initialCameraPosition: googlePlex,
-          onMapCreated: (GoogleMapController controller) async {
-            _controller.complete(controller);
-            mapController = controller;
-            await getCurrentPosition();
-            listenToDriverLocation(driverId);
-          },
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 15.0,
-                  spreadRadius: 0.5,
-                  offset: Offset(0.7, 0.7),
-                ),
-              ],
+              elevation: 0,
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Status of the ride
-                  Center(
-                    child: Text(
-                      driverRideStatus,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis, // Add overflow handling
-                      maxLines: 1, // Force single line
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Track Trip",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          GoogleMap(
+            padding: EdgeInsets.only(
+              top: 10,
+              bottom: 210,
+            ),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            mapType: MapType.normal,
+            markers: _Markers,
+            polylines: _polylines,
+            circles: _Circles,
+            initialCameraPosition: googlePlex,
+            onMapCreated: (GoogleMapController controller) async {
+              _controller.complete(controller);
+              mapController = controller;
+              await getCurrentPosition();
+              listenToDriverLocation(firebaseUser!.uid);
+            },
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 15.0,
+                    spreadRadius: 0.5,
+                    offset: Offset(0.7, 0.7),
                   ),
-
-                  const SizedBox(height: 20.0),
-
-                  BrandDivier(),
-
-                  const SizedBox(height: 20.0),
-
-                  // Modified car model text - Left-aligned
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _vehicleDescription ?? 'n/a',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ),
-
-                  // Modified driver name text - Left-aligned
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _driverName ?? 'n/a',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20.0),
-
-                  BrandDivier(),
-
-                  const SizedBox(height: 20.0),
                 ],
               ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Status of the ride
+                    Center(
+                      child: Text(
+                        driverRideStatus,
+                        textAlign: TextAlign.center,
+                        overflow:
+                            TextOverflow.ellipsis, // Add overflow handling
+                        maxLines: 1, // Force single line
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20.0),
+
+                    BrandDivier(),
+
+                    const SizedBox(height: 20.0),
+
+                    // Modified car model text - Left-aligned
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _vehicleDescription ?? 'n/a',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+
+                    // Modified driver name text - Left-aligned
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        _driverName ?? 'n/a',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20.0),
+
+                    BrandDivier(),
+
+                    const SizedBox(height: 20.0),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -404,8 +438,6 @@ class _TrackVehicleState extends State<TrackVehicle> {
     }
   }
 
-  
-
   void updateArrivalTimeToUserPickupLocation(
       driverCurrentPositionLatLng) async {
     LatLng userPickupPosition =
@@ -433,8 +465,10 @@ class _TrackVehicleState extends State<TrackVehicle> {
   }
 
   Future<void> getDriverDetails() async {
-    DatabaseReference ref =
-        FirebaseDatabase.instance.ref().child('drivers').child(driverId);
+    DatabaseReference ref = FirebaseDatabase.instance
+        .ref()
+        .child('drivers')
+        .child(firebaseUser!.uid);
 
     try {
       DatabaseEvent event = await ref.once();
