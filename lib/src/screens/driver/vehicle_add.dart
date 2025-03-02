@@ -3,6 +3,7 @@ import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/data_provider/prediction.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/models/address.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -104,19 +105,81 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   void addVehicle() async {
-    DatabaseReference driverData =
-        FirebaseDatabase.instance.ref().child("drivers/1234");
+    if (modelController.text.isEmpty || modelController.text.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Vehicle name should have at least 5 characters",
+        type: MessageType.error,
+      ));
+      return;
+    } else if (seatingController.text.isEmpty ||
+        int.tryParse(seatingController.text) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Seating capacity should be a valid number",
+        type: MessageType.error,
+      ));
+      return;
+    } else if (priceController.text.isEmpty ||
+        double.tryParse(priceController.text) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Price should be a valid number",
+        type: MessageType.error,
+      ));
+      return;
+    } else if (descriptionController.text.isEmpty ||
+        descriptionController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Route details should have at least 10 characters",
+        type: MessageType.error,
+      ));
+      return;
+    } else if (experienceController.text.isEmpty ||
+        int.tryParse(experienceController.text) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Experience should be a valid number",
+        type: MessageType.error,
+      ));
+      return;
+    }
 
-    Map<String, String> vehicleData = {
+    DatabaseReference driverData =
+        FirebaseDatabase.instance.ref().child("drivers/${firebaseUser!.uid}");
+
+    Map<String, dynamic> vehicleData = {
       "vehicleName": modelController.text,
       "vehicleNo": vehicleNoController.text,
       "vehiclePrice": priceController.text,
       "seatCapacity": seatingController.text,
-      "expereience": experienceController.text,
-      "routeDetails": descriptionController.text
+      "experience": experienceController.text,
+      "routeDetails": descriptionController.text,
+      "type": type,
+      "vehicleType": vehicleType,
+      "location": {
+        "startLat": Provider.of<AppData>(context).driverStartAddress.latitude,
+        "startLng": Provider.of<AppData>(context).driverStartAddress.longituge,
+        "endLat": Provider.of<AppData>(context).driverEndAddress.latitude,
+        "endLng": Provider.of<AppData>(context).driverEndAddress.longituge
+      }
     };
 
-    driverData.set(driverData);
+    try {
+      await driverData.set(vehicleData); // Save the vehicle data
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Vehicle added successfully",
+        type: MessageType.success,
+      ));
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Error",
+        message: "Failed to add vehicle: $error",
+        type: MessageType.error,
+      ));
+    }
   }
 
   void getPlacedDetails(String placeId, bool isStartLocation) async {
@@ -146,11 +209,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
           placeFormattedAddress: '');
 
       if (isStartLocation) {
-        appData.updateStartAddress(thisPlace);
+        Provider.of<AppData>(context, listen: false)
+            .updateStartAddress(thisPlace);
       } else {
-        appData.updateEndAddress(thisPlace);
+        Provider.of<AppData>(context, listen: false)
+            .updateEndAddress(thisPlace);
       }
-
       setState(() {
         _showDropdown = false;
       });
@@ -228,7 +292,49 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                   child: Column(
                     children: [
                       ElevatedButton(
-                        onPressed: details.onStepContinue,
+                        onPressed: () {
+                          if (_currentStep == 0) {
+                            if (type.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select service type",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            }
+                          } else if (vehicleType.isEmpty) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              title: "Error",
+                              message: "Please select vehicle type",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          } else if (vehicleNoController.text.isEmpty) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(createMessageBar(
+                              title: "Error",
+                              message: "Vehicle number cannot be empty",
+                              type: MessageType.error,
+                            ));
+                            return;
+                          } else if (airCondition.isEmpty) {
+                            if (vehicleNoController.text.isEmpty) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(createMessageBar(
+                                title: "Error",
+                                message: "Please select air conditioned or not",
+                                type: MessageType.error,
+                              ));
+                              return;
+                            }
+                          }
+
+                          if (details.onStepContinue != null) {
+                            details.onStepContinue!();
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
                           backgroundColor: const Color(0xFF0051ED),
@@ -499,7 +605,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       if (_showDropdown)
                         Positioned(
                           top:
-                              isStart ? 55 : 155, // Adjust position dynamically
+                              isStart ? 55 : 126, // Adjust position dynamically
                           left: 0,
                           right: 0,
                           child: Container(
