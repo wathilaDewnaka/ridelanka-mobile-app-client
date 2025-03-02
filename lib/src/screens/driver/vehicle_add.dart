@@ -181,6 +181,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         message: "Vehicle added successfully",
         type: MessageType.success,
       ));
+
+      Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
@@ -190,6 +192,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
     }
 
     Navigator.pop(context);
+    
   }
 
   void getPlacedDetails(String placeId, bool isStartLocation) async {
@@ -203,8 +206,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$mapKey';
 
     var response = await RequestHelper.getRequest(url);
-
-    Navigator.pop(context);
 
     if (response == 'failed') {
       return;
@@ -228,6 +229,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       setState(() {
         _showDropdown = false;
       });
+
+      Navigator.pop(context);
     }
   }
 
@@ -454,12 +457,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                         ),
                         child: Text(
                           _currentStep < 1 ? "Next" : "Add Vehicle",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       ElevatedButton(
@@ -496,7 +499,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                       GestureDetector(
                         onTap: _pickImage,
                         child: Container(
-                          height: 100,
+                          height: 110,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.grey[50],
@@ -512,7 +515,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0)),
                             child: _image == null
-                                ? Padding(
+                                ? const Padding(
                                     padding: EdgeInsets.all(15.0),
                                     child: Column(
                                       crossAxisAlignment:
@@ -549,12 +552,12 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             type = value!.toLowerCase();
                           });
                         },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Service Type',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       DropdownButtonFormField(
                         items: ['Van', 'Bus']
                             .map((value) => DropdownMenuItem(
@@ -565,31 +568,31 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                             vehicleType = value!;
                           });
                         },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Vehicle Type',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: modelController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Vehicle Model and Year',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: vehicleNoController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Vehicle Number',
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: seatingController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Seating Capacity',
                           border: OutlineInputBorder(),
                         ),
@@ -615,7 +618,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           // Start Location TextField
                           TextField(
                             controller: startLocationController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Start Location',
                               border: OutlineInputBorder(),
                             ),
