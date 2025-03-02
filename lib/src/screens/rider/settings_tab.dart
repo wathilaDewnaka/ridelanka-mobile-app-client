@@ -33,6 +33,30 @@ class _SettingsPageState extends State<SettingsPage> {
         type: MessageType.success));
   }
 
+  void _updateEmail(String email) async {
+    if (!RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "Invalid email address!",
+          type: MessageType.error));
+      return;
+    }
+
+    bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+    DatabaseReference databaseReference = isPassenger
+        ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
+        : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
+
+    await databaseReference.update({"email": email});
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Email updated successfully !",
+        type: MessageType.success));
+  }
+
   @override
   Widget build(BuildContext context) {
     const Color iconColor = Color(0xFF0051ED);
