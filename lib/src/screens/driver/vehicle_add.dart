@@ -145,6 +145,13 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
           placeName: response['result']['name'],
           placeFormattedAddress: '');
 
+      if (isStartLocation) {
+        Provider.of<AppData>(context, listen: false)
+            .updateStartAddress(thisPlace);
+      } else {
+        Provider.of<AppData>(context, listen: false)
+            .updateEndAddress(thisPlace);
+      }
       setState(() {
         _showDropdown = false;
       });
