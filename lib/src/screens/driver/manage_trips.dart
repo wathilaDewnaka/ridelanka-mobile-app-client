@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/driver.dart';
 import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/widgets/confirm_sheet.dart';
@@ -105,6 +106,42 @@ class _RidesTabState extends State<RidesTab> {
           bookingsRef.child(uid).update({"marked": "not_marked"});
         });
       }
+    });
+  }
+
+  void sendDropNotification(LatLng position) async {
+    DatabaseReference bookingsRef = FirebaseDatabase.instance
+        .ref()
+        .child("drivers/${firebaseUser!.uid}/bookings");
+
+    bookingsRef.once().then((snapshot) {
+      if (snapshot.snapshot.value != null) {
+        Map<dynamic, dynamic> bookings =
+            snapshot.snapshot.value as Map<dynamic, dynamic>;
+
+        bookings.forEach((bookingId, bookingData) {
+          int distance = HelperMethods.haversine(
+              position,
+              LatLng(bookingData['location']['endLat'],
+                  bookingData['location']['endLng']));
+          if (distance <= 0.5) {
+            sendNotification(bookingData['uId']);
+          }
+        });
+      }
+    });
+  }
+
+  void sendNotification(String uid) {
+    DatabaseReference databaseReference =
+        FirebaseDatabase.instance.ref("users/$uid/notifications");
+    databaseReference.push().set({
+      "title": "Driver nearby drop",
+      "description": "Driver nearby the drop location",
+      "icon": "tick",
+      "date": DateTime.now().microsecondsSinceEpoch.toString(),
+      "isRead": "false",
+      "isActive": ""
     });
   }
 
@@ -296,6 +333,7 @@ class _RidesTabState extends State<RidesTab> {
     ).listen((Position position) {
       // Handle location updates
       if (position != null) {
+        sendDropNotification(LatLng(position.latitude, position.longitude));
         setState(() {
           currentPosition = position;
 

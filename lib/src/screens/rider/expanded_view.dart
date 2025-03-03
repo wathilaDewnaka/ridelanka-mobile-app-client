@@ -130,12 +130,18 @@ class _ExpandedViewState extends State<ExpandedView> {
 
     _saveButtonState(); // Save the timestamp
 
-    Map<String, String> userBookingDetails = {
+    Map<dynamic, dynamic> userBookingDetails = {
       "start": pickupLocation,
       "end": destLocation,
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().add(const Duration(days: 30)).microsecondsSinceEpoch.toString(),
       "isActive": "Pending",
+      "location": {
+        "startLat": Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
+        "startLng": Provider.of<AppData>(context, listen: false).pickupAddress.longituge,
+        "endLat": Provider.of<AppData>(context, listen: false).destinationAddress.latitude,
+        "endLng": Provider.of<AppData>(context, listen: false).destinationAddress.longituge
+      }
     };
 
     Map<String, String> driverNotifications = {

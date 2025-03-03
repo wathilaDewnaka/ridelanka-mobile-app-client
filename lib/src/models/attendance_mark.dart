@@ -1,14 +1,12 @@
 class AttendanceMark {
   final String id;
   final String name;
-  final String timestamp;
   final String marked;
   final String userId;
 
   AttendanceMark(
       {required this.id,
       required this.name,
-      required this.timestamp,
       required this.marked,
       required this.userId});
 
@@ -18,7 +16,6 @@ class AttendanceMark {
       id: trpId ?? "",
       userId: json['uId'],
       name: name,
-      timestamp: json['timestamp'].toString(),
       marked: json['marked'],
     );
   }

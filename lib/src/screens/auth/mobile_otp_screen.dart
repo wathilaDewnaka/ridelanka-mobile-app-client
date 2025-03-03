@@ -94,6 +94,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
       // Sign in with the credential
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(cred);
+      firebaseUser = FirebaseAuth.instance.currentUser;
 
       DatabaseReference databaseReference = (widget.isPassenger)
           ? FirebaseDatabase.instance
@@ -136,7 +137,8 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
 
         isVehicleExist =
             await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
-        driverName = await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
+        driverName =
+            await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
 
         Navigator.pushNamedAndRemoveUntil(
           context,
