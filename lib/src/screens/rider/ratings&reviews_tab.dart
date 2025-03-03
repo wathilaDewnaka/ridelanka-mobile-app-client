@@ -1,17 +1,58 @@
+import 'package:client/global_variable.dart';
 import 'package:client/src/widgets/overall_progress_indicator.dart';
 import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:client/src/widgets/user_review_card.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ReviewsRatings extends StatefulWidget {
-  const ReviewsRatings({super.key});
+  const ReviewsRatings({super.key, required this.driverId});
+
+  final String driverId;
 
   @override
   State<ReviewsRatings> createState() => _ReviewsRatingsState();
 }
 
 class _ReviewsRatingsState extends State<ReviewsRatings> {
+  void postNewReview(double rating, String text) async {
+    DatabaseReference databaseReference = FirebaseDatabase.instance
+        .ref("drivers/${widget.driverId}/ratings/${firebaseUser!.uid}");
+    DatabaseReference databaseReference2 =
+        FirebaseDatabase.instance.ref("drivers/${widget.driverId}/ratings");
+
+    await databaseReference.set({'rate': rating, 'message': text});
+    await databaseReference2.update({"total": 0, "count": 33});
+  }
+
+  Future<Map<String, dynamic>> getAverageRating(String driverId) async {
+    DatabaseReference databaseReference =
+        FirebaseDatabase.instance.ref("drivers/$driverId/ratings");
+
+    DataSnapshot snapshot = await databaseReference.get();
+
+    if (!snapshot.exists || snapshot.value == null) {
+      return {'average': 5.0, 'count': 0};
+    }
+
+    double totalRating = 0.0;
+    int count = 0;
+
+    Map<dynamic, dynamic> ratings = snapshot.value as Map<dynamic, dynamic>;
+
+    ratings.forEach((key, value) {
+      if (value is Map && value.containsKey('rate')) {
+        totalRating += (value['rate'] as num).toDouble();
+        count++;
+      }
+    });
+
+    double averageRating = count > 0 ? totalRating / count : 0.0;
+
+    return {'average': averageRating, 'count': count};
+  }
+
   void _showReviewDialog() {
     double _rating = 3.0;
     TextEditingController _reviewController = TextEditingController();
@@ -64,9 +105,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Handle review submission logic here
-                print("Rating: \$_rating");
-                print("Review: \${_reviewController.text}");
+                postNewReview(_rating, _reviewController.text);
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
