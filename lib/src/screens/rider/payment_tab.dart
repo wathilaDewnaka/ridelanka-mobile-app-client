@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 
-
 class PaymentScreen extends StatefulWidget {
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
@@ -30,54 +29,83 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Card Payment")),
-      body: SingleChildScrollView(
-        child: Column(
+      backgroundColor: const Color.fromARGB(200, 224, 200, 200),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            // Credit Card UI Preview
-            CreditCardWidget(
-              cardNumber: cardNumber,
-              expiryDate: expiryDate,
-              cardHolderName: cardHolderName,
-              cvvCode: cvvCode,
-              showBackView: isCvvFocused, // Flip when CVV is focused
-              onCreditCardWidgetChange: (brand) {},
+            AppBar(
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 255, 126, 126), size: 18),
+                onPressed: () async {
+                  // Add your navigation logic here
+                  Navigator.pop(context); // Example navigation
+                },
+              ),
+              elevation: 0,
             ),
-
-            // Credit Card Form
-            CreditCardForm(
-              formKey: formKey, // Required
-              cardNumber: cardNumber, // Required
-              expiryDate: expiryDate, // Required
-              cardHolderName: cardHolderName, // Required
-              cvvCode: cvvCode, // Required
-              themeColor: Colors.blue, // Required
-              onCreditCardModelChange: (CreditCardModel data) {
-                setState(() {
-                  cardNumber = data.cardNumber;
-                  expiryDate = data.expiryDate;
-                  cardHolderName = data.cardHolderName;
-                  cvvCode = data.cvvCode;
-                  isCvvFocused = data.isCvvFocused;
-                });
-              },
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Checkbox(
-                  value: saveCard,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      saveCard = value!;
-                    });
-                  },
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Card Payment",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
                 ),
-                Text("Save card for future payments"),
-              ],
+              ),
             ),
-            SizedBox(height: 20),
+          ],
+        ),
+      ),
+      body: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              CreditCardWidget(
+                cardNumber: cardNumber,
+                expiryDate: expiryDate,
+                cardHolderName: cardHolderName,
+                cvvCode: cvvCode,
+                showBackView: isCvvFocused,
+                onCreditCardWidgetChange: (brand) {},
+              ),
+              SizedBox(height: 20),
+              CreditCardForm(
+                formKey: formKey,
+                cardNumber: cardNumber,
+                expiryDate: expiryDate,
+                cardHolderName: cardHolderName,
+                cvvCode: cvvCode,
+                themeColor: Colors.blue,
+                onCreditCardModelChange: (CreditCardModel data) {
+                  setState(() {
+                    cardNumber = data.cardNumber;
+                    expiryDate = data.expiryDate;
+                    cardHolderName = data.cardHolderName;
+                    cvvCode = data.cvvCode;
+                    isCvvFocused = data.isCvvFocused;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: saveCard,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        saveCard = value!;
+                      });
+                    },
+                  ),
+                  Text("Save card for future payments"),
+                ],
+              ),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
@@ -113,7 +141,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );
