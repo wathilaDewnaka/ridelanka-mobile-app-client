@@ -144,7 +144,7 @@ class _RidesTabState extends State<RidesTab> {
           DateTime.fromMillisecondsSinceEpoch(timestampInMicros ~/ 1000);
       DateTime currentDate = DateTime.now();
       Duration difference = currentDate.difference(storedDate);
-      return difference.inHours;
+      return difference.inMinutes;
     } else {
       return 999;
     }
@@ -154,7 +154,7 @@ class _RidesTabState extends State<RidesTab> {
     int time = await calculateDaysPassed(uid);
     final pref = await SharedPreferences.getInstance();
 
-    if (time >= 2) {
+    if (time >= 10) {
       DatabaseReference databaseReference =
           FirebaseDatabase.instance.ref("users/$uid/notifications");
       await databaseReference.push().set({
@@ -165,7 +165,8 @@ class _RidesTabState extends State<RidesTab> {
         "isRead": "false",
         "isActive": ""
       });
-      pref.setString(uid, DateTime.now().microsecondsSinceEpoch.toString());
+      await pref.setString(
+          uid, DateTime.now().microsecondsSinceEpoch.toString());
     }
   }
 
