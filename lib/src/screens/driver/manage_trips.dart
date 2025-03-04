@@ -5,6 +5,7 @@ import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/driver.dart';
 import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/widgets/confirm_sheet.dart';
+import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -133,24 +134,45 @@ class _RidesTabState extends State<RidesTab> {
     });
   }
 
-  void sendNotification(String uid) {
-    DatabaseReference databaseReference =
-        FirebaseDatabase.instance.ref("users/$uid/notifications");
-    databaseReference.push().set({
-      "title": "Driver nearby drop",
-      "description": "Driver nearby the drop location",
-      "icon": "tick",
-      "date": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isRead": "false",
-      "isActive": ""
-    });
+  Future<int> calculateDaysPassed(String uid) async {
+    final pref = await SharedPreferences.getInstance();
+    String? time = pref.getString(uid);
+
+    if (time != null) {
+      int timestampInMicros = int.parse(time);
+      DateTime storedDate =
+          DateTime.fromMillisecondsSinceEpoch(timestampInMicros ~/ 1000);
+      DateTime currentDate = DateTime.now();
+      Duration difference = currentDate.difference(storedDate);
+      return difference.inHours;
+    } else {
+      return 999;
+    }
+  }
+
+  void sendNotification(String uid) async {
+    int time = await calculateDaysPassed(uid);
+    final pref = await SharedPreferences.getInstance();
+
+    if (time >= 2) {
+      DatabaseReference databaseReference =
+          FirebaseDatabase.instance.ref("users/$uid/notifications");
+      await databaseReference.push().set({
+        "title": "Driver nearby drop",
+        "description": "Driver nearby the drop location",
+        "icon": "tick",
+        "date": DateTime.now().microsecondsSinceEpoch.toString(),
+        "isRead": "false",
+        "isActive": ""
+      });
+      pref.setString(uid, DateTime.now().microsecondsSinceEpoch.toString());
+    }
   }
 
   void getPreviousState() async {
     final prefs = await SharedPreferences.getInstance();
     String sha = prefs.getString("online") ?? "false";
     if (sha == "true") {
-      startTrip();
       getLocationUpdate();
 
       setState(() {
@@ -182,7 +204,14 @@ class _RidesTabState extends State<RidesTab> {
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () {
-                  Navigator.pop(context);
+                  if (!isAvailable) {
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+                        title: "Error",
+                        message: "Cannot go to back until trip ends",
+                        type: MessageType.error));
+                  }
                 },
               ),
               elevation: 0,
@@ -359,20 +388,21 @@ class _RidesTabState extends State<RidesTab> {
       if (position != null) {
         sendDropNotification(LatLng(position.latitude, position.longitude));
         if (mounted) {
-        setState(() {
-          currentPosition = position;
+          setState(() {
+            currentPosition = position;
 
-          if (isAvailable) {
-            Geofire.setLocation(
-                firebaseUser!.uid, position.latitude, position.longitude);
-          }
+            if (isAvailable) {
+              Geofire.setLocation(
+                  firebaseUser!.uid, position.latitude, position.longitude);
+            }
 
-          LatLng pos = LatLng(position.latitude, position.longitude);
-          CameraPosition cameraPosition = CameraPosition(target: pos, zoom: 18);
+            LatLng pos = LatLng(position.latitude, position.longitude);
+            CameraPosition cameraPosition =
+                CameraPosition(target: pos, zoom: 18);
 
-          mapController!
-              .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-        });
+            mapController!
+                .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+          });
         }
       }
     });
