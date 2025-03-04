@@ -1,6 +1,7 @@
 import 'package:client/global_variable.dart';
-import 'package:client/src/widgets/overall_progress_indicator.dart';
-import 'package:client/src/widgets/rating_bar_indicator.dart';
+import 'package:client/src/models/ratings.dart';
+import 'package:client/src/widgets/message_bar.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:client/src/widgets/user_review_card.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -16,14 +17,77 @@ class ReviewsRatings extends StatefulWidget {
 }
 
 class _ReviewsRatingsState extends State<ReviewsRatings> {
+  List<Ratings> notificationAll = [];
+  bool loading = true;
+
   void postNewReview(double rating, String text) async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
     DatabaseReference databaseReference = FirebaseDatabase.instance
-        .ref("drivers/${widget.driverId}/ratings/${firebaseUser!.uid}");
+        .ref("drivers/${widget.driverId}/ratings/reviews/${firebaseUser!.uid}");
     DatabaseReference databaseReference2 =
         FirebaseDatabase.instance.ref("drivers/${widget.driverId}/ratings");
 
+    Map<String, dynamic> mapOfData = await getAverageRating(widget.driverId);
+
     await databaseReference.set({'rate': rating, 'message': text});
-    await databaseReference2.update({"total": 0, "count": 33});
+    await databaseReference2
+        .update({"total": mapOfData['average'], "count": mapOfData['count']});
+
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Success",
+        message: "Review posted successfully !",
+        type: MessageType.success));
+    getRatings();
+
+    Navigator.pop(context);
+  }
+
+  Future<void> getRatings() async {
+    DatabaseReference notifications = FirebaseDatabase.instance
+        .ref()
+        .child('drivers/${widget.driverId}/ratings/reviews');
+
+    DataSnapshot mainNotificationsSnapshot = await notifications.get();
+
+    if (mainNotificationsSnapshot.exists) {
+      List<Ratings> newNotifications = [];
+
+      for (var child in mainNotificationsSnapshot.children) {
+        if (child.value is Map<dynamic, dynamic>) {
+          Map<dynamic, dynamic> notificationData =
+              Map<dynamic, dynamic>.from(child.value as Map);
+
+          DatabaseReference driverRef =
+              FirebaseDatabase.instance.ref().child('users/${child.key}');
+          DataSnapshot snapshot = await driverRef.get();
+
+          if (snapshot.exists) {
+            Map<dynamic, dynamic> userData =
+                Map<dynamic, dynamic>.from(snapshot.value as Map);
+
+            Ratings notificationItem = Ratings.fromJson(
+                notificationData, child.key ?? "", userData['fullname']);
+
+            newNotifications.add(notificationItem);
+          }
+        }
+      }
+
+      setState(() {
+        notificationAll = newNotifications.reversed.toList();
+      });
+    } else {
+      print("No notifications found in the main path.");
+    }
+
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<Map<String, dynamic>> getAverageRating(String driverId) async {
@@ -53,6 +117,28 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
     return {'average': averageRating, 'count': count};
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) =>
+            ProgressDialog(status: 'Please wait...'),
+      );
+
+      // Initialize async tasks
+      getRatings().then((_) {
+        // After tasks are complete, dismiss the dialog
+        print("object");
+        Navigator.pop(context);
+      }).catchError((error) {
+        Navigator.pop(context);
+      });
+    });
+  }
+
   void _showReviewDialog() {
     double _rating = 3.0;
     TextEditingController _reviewController = TextEditingController();
@@ -64,7 +150,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
           title: const Text("Write a Review",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8, // Increase width
+            width: MediaQuery.of(context).size.width * 5, // Increase width
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,41 +209,76 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Reviews & Ratings',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF0051ED),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+      backgroundColor: const Color(0xFF0051ED),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () async {
+                  Navigator.pop(context);
+                },
+              ),
+              elevation: 0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Ratings & Reviews",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                  'Ratings and reviews are verified and are from people who use the same type of device that you use'),
-              const SizedBox(height: 10),
-              const OverallVehicleRating(),
-              const VehicleRatingBarIndicator(rating: 3.5),
-              Text('12,111', style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 19),
-              const UserReviewCard(userName: "Thisuri Nethma"),
-              const UserReviewCard(userName: "Thisuri Nethma"),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
           ),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: notificationAll.isEmpty
+                  ? ListView.builder(
+                      padding: const EdgeInsets.only(
+                          top: 10, bottom: 80), // Spacing for floating button
+                      itemCount: notificationAll.length,
+                      itemBuilder: (context, index) {
+                        final Ratings review = notificationAll[index];
+                        print(review);
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: UserReviewCard(
+                            userName: review.fullname,
+                            timestamp: review.timestamp,
+                            messsage: review.description,
+                            rate: review.count,
+                          ),
+                        );
+                      },
+                    )
+                  : SizedBox(
+                      height: 100,
+                      width: double.infinity,
+                      child: Text("No reviews or ratings found"),
+                    ),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
