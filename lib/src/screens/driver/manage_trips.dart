@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RidesTab extends StatefulWidget {
   @override
@@ -145,10 +146,26 @@ class _RidesTabState extends State<RidesTab> {
     });
   }
 
+  void getPreviousState() async {
+    final prefs = await SharedPreferences.getInstance();
+    String sha = prefs.getString("online") ?? "false";
+    if (sha == "true") {
+      startTrip();
+      getLocationUpdate();
+
+      setState(() {
+        availabilityColor = Color(0xFF40cf89);
+        availabilityTitle = 'END TRIP';
+        isAvailable = true;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getCurrentDriverInfo();
+    getPreviousState();
   }
 
   @override
@@ -304,7 +321,7 @@ class _RidesTabState extends State<RidesTab> {
     );
   }
 
-  void startTrip() {
+  void startTrip() async {
     Geofire.initialize('driversAvailable');
     Geofire.setLocation(firebaseUser!.uid, currentPosition!.latitude,
         currentPosition!.longitude);
@@ -314,13 +331,20 @@ class _RidesTabState extends State<RidesTab> {
         .child('drivers/${firebaseUser!.uid}/trip');
     tripRequestRef?.set('online');
 
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('online', "true");
+
     tripRequestRef?.onValue.listen((event) {});
   }
 
-  void endTrip() {
+  void endTrip() async {
     Geofire.removeLocation(firebaseUser!.uid);
     tripRequestRef?.onDisconnect();
     tripRequestRef?.remove();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('online', "false");
+
     tripRequestRef = null;
   }
 
@@ -334,6 +358,7 @@ class _RidesTabState extends State<RidesTab> {
       // Handle location updates
       if (position != null) {
         sendDropNotification(LatLng(position.latitude, position.longitude));
+        if (mounted) {
         setState(() {
           currentPosition = position;
 
@@ -348,6 +373,7 @@ class _RidesTabState extends State<RidesTab> {
           mapController!
               .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
         });
+        }
       }
     });
   }
