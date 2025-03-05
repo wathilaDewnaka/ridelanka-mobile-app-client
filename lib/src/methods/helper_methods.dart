@@ -257,8 +257,6 @@ class HelperMethods {
         vehiclesDetails.entries.map((entry) async {
       final uid = entry.key;
       final vehicleData = entry.value;
-      
-
       final LatLng start =
           LatLng(vehicleData['startLat'], vehicleData['startLng']);
       final LatLng end = LatLng(vehicleData['endLat'], vehicleData['endLng']);
@@ -292,7 +290,6 @@ class HelperMethods {
           endLatLng = positionOnWay;
         }
       }
-          
       if (startKm >= 0 && endKm >= 0 && startKm < 100 && endKm < 100) {
         final startPlaceName = await returnPlaceAddress(startLatLng);
         final endPlaceName = await returnPlaceAddress(endLatLng);
@@ -341,6 +338,31 @@ class HelperMethods {
 
     if (snapshot.exists) {
       return true;
+    } else {
+      return false;
+    }
+  }
+
+  static Future<bool> checkIsUserSubscribed(String uid) async {
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}/bookings");
+    DataSnapshot snapshot = await ref.get();
+
+    if (snapshot.exists) {
+      Map<dynamic, dynamic> bookings = snapshot.value as Map<dynamic, dynamic>;
+
+      for (var bookingId in bookings.keys) {
+        var bookingData = bookings[bookingId];
+        print(bookingData);
+
+        if (bookingData is Map<dynamic, dynamic> &&
+            bookingData.containsKey("driverUid")) {
+          String driverUid = bookingData["driverUid"];
+          return driverUid == uid;
+        }
+      }
+
+      return false;
     } else {
       return false;
     }
