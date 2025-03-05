@@ -29,16 +29,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(200, 224, 200, 200),
+      backgroundColor: const Color.fromARGB(255, 254, 255, 255), // Updated background color
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Stack(
           alignment: Alignment.center,
           children: [
             AppBar(
-              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            backgroundColor: const Color(0xFF0051ED),
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 255, 126, 126), size: 18),
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
                 onPressed: () async {
                   // Add your navigation logic here
                   Navigator.pop(context); // Example navigation
