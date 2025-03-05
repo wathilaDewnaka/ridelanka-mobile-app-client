@@ -258,6 +258,11 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                       endKm: ride.endKm,
                                       startPl: ride.startPlaceName,
                                       endPl: ride.endPlaceName,
+                                      mainPoints: "",
+                                      seatCap: "",
+                                      vehType: "",
+                                      lang: "",
+                                      exp: "",
                                     )));
                       },
                       child: Card(

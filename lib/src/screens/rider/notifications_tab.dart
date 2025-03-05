@@ -170,43 +170,58 @@ class _NotificationTabState extends State<NotificationTab> {
     DatabaseReference userReference = FirebaseDatabase.instance
         .ref()
         .child('users/${userId}/bookings/$notificationId');
+    DatabaseEvent event = await userReference.once();
 
-    DatabaseReference userNotificationReference =
-        FirebaseDatabase.instance.ref().child('users/${userId}/notifications');
+    if (event.snapshot.exists) {
+      Map<dynamic, dynamic>? bookingData =
+          event.snapshot.value as Map<dynamic, dynamic>?;
+      print(bookingData);
+      print(bookingData?['location']);
+      print(bookingData?['location']['startLat']);
 
-    Map<String, String> userNotifications = {
-      "title": "Booking Request Accepted",
-      "description": "Booking request accepted by the driver",
-      "icon": "tick",
-      "date": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isRead": "false",
-      "isActive": ""
-    };
+      DatabaseReference userNotificationReference = FirebaseDatabase.instance
+          .ref()
+          .child('users/${userId}/notifications');
 
-    Map<String, String> bookingReference = {
-      "uId": userId ?? "",
-      "marked": "false"
-    };
+      Map<String, String> userNotifications = {
+        "title": "Booking Request Accepted",
+        "description": "Booking request accepted by the driver",
+        "icon": "tick",
+        "date": DateTime.now().microsecondsSinceEpoch.toString(),
+        "isRead": "false",
+        "isActive": ""
+      };
 
-    await driverBookingReference.push().set(bookingReference);
-    await userNotificationReference.push().set(userNotifications);
+      Map<dynamic, dynamic> bookingReference = {
+        "uId": userId ?? "",
+        "marked": "false",
+        "location": {
+          "startLat": bookingData?['location']['startLat'],
+          "startLng": bookingData?['location']['startLng'],
+          "endLat": bookingData?['location']['endLat'],
+          "endLng": bookingData?['location']['endLng']
+        }
+      };
 
-    await databaseReference.update({'isRead': "true", 'isActive': ''});
+      await driverBookingReference.push().set(bookingReference);
+      await userNotificationReference.push().set(userNotifications);
 
-    await userReference.update({
-      'isActive': "Active",
-      "subscriptionDate": DateTime.now()
-          .add(Duration(days: 30))
-          .microsecondsSinceEpoch
-          .toString(),
-      "attendance": {
-        "isComming": "not_marked",
-        "timestamp": DateTime.now()
-            .subtract(Duration(days: 1))
+      await databaseReference.update({'isRead': "true", 'isActive': ''});
+      await userReference.update({
+        'isActive': "Active",
+        "subscriptionDate": DateTime.now()
+            .add(Duration(days: 30))
             .microsecondsSinceEpoch
-            .toString()
-      }
-    });
+            .toString(),
+        "attendance": {
+          "isComming": "not_marked",
+          "timestamp": DateTime.now()
+              .subtract(Duration(days: 1))
+              .microsecondsSinceEpoch
+              .toString()
+        }
+      });
+    }
 
     getNotifications();
 
@@ -231,10 +246,10 @@ class _NotificationTabState extends State<NotificationTab> {
 
     DatabaseReference userReference = FirebaseDatabase.instance
         .ref()
-        .child('users/${userId}/bookings/$notificationId');
+        .child('users/$userId/bookings/$notificationId');
 
     DatabaseReference userNotificationReference =
-        FirebaseDatabase.instance.ref().child('users/${userId}/notifications');
+        FirebaseDatabase.instance.ref().child('users/$userId/notifications');
 
     Map<String, String> userNotifications = {
       "title": "Booking Request Rejected",

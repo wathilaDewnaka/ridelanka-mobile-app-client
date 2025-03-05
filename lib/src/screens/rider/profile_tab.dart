@@ -22,6 +22,7 @@ class _ProfileTabState extends State<ProfileTab> {
   late String phone = "";
   bool isLoading = true; // Control UI visibility
 
+
   Future<void> _logout(BuildContext context) async {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -29,6 +30,9 @@ class _ProfileTabState extends State<ProfileTab> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove("isPassenger");
 
+    await prefs.remove(
+        "isPassenger");
+    // Navigate to the login page or perform other actions after logout
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
@@ -90,7 +94,6 @@ class _ProfileTabState extends State<ProfileTab> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -251,6 +254,29 @@ class _ProfileTabState extends State<ProfileTab> {
                     backgroundColor: Color(0xFF0051ED),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => SettingsTab()),
+                      // );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF0051ED), // Button color
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                    ),
+                    icon: Icon(Icons.settings, color: Colors.white, size: 26),
+                    label: Text(
+                      'Settings',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -265,39 +291,40 @@ class _ProfileTabState extends State<ProfileTab> {
           ],
         ),
         SizedBox(height: 10),
-        GestureDetector(
-          onTap: () {
-            _logout(context);
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF0051ED),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.logout,
-                          size: 26,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'Log Out',
-                          style: TextStyle(
+       
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  _logout(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF0051ED),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.logout,
+                            size: 26,
                             color: Colors.white,
-                            fontSize: 16,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 8),
+                          Text(
+                            'Log Out',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

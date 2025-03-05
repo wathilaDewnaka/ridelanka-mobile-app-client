@@ -1,8 +1,8 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
-import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
+import 'package:client/src/widgets/star_view.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,8 +20,13 @@ class ExpandedView extends StatefulWidget {
       required this.startPl,
       required this.endPl,
       required this.startKm,
+      required this.seatCap,
+      required this.exp,
+      required this.lang,
+      required this.mainPoints,
       required this.endKm,
-      required this.vehicleNo});
+      required this.vehicleNo,
+      required this.vehType});
 
   final String driverUid;
   final String driverName;
@@ -30,6 +35,11 @@ class ExpandedView extends StatefulWidget {
   final String vehicleName;
   final String vehicleNo;
   final double price;
+  final String lang;
+  final String exp;
+  final String seatCap;
+  final String mainPoints;
+  final String vehType;
   final int startKm;
   final int endKm;
   final String startPl;
@@ -38,6 +48,7 @@ class ExpandedView extends StatefulWidget {
   @override
   State<ExpandedView> createState() => _ExpandedViewState();
 }
+
 
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
@@ -119,12 +130,18 @@ class _ExpandedViewState extends State<ExpandedView> {
 
     _saveButtonState(); // Save the timestamp
 
-    Map<String, String> userBookingDetails = {
+    Map<dynamic, dynamic> userBookingDetails = {
       "start": pickupLocation,
       "end": destLocation,
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().add(const Duration(days: 30)).microsecondsSinceEpoch.toString(),
       "isActive": "Pending",
+      "location": {
+        "startLat": Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
+        "startLng": Provider.of<AppData>(context, listen: false).pickupAddress.longituge,
+        "endLat": Provider.of<AppData>(context, listen: false).destinationAddress.latitude,
+        "endLng": Provider.of<AppData>(context, listen: false).destinationAddress.longituge
+      }
     };
 
     Map<String, String> driverNotifications = {
@@ -326,43 +343,83 @@ class _ExpandedViewState extends State<ExpandedView> {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 10.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                        recieverName: widget.driverName,
-                                        recieverUid: widget.driverUid,
-                                        recieverTel: "",
-                                        isMobile: false)));
-                          },
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.blue,
-                                child: Text(
-                                  widget.driverName.contains(" ")
-                                      ? widget.driverName.split(" ")[1][0]
-                                      : widget.driverName[0],
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: Colors.blue,
+                              child: Text(
+                                widget.driverName.contains(" ")
+                                    ? widget.driverName.split(" ")[1][0]
+                                    : widget.driverName[0],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Text(
-                                widget.driverName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              widget.driverName,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [const Text("Vehicle Type"), Text(widget.vehType)],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Seat Capacity"),
+                                Text(widget.seatCap)
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Driver Experience"),
+                                Text("${widget.exp} Years")
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Prefered Lanuage"),
+                                Text(widget.lang)
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Main Start and End"),
+                                Text(widget.mainPoints)
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
@@ -375,7 +432,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
-
+                      
                       // Route Details
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -389,6 +446,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
+                      StarView(rating: 5)
                     ],
                   ),
                 ),
