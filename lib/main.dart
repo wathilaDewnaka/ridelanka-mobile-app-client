@@ -76,7 +76,7 @@ void onStart(ServiceInstance service) async {
     print("Background process is now stopped");
   });
 
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
+  Timer.periodic(const Duration(seconds: 50), (timer) async {
     print("Testing 1");
 
     final pref = await SharedPreferences.getInstance();
