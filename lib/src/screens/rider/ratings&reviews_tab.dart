@@ -1,4 +1,5 @@
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/ratings.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
@@ -19,6 +20,7 @@ class ReviewsRatings extends StatefulWidget {
 class _ReviewsRatingsState extends State<ReviewsRatings> {
   List<Ratings> notificationAll = [];
   bool loading = true;
+  bool canPostReview = false;
 
   void postNewReview(double rating, String text) async {
     showDialog(
@@ -84,16 +86,24 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
             Map<dynamic, dynamic> userData =
                 Map<dynamic, dynamic>.from(snapshot.value as Map);
 
-            Ratings notificationItem = Ratings.fromJson(
-                notificationData, child.key ?? "", userData['fullname']);
+            try {
+              Ratings notificationItem = Ratings.fromJson(
+                  notificationData, child.key ?? "", userData['fullname']);
 
-            newNotifications.add(notificationItem);
+              newNotifications.add(notificationItem);
+            } catch (e) {
+              print(e);
+            }
           }
         }
       }
 
+      bool canPost =
+          await HelperMethods.checkIsUserSubscribed(firebaseUser!.uid);
+
       setState(() {
         notificationAll = newNotifications.reversed.toList();
+        canPostReview = canPost;
       });
     } else {
       print("No notifications found in the main path.");
@@ -159,6 +169,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           title: const Text("Write a Review",
@@ -205,8 +216,8 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
             ),
             ElevatedButton(
               onPressed: () {
-                postNewReview(_rating, _reviewController.text);
                 Navigator.pop(context);
+                postNewReview(_rating, _reviewController.text);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0051ED),
@@ -265,9 +276,11 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: notificationAll.isEmpty
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+              child: notificationAll.isNotEmpty
                   ? ListView.builder(
+                      shrinkWrap: true,
                       padding: const EdgeInsets.only(
                           top: 10, bottom: 80), // Spacing for floating button
                       itemCount: notificationAll.length,
@@ -299,11 +312,13 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showReviewDialog,
-        backgroundColor: const Color(0xFF0051ED),
-        child: const Icon(Icons.edit, color: Colors.white),
-      ),
+      floatingActionButton: canPostReview
+          ? FloatingActionButton(
+              onPressed: _showReviewDialog,
+              backgroundColor: const Color(0xFF0051ED),
+              child: const Icon(Icons.edit, color: Colors.white),
+            )
+          : null,
     );
   }
 }
