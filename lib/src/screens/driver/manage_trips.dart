@@ -9,6 +9,7 @@ import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -362,7 +363,11 @@ class _RidesTabState extends State<RidesTab> {
     tripRequestRef?.set('online');
 
     final prefs = await SharedPreferences.getInstance();
+    final service = FlutterBackgroundService();
     await prefs.setString('online', "true");
+    await prefs.setString("driverId", firebaseUser!.uid);
+
+    service.startService();
 
     tripRequestRef?.onValue.listen((event) {});
   }
@@ -374,6 +379,8 @@ class _RidesTabState extends State<RidesTab> {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('online', "false");
+
+    FlutterBackgroundService().invoke("stop");
 
     tripRequestRef = null;
   }

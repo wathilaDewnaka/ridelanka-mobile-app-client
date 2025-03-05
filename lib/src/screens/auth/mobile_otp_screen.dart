@@ -139,6 +139,9 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
             await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
         driverName =
             await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
+            
+        final pref = await SharedPreferences.getInstance();
+        await pref.setString("driverId", userCredential.user!.uid);
 
         Navigator.pushNamedAndRemoveUntil(
           context,
