@@ -34,7 +34,11 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
 
     Map<String, dynamic> mapOfData = await getAverageRating(widget.driverId);
 
-    await databaseReference.set({'rate': rating, 'message': text});
+    await databaseReference.set({
+      'rate': rating,
+      'message': text,
+      'timestamp': DateTime.now().microsecondsSinceEpoch.toString()
+    });
     await databaseReference2
         .update({"total": mapOfData['average'], "count": mapOfData['count']});
 
@@ -45,6 +49,16 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
     getRatings();
 
     Navigator.pop(context);
+  }
+
+  String formatDate(int microsecondsSinceEpoch) {
+    DateTime date = DateTime.fromMicrosecondsSinceEpoch(microsecondsSinceEpoch);
+
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString().substring(2);
+
+    return "$day/$month/$year";
   }
 
   Future<void> getRatings() async {
@@ -265,7 +279,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: UserReviewCard(
                             userName: review.fullname,
-                            timestamp: review.timestamp,
+                            timestamp: formatDate(int.parse(review.timestamp)),
                             messsage: review.description,
                             rate: review.count,
                           ),
@@ -275,7 +289,11 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
                   : SizedBox(
                       height: 100,
                       width: double.infinity,
-                      child: Text("No reviews or ratings found"),
+                      child: Text(
+                        "No reviews or ratings found",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
                     ),
             ),
           ],
