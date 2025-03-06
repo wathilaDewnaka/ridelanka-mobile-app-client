@@ -1,7 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
-import 'package:client/src/widgets/chat_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/star_view.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -131,12 +130,18 @@ class _ExpandedViewState extends State<ExpandedView> {
 
     _saveButtonState(); // Save the timestamp
 
-    Map<String, String> userBookingDetails = {
+    Map<dynamic, dynamic> userBookingDetails = {
       "start": pickupLocation,
       "end": destLocation,
       "driverUid": widget.driverUid,
       "subscriptionDate": DateTime.now().add(const Duration(days: 30)).microsecondsSinceEpoch.toString(),
       "isActive": "Pending",
+      "location": {
+        "startLat": Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
+        "startLng": Provider.of<AppData>(context, listen: false).pickupAddress.longituge,
+        "endLat": Provider.of<AppData>(context, listen: false).destinationAddress.latitude,
+        "endLng": Provider.of<AppData>(context, listen: false).destinationAddress.longituge
+      }
     };
 
     Map<String, String> driverNotifications = {
@@ -338,41 +343,29 @@ class _ExpandedViewState extends State<ExpandedView> {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 10.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                        recieverName: widget.driverName,
-                                        recieverUid: widget.driverUid,
-                                        recieverTel: "",
-                                        isMobile: false)));
-                          },
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.blue,
-                                child: Text(
-                                  widget.driverName.contains(" ")
-                                      ? widget.driverName.split(" ")[1][0]
-                                      : widget.driverName[0],
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: Colors.blue,
+                              child: Text(
+                                widget.driverName.contains(" ")
+                                    ? widget.driverName.split(" ")[1][0]
+                                    : widget.driverName[0],
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Text(
-                                widget.driverName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              widget.driverName,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ],
                         ),
                       ),
                       Padding(

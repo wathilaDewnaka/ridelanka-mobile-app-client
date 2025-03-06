@@ -36,6 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
+      if (!isPassenger) {
+        isVehicleExist =
+            await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
+        driverName = await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
+      }
+
       Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(

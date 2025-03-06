@@ -4,12 +4,20 @@ import 'package:readmore/readmore.dart';
 
 class UserReviewCard extends StatelessWidget {
   final String userName;
+  final String messsage;
+  final String timestamp;
+  final double rate;
 
-  const UserReviewCard({super.key, required this.userName});
+  const UserReviewCard(
+      {super.key,
+      required this.userName,
+      required this.messsage,
+      required this.rate,
+      required this.timestamp});
 
   @override
   Widget build(BuildContext context) {
-    String firstLetter = userName.isNotEmpty ? userName[0].toUpperCase() : '?';
+    String firstLetter = userName.split(" ")[1][0];
 
     return Column(
       children: [
@@ -18,7 +26,7 @@ class UserReviewCard extends StatelessWidget {
           children: [
             CircleAvatar(
               backgroundColor: Color(0xFF0051ED),
-              radius: 30,
+              radius: 25,
               child: Text(
                 firstLetter,
                 style: TextStyle(
@@ -38,29 +46,42 @@ class UserReviewCard extends StatelessWidget {
         const SizedBox(height: 10),
         Row(
           children: [
-            VehicleRatingBarIndicator(rating: 4),
+            VehicleRatingBarIndicator(rating: rate),
             const SizedBox(width: 10),
-            Text('01 Nov 2023', style: Theme.of(context).textTheme.bodyMedium),
+            Text("$rate/5.0", style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
         const SizedBox(height: 15),
-        ReadMoreText(
-          "Excellent experience! The app is user-friendly, well-designed, and runs smoothly. I love how intuitive the interface is, making it easy to navigate through different features. Great job!",
-          trimLines: 2,
-          trimMode: TrimMode.Line,
-          trimExpandedText: "...show less",
-          trimCollapsedText: "show more",
-          moreStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0051ED),
-          ),
-          lessStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0051ED),
-          ),
-        ),
+        messsage.length > 100
+            ? ReadMoreText(
+                messsage,
+                trimLines: 2,
+                trimMode: TrimMode.Line,
+                trimExpandedText: "...show less",
+                trimCollapsedText: "show more",
+                moreStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0051ED),
+                ),
+                lessStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0051ED),
+                ),
+              )
+            : Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  messsage,
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+        SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(timestamp, style: Theme.of(context).textTheme.bodyMedium),
+        )
       ],
     );
   }

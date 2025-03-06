@@ -563,6 +563,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                                       recieverUid: trip.id,
                                                       recieverTel: "",
                                                       isMobile: true,
+                                                      senderId: "user ${firebaseUser!.uid}",
                                                     )),
                                           );
                                         },

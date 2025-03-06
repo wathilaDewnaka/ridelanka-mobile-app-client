@@ -92,24 +92,6 @@ class _AttendancePageState extends State<AttendancePage> {
     });
   }
 
-  // Reset att
-  //void initalizeTheAttendance() async {
-  //   DatabaseReference bookingsRef = FirebaseDatabase.instance
-  //       .ref()
-  //       .child("drivers/${firebaseUser!.uid}/bookings");
-
-  //   bookingsRef.once().then((snapshot) {
-  //     if (snapshot.snapshot.value != null) {
-  //       Map<dynamic, dynamic> bookings =
-  //           snapshot.snapshot.value as Map<dynamic, dynamic>;
-
-  //       bookings.forEach((uid, bookingData) {
-  //         bookingsRef.child(uid).update({"marked": "not_marked"});
-  //       });
-  //     }
-  //   });
-  // }
-
   void _toggleAttendance(int index, String status) async {
     showDialog(
       barrierDismissible: false,
@@ -157,7 +139,9 @@ class _AttendancePageState extends State<AttendancePage> {
               leading: IconButton(
                 icon:
                     const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-                onPressed: () async {},
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
               elevation: 0,
             ),
@@ -233,13 +217,16 @@ class _AttendancePageState extends State<AttendancePage> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => ChatScreen(
-                                              recieverName:
-                                                  _students[index].name,
-                                              recieverUid:
-                                                  _students[index].userId,
-                                              recieverTel:
-                                                  _students[index].name,
-                                              isMobile: true)));
+                                                recieverName:
+                                                    _students[index].name,
+                                                recieverUid:
+                                                    _students[index].userId,
+                                                recieverTel:
+                                                    _students[index].name,
+                                                isMobile: true,
+                                                senderId:
+                                                    "driver ${firebaseUser!.uid}",
+                                              )));
                                 },
                                 child: Text(
                                   _students[index].name,

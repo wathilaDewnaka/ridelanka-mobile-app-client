@@ -1,7 +1,5 @@
 import 'package:client/global_variable.dart';
-import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/driver/manage_trips.dart';
-import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/screens/driver/vehicle_add.dart';
 import 'package:client/src/screens/rider/notifications_tab.dart';
 import 'package:client/src/screens/rider/profile_tab.dart';
@@ -17,9 +15,6 @@ class DriverHome extends StatefulWidget {
 }
 
 class _DriverHomeState extends State<DriverHome> {
-  String? driverName;
-  bool hasVehicle = false;
-
   String getGreeting() {
     final int hour = DateTime.now().hour;
     if (hour < 12) {
@@ -29,23 +24,6 @@ class _DriverHomeState extends State<DriverHome> {
     } else {
       return "Good Evening";
     }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getName();
-  }
-
-  void getName() async {
-    String? name = await HelperMethods.getDriverName(firebaseUser!.uid);
-    bool veh = await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
-
-    setState(() {
-      driverName = name;
-      hasVehicle = veh;
-    });
   }
 
   @override
@@ -102,7 +80,7 @@ class _DriverHomeState extends State<DriverHome> {
                     ),
                   ),
                   Text(
-                    driverName ?? "Mr. NaN",
+                    driverName,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -147,7 +125,7 @@ class _DriverHomeState extends State<DriverHome> {
                       iconImage:
                           'assets/images/driver_dashboard_images/attendance.png',
                       label: "Rides",
-                      onPressed: () 
+                      onPressed: () {
                         print("Rides pressed");
                         Navigator.push(
                             context,
@@ -169,12 +147,12 @@ class _DriverHomeState extends State<DriverHome> {
                     MenuButton(
                       iconImage:
                           'assets/images/driver_dashboard_images/van.png',
-                      label: hasVehicle ? "Add" : "View / Edit",
+                      label: !isVehicleExist ? "Add" : "View / Edit",
                       onPressed: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => VehicleAddScreen()));
+                                builder: (context) => VehicleAddScreen(isAdd: !isVehicleExist)));
                       },
                     ),
                     MenuButton(
