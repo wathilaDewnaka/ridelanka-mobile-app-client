@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/data_provider/prediction.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/models/address.dart';
 import 'package:client/src/widgets/message_bar.dart';
@@ -10,8 +12,10 @@ import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class VehicleAddScreen extends StatefulWidget {
   VehicleAddScreen({super.key, required this.isAdd});
@@ -213,7 +217,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         "endLng": Provider.of<AppData>(context, listen: false)
             .driverEndAddress
             .longituge
-      }
+      },
+      "ratings": {"average": 5.0, "count": 0}
     };
 
     try {
@@ -279,6 +284,63 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         _showDropdown = false;
       });
     }
+  }
+
+  Future<void> makePostRequest() async {
+    final url =
+        Uri.parse('https://harmonious-dream-production.up.railway.app/predict');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'start': startLocationController.text,
+        'end': endLocationController.text,
+        'type': vehicleType,
+        'service': type,
+        'distance': HelperMethods.haversine(
+            LatLng(
+                Provider.of<AppData>(context, listen: false)
+                    .driverStartAddress
+                    .latitude,
+                Provider.of<AppData>(context, listen: false)
+                    .driverStartAddress
+                    .longituge),
+            LatLng(
+                Provider.of<AppData>(context, listen: false)
+                    .driverEndAddress
+                    .latitude,
+                Provider.of<AppData>(context, listen: false)
+                    .driverEndAddress
+                    .longituge))
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      priceController.text = responseData['price'];
+    } else {
+      print("Error: ${response.statusCode}");
+    }
+  }
+
+  void predictPriceUsingAI() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+    
+    await makePostRequest();
+    ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+        title: "Predicted Price",
+        message: "Predicted price updated in input box",
+        type: MessageType.info));
+
+    Navigator.pop(context);
   }
 
   @override
@@ -525,7 +587,6 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                           } else {
                             details.onStepCancel!();
                           }
-                        
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
@@ -717,7 +778,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                 child: TextField(
                                   controller: priceController,
                                   decoration: const InputDecoration(
-                                    labelText: 'Price',
+                                    labelText: 'Price (Rs)',
                                     border: OutlineInputBorder(),
                                   ),
                                 ),
@@ -726,7 +787,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                 flex: 3,
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    // Predict action
+                                    predictPriceUsingAI();
                                   },
                                   style: ElevatedButton.styleFrom(
                                     minimumSize:

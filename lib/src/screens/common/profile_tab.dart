@@ -1,6 +1,7 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
-import 'package:client/src/screens/rider/settings_tab.dart';
+import 'package:client/src/screens/common/chat_screen_ai.dart';
+import 'package:client/src/screens/common/settings_tab.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
@@ -22,7 +23,6 @@ class _ProfileTabState extends State<ProfileTab> {
   late String phone = "";
   bool isLoading = true; // Control UI visibility
 
-
   Future<void> _logout(BuildContext context) async {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -30,9 +30,6 @@ class _ProfileTabState extends State<ProfileTab> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove("isPassenger");
 
-    await prefs.remove(
-        "isPassenger");
-    // Navigate to the login page or perform other actions after logout
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
     );
@@ -94,9 +91,13 @@ class _ProfileTabState extends State<ProfileTab> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white
+        ),
         backgroundColor: Color(0xFF0051ED),
         title: isLoading
             ? null // Show nothing while loading
@@ -157,7 +158,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ? Container()
           : ListView(
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.only(left: 25.0),
                   child: Text(
@@ -172,7 +173,8 @@ class _ProfileTabState extends State<ProfileTab> {
                     "${fullName.split(" ")[1]} ${fullName.split(" ")[2]}"),
                 _buildInfoTile(Icons.email, 'Email', email),
                 _buildInfoTile(Icons.phone, 'Phone Number', phone),
-                const SizedBox(height: 40),
+                GestureDetector(child: _buildInfoTile(Icons.chat, "Chat", "Chat with our AI"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreenAI())),),
+                const SizedBox(height: 10),
                 _buildSettingsAndLogoutButtons(),
               ],
             ),
@@ -193,7 +195,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
         ],
       ),
-      padding: EdgeInsets.only(left: 13, bottom: 20, top: 20),
+      padding: EdgeInsets.only(left: 13, bottom: 18, top: 18),
       margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Row(
         children: [
@@ -253,30 +255,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF0051ED),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => SettingsTab()),
-                      // );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0051ED), // Button color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                    ),
-                    icon: Icon(Icons.settings, color: Colors.white, size: 26),
-                    label: Text(
-                      'Settings',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -291,40 +270,39 @@ class _ProfileTabState extends State<ProfileTab> {
           ],
         ),
         SizedBox(height: 10),
-       
-              SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {
-                  _logout(context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 70, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0051ED),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.logout,
-                            size: 26,
+        GestureDetector(
+          onTap: () {
+            _logout(context);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF0051ED),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          size: 26,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Log Out',
+                          style: TextStyle(
                             color: Colors.white,
+                            fontSize: 16,
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Log Out',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

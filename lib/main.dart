@@ -14,7 +14,6 @@ import 'package:client/src/screens/auth/mobile_login_screen.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

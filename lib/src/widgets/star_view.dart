@@ -1,11 +1,14 @@
+import 'package:client/src/screens/rider/ratings_reviews_tab.dart';
 import 'package:flutter/material.dart';
 
 class StarView extends StatelessWidget {
   final double rating;
+  final String driverUid;
 
   const StarView({
     Key? key,
     required this.rating,
+    required this.driverUid
   }) : super(key: key);
 
   @override
@@ -19,7 +22,6 @@ class StarView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           Row(
             children: [
               const Icon(Icons.star, color: Colors.amber, size: 20),
@@ -33,15 +35,23 @@ class StarView extends StatelessWidget {
           // Views counter
           GestureDetector(
             onTap: () {
-
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ReviewsRatings(driverId: driverUid)));
             },
             child: Row(
               children: [
-                Icon(Icons.visibility, size: 20, color: Colors.blue[500],),
+                Icon(
+                  Icons.visibility,
+                  size: 20,
+                  color: Colors.blue[800],
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'View details',
-                  style:  TextStyle(fontSize: 16, color: Colors.blue[500]),
+                  style: TextStyle(fontSize: 16, color: Colors.blue[800]),
                 ),
               ],
             ),

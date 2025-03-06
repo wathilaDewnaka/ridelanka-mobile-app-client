@@ -1,7 +1,7 @@
 import 'package:client/src/screens/rider/history_tab.dart';
 import 'package:client/src/screens/rider/home_tab.dart';
-import 'package:client/src/screens/rider/notifications_tab.dart';
-import 'package:client/src/screens/rider/profile_tab.dart';
+import 'package:client/src/screens/common/notifications_tab.dart';
+import 'package:client/src/screens/common/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class RiderNavigationMenu extends StatefulWidget {

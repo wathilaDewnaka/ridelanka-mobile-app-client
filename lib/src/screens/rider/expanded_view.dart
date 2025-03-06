@@ -446,7 +446,8 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
-                      StarView(rating: 5)
+
+                      StarView(rating: 5, driverUid: widget.driverUid)
                     ],
                   ),
                 ),

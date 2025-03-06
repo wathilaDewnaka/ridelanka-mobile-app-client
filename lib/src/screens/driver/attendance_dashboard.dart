@@ -1,6 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/models/attendance_mark.dart';
-import 'package:client/src/widgets/chat_screen.dart';
+import 'package:client/src/screens/common/chat_screen.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -225,7 +225,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                                     _students[index].name,
                                                 isMobile: true,
                                                 senderId:
-                                                    "driver ${firebaseUser!.uid}",
+                                                    "drivers ${firebaseUser!.uid}",
                                               )));
                                 },
                                 child: Text(

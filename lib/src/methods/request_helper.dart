@@ -19,4 +19,16 @@ class RequestHelper {
       return 'failed';
     }
   }
+
+  static Future<String> fetchData(String url) async {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonData = jsonDecode(response.body);
+
+      return jsonData['response'] ?? 'Something went wrong !';
+    } else {
+      return 'Something went wrong !';
+    }
+  }
 }

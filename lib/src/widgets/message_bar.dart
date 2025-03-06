@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
 
-enum MessageType { success, error }
+enum MessageType { success, error, info }
 
 SnackBar createMessageBar({
   String title = "Success",
-  String message = "Sucess message description",
+  String message = "Success message description",
   MessageType type = MessageType.success,
 }) {
   // Set the color and icon based on the message type
   Color backgroundColor;
   Icon icon;
 
-  if (type == MessageType.error) {
-    backgroundColor = Colors.red;
-    icon = const Icon(Icons.error, color: Colors.white, size: 40);
-  } else {
-    backgroundColor = Colors.green;
-    icon = const Icon(Icons.check_circle, color: Colors.white, size: 40);
+  switch (type) {
+    case MessageType.error:
+      backgroundColor = Colors.red;
+      icon = const Icon(Icons.error, color: Colors.white, size: 40);
+      break;
+    case MessageType.info:
+      backgroundColor = Colors.blue;
+      icon = const Icon(Icons.info, color: Colors.white, size: 40);
+      break;
+    default:
+      backgroundColor = Colors.green;
+      icon = const Icon(Icons.check_circle, color: Colors.white, size: 40);
   }
 
   return SnackBar(

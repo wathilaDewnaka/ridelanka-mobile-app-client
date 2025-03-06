@@ -34,7 +34,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Stack(
           alignment: Alignment.center,
-        appBar: AppBar(title: Text("Card Payment")),
+          children: [
+            AppBar(
+            backgroundColor: const Color(0xFF0051ED),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                onPressed: () async {
+                  // Add your navigation logic here
+                  Navigator.pop(context); // Example navigation
+                },
+              ),
+              elevation: 0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 17.0),
+              child: Text(
+                "Card Payment",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -94,40 +119,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     setState(() {
                       isProcessing = true;
                     });
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  setState(() {
-                    isProcessing = true;
-                  });
 
-                  // Simulate payment processing
-                  await Future.delayed(Duration(seconds: 2));
+                    // Simulate payment processing
+                    await Future.delayed(Duration(seconds: 2));
 
-                  setState(() {
-                    isProcessing = false;
-                  });
+                    setState(() {
+                      isProcessing = false;
+                    });
 
-                  showPaymentResult(true); // or false for failure
-                } else {
-                  print("Invalid Card Details");
-                }
-              },
-              child: isProcessing
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      "Pay \$97.42",
-                      style: TextStyle(
-                        color: Colors.blue, // Change this to any color you want
-                        fontSize: 18, // Optional: Adjust font size
-                        fontWeight:
-                            FontWeight.bold, // Optional: Add bold font weight
+                    showPaymentResult(true); // or false for failure
+                  } else {
+                    print("Invalid Card Details");
+                  }
+                },
+                child: isProcessing
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        "Pay \$97.42",
+                        style: TextStyle(
+                          color: Colors.blue, // Change this to any color you want
+                          fontSize: 18, // Optional: Adjust font size
+                          fontWeight: FontWeight.bold, // Optional: Add bold font weight
+                        ),
                       ),
-                    ),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                textStyle: TextStyle(fontSize: 18),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                ),
               ),
             ],
           ),

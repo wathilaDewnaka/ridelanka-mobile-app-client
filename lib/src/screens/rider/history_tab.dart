@@ -3,7 +3,7 @@ import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/screens/rider/track_vehicle.dart';
-import 'package:client/src/widgets/chat_screen.dart';
+import 'package:client/src/screens/common/chat_screen.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -563,7 +563,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                                       recieverUid: trip.id,
                                                       recieverTel: "",
                                                       isMobile: true,
-                                                      senderId: "user ${firebaseUser!.uid}",
+                                                      senderId: "users ${firebaseUser!.uid}",
                                                     )),
                                           );
                                         },

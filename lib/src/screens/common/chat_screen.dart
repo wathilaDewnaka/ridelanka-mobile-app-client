@@ -56,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final messageData = {
         'text': EncryptMethods.encryptText(_messageController.text),
         'sender': EncryptMethods.encryptText(senderId),
-        'receiver': EncryptMethods.encryptText(senderId.split(" ")[0] == "drivers" ? "users " : "drivers " + receiverId),
+        'receiver': EncryptMethods.encryptText(senderId.split(" ")[0] == "drivers" ? "users " + receiverId : "drivers " + receiverId),
         'timestamp': ServerValue.timestamp,
       };
 
