@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/models/driver.dart';
 import 'package:client/src/screens/driver/attendance_dashboard.dart';
 import 'package:client/src/widgets/confirm_sheet.dart';
@@ -168,6 +169,17 @@ class _RidesTabState extends State<RidesTab> {
       });
       await pref.setString(
           uid, DateTime.now().microsecondsSinceEpoch.toString());
+
+      try {
+        DatabaseReference fcm =
+            FirebaseDatabase.instance.ref().child("users/$uid/token");
+        DataSnapshot snapshot = await fcm.get();
+        String token = snapshot.value as String;
+        PushNotificationService.sendNotificationsToUsers(
+            token, "User Dropped Up", "User has been dropped by the driver");
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -364,7 +376,7 @@ class _RidesTabState extends State<RidesTab> {
 
     final prefs = await SharedPreferences.getInstance();
     final service = FlutterBackgroundService();
-    
+
     await prefs.setString('online', "true");
     await prefs.setString("driverId", firebaseUser!.uid);
 

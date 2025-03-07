@@ -1,4 +1,5 @@
 import 'package:client/global_variable.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/models/attendance_mark.dart';
 import 'package:client/src/screens/common/chat_screen.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
@@ -101,6 +102,7 @@ class _AttendancePageState extends State<AttendancePage> {
     );
 
     AttendanceMark attendanceMark = _students[index];
+
     DatabaseReference att = FirebaseDatabase.instance
         .ref()
         .child("drivers/${firebaseUser!.uid}/bookings/${attendanceMark.id}");
@@ -109,19 +111,34 @@ class _AttendancePageState extends State<AttendancePage> {
         .ref()
         .child("users/${attendanceMark.userId}/notifications");
 
+    try {
+      DatabaseReference fcm = FirebaseDatabase.instance
+          .ref()
+          .child("users/${attendanceMark.userId}/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(
+          token, "User Picked Up", "User has been picked up by the driver");
+    } catch (e) {
+      print(e);
+    }
+
     await att.update({"marked": status});
 
-    Map<String, String> userNotifications = {
-      "title": "User has been picked up",
-      "description": "User has been picked up by the driver",
-      "icon": "tick",
-      "date": DateTime.now().microsecondsSinceEpoch.toString(),
-      "isRead": "false",
-      "isActive": ""
-    };
+    if (status == "P") {
+      Map<String, String> userNotifications = {
+        "title": "User has been picked up",
+        "description": "User has been picked up by the driver",
+        "icon": "tick",
+        "date": DateTime.now().microsecondsSinceEpoch.toString(),
+        "isRead": "false",
+        "isActive": ""
+      };
 
-    await noti.push().set(userNotifications);
-    getAttendance();
+      await noti.push().set(userNotifications);
+    }
+
+    await getAttendance();
     Navigator.pop(context);
   }
 

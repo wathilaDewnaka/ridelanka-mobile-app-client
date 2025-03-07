@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/methods/initialize_push.dart';
 import 'package:client/src/screens/auth/on_board_screen.dart';
 import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
@@ -34,12 +35,15 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       });
     } else {
-      bool isPassenger = await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+      bool isPassenger =
+          await HelperMethods.checkIsPassenger(firebaseUser!.uid);
+      InitializePush().initialize();
 
       if (!isPassenger) {
         isVehicleExist =
             await HelperMethods.checkIsVehicleExist(firebaseUser!.uid);
-        driverName = await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
+        driverName =
+            await HelperMethods.getDriverName(firebaseUser!.uid) ?? "Mr. N /A";
       }
 
       Future.delayed(const Duration(seconds: 3), () {
@@ -47,9 +51,9 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(
             builder: (_) => isPassenger
                 ? const RiderNavigationMenu(selectedIndex: 0)
-                : const DriverHome() 
-                // : const RiderNavigationMenu(selectedIndex: 0)
-                ,
+                : const DriverHome()
+            // : const RiderNavigationMenu(selectedIndex: 0)
+            ,
           ),
         );
       });
