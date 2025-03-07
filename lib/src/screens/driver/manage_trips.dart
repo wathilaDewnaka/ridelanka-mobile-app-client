@@ -364,6 +364,7 @@ class _RidesTabState extends State<RidesTab> {
 
     final prefs = await SharedPreferences.getInstance();
     final service = FlutterBackgroundService();
+    
     await prefs.setString('online', "true");
     await prefs.setString("driverId", firebaseUser!.uid);
 

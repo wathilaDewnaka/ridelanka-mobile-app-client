@@ -2,6 +2,7 @@ import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
+import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:client/src/widgets/star_view.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,9 @@ class ExpandedView extends StatefulWidget {
       required this.mainPoints,
       required this.endKm,
       required this.vehicleNo,
-      required this.vehType});
+      required this.vehType,
+      required this.rate,
+      required this.count});
 
   final String driverUid;
   final String driverName;
@@ -40,15 +43,17 @@ class ExpandedView extends StatefulWidget {
   final String seatCap;
   final String mainPoints;
   final String vehType;
+
   final int startKm;
   final int endKm;
   final String startPl;
   final String endPl;
+  final double rate;
+  final int count;
 
   @override
   State<ExpandedView> createState() => _ExpandedViewState();
 }
-
 
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
@@ -121,9 +126,8 @@ class _ExpandedViewState extends State<ExpandedView> {
       remainingTime = totalDisableTime;
     });
 
-    String? pickupLocation = Provider.of<AppData>(context, listen: false)
-        .pickupAddress
-        .placeName;
+    String? pickupLocation =
+        Provider.of<AppData>(context, listen: false).pickupAddress.placeName;
     String? destLocation = Provider.of<AppData>(context, listen: false)
         .destinationAddress
         .placeName;
@@ -134,19 +138,30 @@ class _ExpandedViewState extends State<ExpandedView> {
       "start": pickupLocation,
       "end": destLocation,
       "driverUid": widget.driverUid,
-      "subscriptionDate": DateTime.now().add(const Duration(days: 30)).microsecondsSinceEpoch.toString(),
+      "subscriptionDate": DateTime.now()
+          .add(const Duration(days: 30))
+          .microsecondsSinceEpoch
+          .toString(),
       "isActive": "Pending",
       "location": {
-        "startLat": Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
-        "startLng": Provider.of<AppData>(context, listen: false).pickupAddress.longituge,
-        "endLat": Provider.of<AppData>(context, listen: false).destinationAddress.latitude,
-        "endLng": Provider.of<AppData>(context, listen: false).destinationAddress.longituge
+        "startLat":
+            Provider.of<AppData>(context, listen: false).pickupAddress.latitude,
+        "startLng": Provider.of<AppData>(context, listen: false)
+            .pickupAddress
+            .longituge,
+        "endLat": Provider.of<AppData>(context, listen: false)
+            .destinationAddress
+            .latitude,
+        "endLng": Provider.of<AppData>(context, listen: false)
+            .destinationAddress
+            .longituge
       }
     };
 
     Map<String, String> driverNotifications = {
       "title": "Booking Request",
-      "description":  "New booking request from $pickupLocation to $destLocation",
+      "description":
+          "New booking request from $pickupLocation to $destLocation",
       "icon": "new",
       "date": DateTime.now().microsecondsSinceEpoch.toString(),
       "isRead": "false",
@@ -286,14 +301,10 @@ class _ExpandedViewState extends State<ExpandedView> {
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      children: List.generate(
-                        5,
-                        (index) => const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 20,
-                        ),
-                      ),
+                      children: [
+                        VehicleRatingBarIndicator(rating: widget.rate),
+                        Text(" ${widget.rate}/5.0 (${widget.count})")
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -334,7 +345,7 @@ class _ExpandedViewState extends State<ExpandedView> {
                 ),
               ),
 
-              SizedBox(height: 18),
+              SizedBox(height: 12),
 
               Expanded(
                 child: SingleChildScrollView(
@@ -374,7 +385,10 @@ class _ExpandedViewState extends State<ExpandedView> {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [const Text("Vehicle Type"), Text(widget.vehType)],
+                              children: [
+                                const Text("Vehicle Type"),
+                                Text(widget.vehType)
+                              ],
                             ),
                             const SizedBox(
                               height: 14,
@@ -411,9 +425,10 @@ class _ExpandedViewState extends State<ExpandedView> {
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text("Main Start and End"),
-                                Text(widget.mainPoints)
+                                SizedBox(width: 170, child: Text(widget.mainPoints, textAlign: TextAlign.end,))
                               ],
                             )
                           ],
@@ -432,22 +447,24 @@ class _ExpandedViewState extends State<ExpandedView> {
                           ),
                         ),
                       ),
-                      
+
                       // Route Details
                       Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          textAlign: TextAlign.justify,
-                          widget.routeDetails,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.5,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            textAlign: TextAlign.justify,
+                            widget.routeDetails,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
                           ),
                         ),
                       ),
-
-                      StarView(rating: 5, driverUid: widget.driverUid)
+                      StarView(rating: widget.rate, driverUid: widget.driverUid)
                     ],
                   ),
                 ),

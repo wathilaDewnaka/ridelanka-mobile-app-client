@@ -34,13 +34,13 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
     DatabaseReference databaseReference2 =
         FirebaseDatabase.instance.ref("drivers/${widget.driverId}/ratings");
 
-    Map<String, dynamic> mapOfData = await getAverageRating(widget.driverId);
-
     await databaseReference.set({
       'rate': rating,
       'message': text,
       'timestamp': DateTime.now().microsecondsSinceEpoch.toString()
     });
+
+    Map<String, dynamic> mapOfData = await getAverageRating(widget.driverId);
     await databaseReference2
         .update({"total": mapOfData['average'], "count": mapOfData['count']});
 
@@ -81,10 +81,12 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
           DatabaseReference driverRef =
               FirebaseDatabase.instance.ref().child('users/${child.key}');
           DataSnapshot snapshot = await driverRef.get();
+          print(notificationData);
 
           if (snapshot.exists) {
             Map<dynamic, dynamic> userData =
                 Map<dynamic, dynamic>.from(snapshot.value as Map);
+            print(userData);
 
             try {
               Ratings notificationItem = Ratings.fromJson(
@@ -104,6 +106,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
       setState(() {
         notificationAll = newNotifications.reversed.toList();
         canPostReview = canPost;
+        loading = false;
       });
     } else {
       print("No notifications found in the main path.");
@@ -116,7 +119,7 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
 
   Future<Map<String, dynamic>> getAverageRating(String driverId) async {
     DatabaseReference databaseReference =
-        FirebaseDatabase.instance.ref("drivers/$driverId/ratings");
+        FirebaseDatabase.instance.ref("drivers/$driverId/ratings/reviews");
 
     DataSnapshot snapshot = await databaseReference.get();
 
@@ -130,14 +133,14 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
     Map<dynamic, dynamic> ratings = snapshot.value as Map<dynamic, dynamic>;
 
     ratings.forEach((key, value) {
+      print(ratings);
       if (value is Map && value.containsKey('rate')) {
         totalRating += (value['rate'] as num).toDouble();
         count++;
       }
     });
 
-    double averageRating = count > 0 ? totalRating / count : 0.0;
-
+    double averageRating = count > 0 ? totalRating / count : 5.0;
     return {'average': averageRating, 'count': count};
   }
 
@@ -299,15 +302,18 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
                         );
                       },
                     )
-                  : SizedBox(
+                  : !loading ? const SizedBox(
                       height: 100,
                       width: double.infinity,
-                      child: Text(
-                        "No reviews or ratings found",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 16.0, left: 10),
+                        child: Text(
+                          "No reviews or ratings found",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
                       ),
-                    ),
+                    ) : null,
             ),
           ],
         ),

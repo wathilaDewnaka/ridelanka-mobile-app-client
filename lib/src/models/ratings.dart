@@ -19,8 +19,8 @@ class Ratings {
     return Ratings(
       fullname: fullname,
       timestamp: json['timestamp'] ?? '',
-      count: json['count'] ?? '',
-      description: json['description'] ?? '',
+      count: json['rate'] * 1.0 ?? 5.0,
+      description: json['message'] ?? '',
       id: uid,
     );
   }

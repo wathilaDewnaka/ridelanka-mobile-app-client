@@ -15,6 +15,7 @@ import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,6 +27,7 @@ Future<void> main() async {
   );
 
   firebaseUser = FirebaseAuth.instance.currentUser;
+  await requestPermissions();
   await initializeService();
 
   runApp(const MyApp());
@@ -36,12 +38,12 @@ Future<void> initializeService() async {
 
   await service.configure(
     iosConfiguration: IosConfiguration(
-      autoStart: true,
+      autoStart: false,
       onForeground: onStart,
       onBackground: onIosBackground,
     ),
     androidConfiguration: AndroidConfiguration(
-      autoStart: true,
+      autoStart: false,
       onStart: onStart,
       isForegroundMode: true,
       autoStartOnBoot: true,
@@ -106,6 +108,24 @@ void onStart(ServiceInstance service) async {
       }
     }
   });
+}
+
+Future<void> requestPermissions() async {
+  PermissionStatus locationStatus = await Permission.location.status;
+  if (!locationStatus.isGranted) {
+    await Permission.location.request();
+  }
+
+  PermissionStatus notificationStatus = await Permission.notification.status;
+  if (!notificationStatus.isGranted) {
+    await Permission.notification.request();
+  }
+
+  PermissionStatus backgroundStatus =
+      await Permission.accessMediaLocation.status;
+  if (!backgroundStatus.isGranted) {
+    await Permission.accessMediaLocation.request();
+  }
 }
 
 class MyApp extends StatelessWidget {

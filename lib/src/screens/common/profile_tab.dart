@@ -27,8 +27,18 @@ class _ProfileTabState extends State<ProfileTab> {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
     await _auth.signOut();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("isPassenger");
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String online = prefs.getString("online") ?? "false";
+    if (online == "true") {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "End the trip to logout",
+          type: MessageType.error));
+      return;
+    }
+
+    await prefs.clear(); // Removes all stored preferences
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
@@ -95,9 +105,7 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white
-        ),
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Color(0xFF0051ED),
         title: isLoading
             ? null // Show nothing while loading
@@ -173,7 +181,13 @@ class _ProfileTabState extends State<ProfileTab> {
                     "${fullName.split(" ")[1]} ${fullName.split(" ")[2]}"),
                 _buildInfoTile(Icons.email, 'Email', email),
                 _buildInfoTile(Icons.phone, 'Phone Number', phone),
-                GestureDetector(child: _buildInfoTile(Icons.chat, "Chat", "Chat with our AI"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreenAI())),),
+                GestureDetector(
+                  child: _buildInfoTile(Icons.chat, "Chat", "Chat with our AI"),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ChatScreenAI())),
+                ),
                 const SizedBox(height: 10),
                 _buildSettingsAndLogoutButtons(),
               ],

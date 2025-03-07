@@ -32,34 +32,34 @@ class _HistoryTabState extends State<HistoryTab> {
       List<TripItem> newNotifications = [];
       for (var child in mainNotificationsSnapshot.children) {
         if (child.value is Map<dynamic, dynamic>) {
-          Map<dynamic, dynamic> notificationData =
-              child.value as Map<dynamic, dynamic>;
-          print(notificationData);
+          try {
+            Map<dynamic, dynamic> notificationData =
+                child.value as Map<dynamic, dynamic>;
+            String? driverUid = notificationData['driverUid'] as String?;
 
-          String? driverUid = notificationData['driverUid'] as String?;
+            DatabaseReference driverRef =
+                FirebaseDatabase.instance.ref().child('drivers/$driverUid');
+            DataSnapshot snapshot = await driverRef.get();
 
-          DatabaseReference driverRef =
-              FirebaseDatabase.instance.ref().child('drivers/$driverUid');
-          DataSnapshot snapshot = await driverRef.get();
+            Map<dynamic, dynamic> driverData =
+                snapshot.value as Map<dynamic, dynamic>;
 
-          Map<dynamic, dynamic> driverData =
-              snapshot.value as Map<dynamic, dynamic>;
+            double vehiclePrice = driverData['vehiclePrice'] is double
+                ? driverData['vehiclePrice']
+                : double.tryParse(driverData['vehiclePrice'].toString()) ?? 0.0;
 
-          double vehiclePrice = driverData['vehiclePrice'] is double
-              ? driverData['vehiclePrice']
-              : double.tryParse(driverData['vehiclePrice'].toString()) ?? 0.0;
-
-          newNotifications.add(TripItem.fromJson(
-              notificationData,
-              child.key,
-              vehiclePrice,
-              driverData['fullname'] ?? "",
-              driverData['vehicleName'] ?? "",
-              driverData['vehicleNo'] ?? ""));
+            newNotifications.add(TripItem.fromJson(
+                notificationData,
+                child.key,
+                vehiclePrice,
+                driverData['fullname'] ?? "",
+                driverData['vehicleName'] ?? "",
+                driverData['vehicleNo'] ?? ""));
+          } catch (e) {
+            print(e);
+          }
         }
       }
-
-      print(newNotifications.toList());
 
       if (mounted) {
         setState(() {
@@ -68,8 +68,6 @@ class _HistoryTabState extends State<HistoryTab> {
         });
       }
     } else {
-      print("No trips found in the main path.");
-
       if (mounted) {
         setState(() {
           loading = false;
@@ -563,7 +561,8 @@ class _HistoryTabState extends State<HistoryTab> {
                                                       recieverUid: trip.id,
                                                       recieverTel: "",
                                                       isMobile: true,
-                                                      senderId: "users ${firebaseUser!.uid}",
+                                                      senderId:
+                                                          "users ${firebaseUser!.uid}",
                                                     )),
                                           );
                                         },
@@ -605,9 +604,10 @@ class _HistoryTabState extends State<HistoryTab> {
                                           ElevatedButton.icon(
                                             onPressed: () {
                                               Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => TrackVehicle()));
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          TrackVehicle()));
                                             },
                                             icon: const Icon(Icons.visibility,
                                                 size: 18),

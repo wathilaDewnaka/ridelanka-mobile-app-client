@@ -1,8 +1,8 @@
 import 'package:client/src/models/available_vehicles.dart';
 import 'package:client/src/models/vehicles.dart';
 import 'package:client/src/screens/rider/expanded_view.dart';
-// import 'package:client/src/screens/rider/expanded_view.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
+import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +39,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
       );
 
       // Initialize async tasks
-      _initializeAsyncTasks().then((_) {
+      _getVehicles().then((_) {
         // After tasks are complete, dismiss the dialog
         Navigator.pop(context);
         setState(() {
@@ -54,7 +54,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
     });
   }
 
-  Future<void> _initializeAsyncTasks() async {
+  Future<void> _getVehicles() async {
     List<AvailableVehicles> vehicles =
         await HelperMethods.findNearestVehicles(context, widget.isStudent);
     final databaseReference = FirebaseDatabase.instance.ref("drivers");
@@ -68,6 +68,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
         if (vehicleSnapshot.exists) {
           final Map<String, dynamic> vehicleData =
               Map<String, dynamic>.from(vehicleSnapshot.value as Map);
+          print(vehicleData);
           fetchedVehicles.add(Vehicle.fromJson(vehicleData, uid.uid,
               uid.startKm, uid.endKm, uid.startPlaceName, uid.endPlaceName));
         } else {
@@ -258,11 +259,13 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                       endKm: ride.endKm,
                                       startPl: ride.startPlaceName,
                                       endPl: ride.endPlaceName,
-                                      mainPoints: "",
-                                      seatCap: "",
-                                      vehType: "",
-                                      lang: "",
-                                      exp: "",
+                                      mainPoints: ride.mainPoints,
+                                      seatCap: ride.seatCapacity,
+                                      vehType: ride.vehicleType,
+                                      lang: ride.lang,
+                                      exp: ride.driverExperience,
+                                      rate: ride.rate,
+                                      count: ride.count,
                                     )));
                       },
                       child: Card(
@@ -326,18 +329,11 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                       style: TextStyle(color: Colors.grey[700]),
                                     ),
                                     const SizedBox(height: 8),
-                                    Row(
-                                      children: List.generate(
-                                        5,
-                                        (starIndex) => Icon(
-                                          starIndex < 4
-                                              ? Icons.star
-                                              : Icons.star_half,
-                                          color: Colors.amber,
-                                          size: 22,
-                                        ),
-                                      ),
-                                    ),
+                                    Row(children: [
+                                      VehicleRatingBarIndicator(
+                                          rating: ride.rate),
+                                      Text(" ${ride.rate}/5.0")
+                                    ]),
                                   ],
                                 ),
                               ),
