@@ -7,7 +7,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class AttendancePage extends StatefulWidget {
-  const AttendancePage({super.key});
+  const AttendancePage({super.key, required this.isAttendance});
+
+  final bool isAttendance;
 
   @override
   _AttendancePageState createState() => _AttendancePageState();
@@ -110,19 +112,6 @@ class _AttendancePageState extends State<AttendancePage> {
     DatabaseReference noti = FirebaseDatabase.instance
         .ref()
         .child("users/${attendanceMark.userId}/notifications");
-
-    try {
-      DatabaseReference fcm = FirebaseDatabase.instance
-          .ref()
-          .child("users/${attendanceMark.userId}/token");
-      DataSnapshot snapshot = await fcm.get();
-      String token = snapshot.value as String;
-      PushNotificationService.sendNotificationsToUsers(
-          token, "User Picked Up", "User has been picked up by the driver");
-    } catch (e) {
-      print(e);
-    }
-
     await att.update({"marked": status});
 
     if (status == "P") {
@@ -136,6 +125,41 @@ class _AttendancePageState extends State<AttendancePage> {
       };
 
       await noti.push().set(userNotifications);
+
+      try {
+        DatabaseReference fcm = FirebaseDatabase.instance
+            .ref()
+            .child("users/${attendanceMark.userId}/token");
+        DataSnapshot snapshot = await fcm.get();
+        String token = snapshot.value as String;
+        PushNotificationService.sendNotificationsToUsers(
+            token, "User Picked Up", "User has been picked up by the driver");
+      } catch (e) {
+        print(e);
+      }
+    } else {
+      Map<String, String> userNotifications = {
+        "title": "User marked absent",
+        "description": "User has been marked absent by the driver",
+        "icon": "tick",
+        "date": DateTime.now().microsecondsSinceEpoch.toString(),
+        "isRead": "false",
+        "isActive": ""
+      };
+
+      await noti.push().set(userNotifications);
+
+      try {
+        DatabaseReference fcm = FirebaseDatabase.instance
+            .ref()
+            .child("users/${attendanceMark.userId}/token");
+        DataSnapshot snapshot = await fcm.get();
+        String token = snapshot.value as String;
+        PushNotificationService.sendNotificationsToUsers(
+            token, "User Absent", "User has been marked absent by the driver");
+      } catch (e) {
+        print(e);
+      }
     }
 
     await getAttendance();
@@ -162,10 +186,10 @@ class _AttendancePageState extends State<AttendancePage> {
               ),
               elevation: 0,
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 17.0),
               child: Text(
-                "Attendance",
+                widget.isAttendance ? "Attendance" : "View Students",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -191,19 +215,20 @@ class _AttendancePageState extends State<AttendancePage> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               color: const Color.fromARGB(255, 255, 255, 255),
-              child: const Row(
+              child:  Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Student Name',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Spacer(), // Pushes the next text to the right
-                  Text(
-                    'Present / Absent',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right, // Ensures text is right-aligned
-                  ),
+                  const Spacer(), // Pushes the next text to the right
+                  if (widget.isAttendance)
+                    const Text(
+                      'Present / Absent',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right, // Ensures text is right-aligned
+                    ),
                 ],
               ),
             ),
@@ -237,7 +262,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                                 recieverName:
                                                     _students[index].name,
                                                 recieverUid:
-                                                    _students[index].userId,
+                                                    "users " + _students[index].userId,
                                                 recieverTel:
                                                     _students[index].name,
                                                 isMobile: true,
@@ -259,41 +284,42 @@ class _AttendancePageState extends State<AttendancePage> {
                             ],
                           ),
                         ),
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _students[index].marked == 'P'
-                                    ? Colors.green
-                                    : Colors.grey.shade300,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
+                        if (widget.isAttendance)
+                          Row(
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _students[index].marked == 'P'
+                                      ? Colors.green
+                                      : Colors.grey.shade300,
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 15),
+                                ),
+                                onPressed: () => _toggleAttendance(index, 'P'),
+                                child: const Text('P',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold)),
                               ),
-                              onPressed: () => _toggleAttendance(index, 'P'),
-                              child: const Text('P',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                            const SizedBox(width: 5),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _students[index].marked == 'A'
-                                    ? Colors.red
-                                    : Colors.grey.shade300,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 15),
+                              const SizedBox(width: 5),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _students[index].marked == 'A'
+                                      ? Colors.red
+                                      : Colors.grey.shade300,
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 15),
+                                ),
+                                onPressed: () => _toggleAttendance(index, 'A'),
+                                child: const Text('A',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold)),
                               ),
-                              onPressed: () => _toggleAttendance(index, 'A'),
-                              child: const Text('A',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                        ],
+                      ),
                   );
                 },
               ),

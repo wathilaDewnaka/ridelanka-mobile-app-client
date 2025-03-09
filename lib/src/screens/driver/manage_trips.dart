@@ -261,7 +261,7 @@ class _RidesTabState extends State<RidesTab> {
             },
           ),
           Container(
-            height: isAvailable ? 235 : 135,
+            height: 235,
             width: double.infinity,
             color: Color(0xFF0e1526),
           ),
@@ -341,7 +341,8 @@ class _RidesTabState extends State<RidesTab> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => AttendancePage()));
+                                builder: (context) =>
+                                    const AttendancePage(isAttendance: true)));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: availabilityColor,
@@ -352,6 +353,40 @@ class _RidesTabState extends State<RidesTab> {
                       ),
                       child: const Text(
                         "Mark Attendance",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Positioned(
+              top: 120,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 230,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const AttendancePage(isAttendance: false)));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: availabilityColor,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: const Text(
+                        "View Users",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ),

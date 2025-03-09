@@ -1,4 +1,5 @@
 import 'package:client/src/methods/encrypt_methods.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,22 +50,35 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void sendMessage() {
-    print("object");
+  void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      print("object2");
       final messageData = {
         'text': EncryptMethods.encryptText(_messageController.text),
         'sender': EncryptMethods.encryptText(senderId),
-        'receiver': EncryptMethods.encryptText(senderId.split(" ")[0] == "drivers" ? "users " + receiverId : "drivers " + receiverId),
+        'receiver': EncryptMethods.encryptText(receiverId),
         'timestamp': ServerValue.timestamp,
       };
 
       _dbRef.child('messages').push().set(messageData);
-      print("object3");
       _messageController.clear();
+
+      // try {
+      //   DatabaseReference fcm = senderId.split(" ")[0] == "drivers"
+      //       ? FirebaseDatabase.instance
+      //           .ref()
+      //           .child("users/${widget.recieverUid}/token")
+      //       : FirebaseDatabase.instance
+      //           .ref()
+      //           .child("drivers/${widget.recieverUid}/token");
+
+      //   DataSnapshot snapshot = await fcm.get();
+      //   String token = snapshot.value as String;
+      //   PushNotificationService.sendNotificationsToUsers(token,
+      //       "New chat ", "User is absenting check details");
+      // } catch (e) {
+      //   print(e);
+      // }
     }
-    print("object4");
   }
 
   @override

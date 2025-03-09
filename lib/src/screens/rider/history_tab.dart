@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/models/trip_item.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/screens/rider/track_vehicle.dart';
@@ -93,6 +94,13 @@ class _HistoryTabState extends State<HistoryTab> {
   void renewSubscription(String tripId) async {
     if (tripId.isEmpty) return;
 
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
     DatabaseReference book = FirebaseDatabase.instance
         .ref()
         .child('users/${firebaseUser!.uid}/bookings/$tripId');
@@ -121,11 +129,31 @@ class _HistoryTabState extends State<HistoryTab> {
     };
 
     noti.push().set(driverNotifications);
-    getTrips();
+
+    try {
+      DatabaseReference fcm =
+          FirebaseDatabase.instance.ref().child("drivers/$driverUid/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(
+          token, "User Renew Request", "User has been added a renew request");
+    } catch (e) {
+      print(e);
+    }
+    await getTrips();
+
+    Navigator.pop(context);
   }
 
   void markAttendance(String tripId) async {
     if (tripId.isEmpty) return;
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
 
     DatabaseReference book = FirebaseDatabase.instance
         .ref()
@@ -150,6 +178,17 @@ class _HistoryTabState extends State<HistoryTab> {
 
     String? name = await HelperMethods.getPassengerFullName(firebaseUser!.uid);
 
+    try {
+      DatabaseReference fcm =
+          FirebaseDatabase.instance.ref().child("drivers/$driverUid/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(
+          token, "User Absenting Tommarow", "User is absenting check details");
+    } catch (e) {
+      print(e);
+    }
+
     Map<String, String> driverNotifications = {
       "title": "Absent Notification !",
       "description":
@@ -165,8 +204,9 @@ class _HistoryTabState extends State<HistoryTab> {
         .child('drivers/$driverUid/notifications');
 
     await driverNotification.push().set(driverNotifications);
+    await getTrips();
 
-    getTrips();
+    Navigator.pop(context);
   }
 
   List<TripItem> getFilteredTrips() {
@@ -558,7 +598,8 @@ class _HistoryTabState extends State<HistoryTab> {
                                                     ChatScreen(
                                                       recieverName:
                                                           trip.driverName,
-                                                      recieverUid: trip.id,
+                                                      recieverUid:
+                                                          "drivers " + trip.id,
                                                       recieverTel: "",
                                                       isMobile: true,
                                                       senderId:

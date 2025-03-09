@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/data_provider/app_data.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/rating_bar_indicator.dart';
@@ -157,6 +158,18 @@ class _ExpandedViewState extends State<ExpandedView> {
             .longituge
       }
     };
+
+    try {
+      DatabaseReference fcm = FirebaseDatabase.instance
+          .ref()
+          .child("drivers/${widget.driverUid}/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(token,
+          "Driver Booking Request", "New booking request checkn details");
+    } catch (e) {
+      print(e);
+    }
 
     Map<String, String> driverNotifications = {
       "title": "Booking Request",
@@ -428,7 +441,12 @@ class _ExpandedViewState extends State<ExpandedView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text("Main Start and End"),
-                                SizedBox(width: 170, child: Text(widget.mainPoints, textAlign: TextAlign.end,))
+                                SizedBox(
+                                    width: 170,
+                                    child: Text(
+                                      widget.mainPoints,
+                                      textAlign: TextAlign.end,
+                                    ))
                               ],
                             )
                           ],

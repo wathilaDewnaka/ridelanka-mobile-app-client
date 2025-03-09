@@ -35,7 +35,13 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
       String email = emailController.text.trim();
       String name = nameController.text.trim();
 
-      if (!RegExp(
+      if (phoneNumber == "") {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Invalid phone number!",
+            type: MessageType.error));
+        return;
+      } else if (!RegExp(
               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
           .hasMatch(email)) {
         ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -48,7 +54,6 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
       // Check if phone number exists
       bool phoneNum =
           await HelperMethods.checkPhoneNumberExists(phoneNumber, isPassenger);
-      String fullName = "$title $name";
 
       if (phoneNum) {
         ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -82,6 +87,8 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
         return;
       }
 
+      String fullName = "$title ${capitalizeFirstLetters(name)}";
+
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
@@ -114,10 +121,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
           );
         },
         codeAutoRetrievalTimeout: (verificationId) {
-          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-              title: "Error",
-              message: "Auto retrievel time out !",
-              type: MessageType.error));
+          print("Auto time out");
         },
       );
 
@@ -132,11 +136,21 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
     }
   }
 
+  String capitalizeFirstLetters(String input) {
+    return input
+        .split(' ') // Split the string by spaces
+        .map((word) => word.isNotEmpty
+            ? word[0].toUpperCase() +
+                word.substring(1).toLowerCase() // Capitalize the first letter
+            : '') // Handle empty strings
+        .join(' '); // Join the words back into a single string
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -161,7 +175,7 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                       border: Border.all(color: Colors.grey), // Border for
                     ),
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: DropdownButton<String>(
                       value: title,
                       items: ["Mr.", "Mrs.", "Miss", "Dr.", "Prof."]
@@ -206,9 +220,15 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                   counterText: ''),
               initialCountryCode: 'LK', // Default country
               onChanged: (phone) {
-                setState(() {
-                  phoneNumber = phone.completeNumber;
-                });
+                if (phone.isValidNumber()) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+                } else {
+                  setState(() {
+                    phoneNumber = "";
+                  });
+                }
               },
               inputFormatters: [
                 FilteringTextInputFormatter

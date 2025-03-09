@@ -31,7 +31,13 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
       });
       String email = emailController.text.trim();
 
-      if (!RegExp(
+      if (phoneNumber == "") {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "Invalid phone number!",
+            type: MessageType.error));
+        return;
+      } else if (!RegExp(
               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
           .hasMatch(email)) {
         ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
@@ -88,27 +94,22 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => MobileOTPScreen(
-                verificationId: verificationId,
-                fullName: "",
-                phoneNumber: phoneNumber,
-                email: email,
-                isPassenger: isPassenger,
-                isRegister: false,
-                forceResendingToken: forceResendingToken
-
-              ),
+                  verificationId: verificationId,
+                  fullName: "",
+                  phoneNumber: phoneNumber,
+                  email: email,
+                  isPassenger: isPassenger,
+                  isRegister: false,
+                  forceResendingToken: forceResendingToken),
             ),
           );
         },
         codeAutoRetrievalTimeout: (verificationId) {
-          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-              title: "Error",
-              message: "Auto retrievel time out !",
-              type: MessageType.error));
+          print("Auto time out");
         },
       );
 
-       await Future.delayed(const Duration(seconds: 8));
+      await Future.delayed(const Duration(seconds: 8));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
           title: "Error", message: e.toString(), type: MessageType.error));
@@ -123,7 +124,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -151,9 +152,15 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                   counterText: ''),
               initialCountryCode: 'LK', // Default country
               onChanged: (phone) {
-                setState(() {
-                  phoneNumber = phone.completeNumber;
-                });
+                if (phone.isValidNumber()) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+                } else {
+                  setState(() {
+                    phoneNumber = "";
+                  });
+                }
               },
               inputFormatters: [
                 FilteringTextInputFormatter
