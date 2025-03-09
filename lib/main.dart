@@ -89,13 +89,11 @@ void onStart(ServiceInstance service) async {
   }
 
   service.on("stop").listen((event) {
-    service.stopSelf();
     print("Background process is now stopped");
+    service.stopSelf();
   });
 
-  Timer.periodic(const Duration(seconds: 50), (timer) async {
-    print("Testing 1");
-
+  Timer.periodic(const Duration(seconds: 35), (timer) async {
     final pref = await SharedPreferences.getInstance();
     await pref.reload();
 
@@ -120,7 +118,7 @@ void onStart(ServiceInstance service) async {
         });
 
         try {
-          sendDropNotification(LatLng(position.latitude, position.longitude));
+          sendDropNotification(LatLng(position.latitude, position.longitude), id, pref);
         } catch (e) {
           print(e);
         }
@@ -132,10 +130,10 @@ void onStart(ServiceInstance service) async {
   });
 }
 
-void sendDropNotification(LatLng position) async {
+void sendDropNotification(LatLng position, String uid, SharedPreferences pref) async {
   DatabaseReference bookingsRef = FirebaseDatabase.instance
       .ref()
-      .child("drivers/${firebaseUser!.uid}/bookings");
+      .child("drivers/$uid/bookings");
 
   bookingsRef.once().then((snapshot) {
     if (snapshot.snapshot.value != null) {
@@ -147,16 +145,15 @@ void sendDropNotification(LatLng position) async {
             position,
             LatLng(bookingData['location']['endLat'],
                 bookingData['location']['endLng']));
-        if (distance <= 0.5) {
-          sendNotification(bookingData['uId']);
+        if (distance <= 1) {
+          sendNotification(bookingData['uId'], pref);
         }
       });
     }
   });
 }
 
-Future<int> calculateDaysPassed(String uid) async {
-  final pref = await SharedPreferences.getInstance();
+Future<int> calculateDaysPassed(String uid, SharedPreferences pref) async {
   String? time = pref.getString(uid);
 
   if (time != null) {
@@ -171,9 +168,9 @@ Future<int> calculateDaysPassed(String uid) async {
   }
 }
 
-void sendNotification(String uid) async {
-  int time = await calculateDaysPassed(uid);
-  final pref = await SharedPreferences.getInstance();
+void sendNotification(String uid, SharedPreferences pref) async {
+  int time = await calculateDaysPassed(uid, pref);
+  print(time);
 
   if (time >= 10) {
     DatabaseReference databaseReference =
@@ -250,4 +247,3 @@ class MyApp extends StatelessWidget {
         ));
   }
 }
-

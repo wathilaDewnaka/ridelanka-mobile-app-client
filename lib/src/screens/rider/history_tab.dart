@@ -633,7 +633,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                                   : trip.driverName[0],
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 16),
+                                                  fontSize: 16, overflow: TextOverflow.ellipsis),
                                             ),
                                           ],
                                         ),

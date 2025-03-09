@@ -1,5 +1,6 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
+import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
@@ -96,6 +97,17 @@ class _NotificationTabState extends State<NotificationTab> {
       "isActive": ""
     };
 
+    try {
+      DatabaseReference fcm =
+          FirebaseDatabase.instance.ref().child("drivers/$userId/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(
+          token, "Booking Renewed", "Driver renewed your booking");
+    } catch (e) {
+      print(e);
+    }
+
     await userNotificationReference.push().set(userNotifications);
 
     await databaseReference.update({'isRead': "true", 'isActive': ''});
@@ -118,7 +130,7 @@ class _NotificationTabState extends State<NotificationTab> {
       "subscriptionDate": differenceInMicroseconds,
     });
 
-    getNotifications();
+    await getNotifications();
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking approved successfully!",
@@ -141,8 +153,8 @@ class _NotificationTabState extends State<NotificationTab> {
         .ref()
         .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
     await databaseReference.update({'isRead': "true", 'isActive': ''});
+    await getNotifications();
 
-    getNotifications();
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking rejected successfully !",
       title: "Success",
@@ -175,9 +187,6 @@ class _NotificationTabState extends State<NotificationTab> {
     if (event.snapshot.exists) {
       Map<dynamic, dynamic>? bookingData =
           event.snapshot.value as Map<dynamic, dynamic>?;
-      print(bookingData);
-      print(bookingData?['location']);
-      print(bookingData?['location']['startLat']);
 
       DatabaseReference userNotificationReference = FirebaseDatabase.instance
           .ref()
@@ -191,6 +200,17 @@ class _NotificationTabState extends State<NotificationTab> {
         "isRead": "false",
         "isActive": ""
       };
+
+      try {
+        DatabaseReference fcm =
+            FirebaseDatabase.instance.ref().child("users/$userId/token");
+        DataSnapshot snapshot = await fcm.get();
+        String token = snapshot.value as String;
+        PushNotificationService.sendNotificationsToUsers(
+            token, "Booking Accepted", "Your booking is accepted");
+      } catch (e) {
+        print(e);
+      }
 
       Map<dynamic, dynamic> bookingReference = {
         "uId": userId ?? "",
@@ -261,6 +281,17 @@ class _NotificationTabState extends State<NotificationTab> {
     };
 
     await userNotificationReference.push().set(userNotifications);
+
+    try {
+      DatabaseReference fcm =
+          FirebaseDatabase.instance.ref().child("users/$userId/token");
+      DataSnapshot snapshot = await fcm.get();
+      String token = snapshot.value as String;
+      PushNotificationService.sendNotificationsToUsers(
+          token, "Booking Rejected", "Driver rejected your recent booking ");
+    } catch (e) {
+      print(e);
+    }
 
     await databaseReference.update({
       'isRead': "true",

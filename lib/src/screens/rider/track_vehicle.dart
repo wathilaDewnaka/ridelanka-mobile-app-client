@@ -233,11 +233,11 @@ class _TrackVehicleState extends State<TrackVehicle> {
                       ),
                     ),
 
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 15.0),
 
                     BrandDivier(),
 
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 15.0),
                   ],
                 ),
               ),

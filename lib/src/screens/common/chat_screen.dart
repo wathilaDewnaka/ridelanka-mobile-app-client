@@ -1,4 +1,6 @@
+import 'package:client/global_variable.dart';
 import 'package:client/src/methods/encrypt_methods.dart';
+import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/methods/push_notification_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -62,22 +64,48 @@ class _ChatScreenState extends State<ChatScreen> {
       _dbRef.child('messages').push().set(messageData);
       _messageController.clear();
 
-      // try {
-      //   DatabaseReference fcm = senderId.split(" ")[0] == "drivers"
-      //       ? FirebaseDatabase.instance
-      //           .ref()
-      //           .child("users/${widget.recieverUid}/token")
-      //       : FirebaseDatabase.instance
-      //           .ref()
-      //           .child("drivers/${widget.recieverUid}/token");
+      String recieverType = receiverId.split(" ")[0];
+      String recieverIdOnly = receiverId.split(" ")[1];
 
-      //   DataSnapshot snapshot = await fcm.get();
-      //   String token = snapshot.value as String;
-      //   PushNotificationService.sendNotificationsToUsers(token,
-      //       "New chat ", "User is absenting check details");
-      // } catch (e) {
-      //   print(e);
-      // }
+      try {
+        DatabaseReference fcm = recieverType == "drivers"
+            ? FirebaseDatabase.instance
+                .ref()
+                .child("drivers/$recieverIdOnly/token")
+            : FirebaseDatabase.instance
+                .ref()
+                .child("users/$recieverIdOnly/token");
+
+        DataSnapshot snapshot = await fcm.get();
+        String token = snapshot.value as String;
+
+        String? name = recieverType == "drivers"
+            ? await HelperMethods.getPassengerFullName(firebaseUser!.uid)
+            : await HelperMethods.getDriverName(firebaseUser!.uid);
+
+        PushNotificationService.sendNotificationsToUsers(
+            token, "New Chat Recieved", "New chat recieved from $name");
+
+        Map<String, String> driverNotifications = {
+          "title": "New Chat Revieved",
+          "description": "New chat recieved from $name",
+          "icon": "new",
+          "date": DateTime.now().microsecondsSinceEpoch.toString(),
+          "isRead": "false",
+          "isActive": ""
+        };
+
+        DatabaseReference noti = recieverType == "drivers"
+            ? FirebaseDatabase.instance
+                .ref()
+                .child("drivers/$recieverIdOnly/notifications")
+            : FirebaseDatabase.instance
+                .ref()
+                .child("users/$recieverIdOnly/notifications");
+        noti.push().set(driverNotifications);
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
