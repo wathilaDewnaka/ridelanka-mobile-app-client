@@ -7,6 +7,7 @@ import 'package:client/src/data_provider/prediction.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/methods/request_helper.dart';
 import 'package:client/src/models/address.dart';
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -231,7 +232,15 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         type: MessageType.success,
       ));
 
-      Navigator.pop(context);
+      if (widget.isAdd) {
+        isVehicleExist = true;
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const DriverHome()),
+            (route) => false);
+      } else {
+        Navigator.pop(context);
+      }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
@@ -333,7 +342,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       builder: (BuildContext context) =>
           ProgressDialog(status: 'Please wait...'),
     );
-    
+
     await makePostRequest();
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Predicted Price",

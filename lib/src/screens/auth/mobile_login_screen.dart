@@ -26,9 +26,6 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
 
   void loginUser() async {
     try {
-      setState(() {
-        isLoading = true;
-      });
       String email = emailController.text.trim();
 
       if (phoneNumber == "") {
@@ -73,19 +70,32 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
         return;
       }
 
+      // Validate email
+      setState(() {
+        isLoading = true;
+      });
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 60),
+        timeout: const Duration(seconds: 120),
         verificationCompleted: (phoneAuthCredential) async {
+          setState(() {
+            isLoading = false;
+          });
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (error) {
+          setState(() {
+            isLoading = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Error",
               message: "Unable to verify the phone number !",
               type: MessageType.error));
         },
         codeSent: (verificationId, forceResendingToken) {
+          setState(() {
+            isLoading = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Success",
               message: "OTP Sent to $phoneNumber successfully !",
@@ -108,15 +118,12 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
           print("Auto time out");
         },
       );
-
-      await Future.delayed(const Duration(seconds: 8));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-          title: "Error", message: e.toString(), type: MessageType.error));
-    } finally {
       setState(() {
         isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error", message: e.toString(), type: MessageType.error));
     }
   }
 
@@ -226,8 +233,8 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: const Color(0xFF0051ED),
                   shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(10)), // Removes rounding
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(10)), // Removes rounding
                   ),
                 ),
                 child: isLoading

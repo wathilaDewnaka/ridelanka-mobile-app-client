@@ -3,6 +3,7 @@ import 'package:client/src/data_provider/app_data.dart';
 import 'package:client/src/methods/push_notification_service.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
+import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:client/src/widgets/star_view.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -59,7 +60,7 @@ class ExpandedView extends StatefulWidget {
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
   int remainingTime = 0; // Remaining time in seconds
-  int totalDisableTime = 5; // Total disable time in seconds
+  int totalDisableTime = 5000; // Total disable time in seconds
 
   @override
   void initState() {
@@ -81,7 +82,7 @@ class _ExpandedViewState extends State<ExpandedView> {
         if (mounted) {
           setState(() {
             isButtonDisabled = true;
-            remainingTime = totalDisableTime - elapsedTime;
+            remainingTime = elapsedTime;
           });
         }
 
@@ -112,6 +113,14 @@ class _ExpandedViewState extends State<ExpandedView> {
   }
 
   void confirmSubscription() async {
+    // Show the dialog
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) =>
+          ProgressDialog(status: 'Please wait...'),
+    );
+
     if (isButtonDisabled) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         message: "Wait atleast 5 minutes before making new booking",

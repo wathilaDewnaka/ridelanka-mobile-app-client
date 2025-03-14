@@ -5,6 +5,7 @@ import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,6 +59,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _deleteAccount() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String online = prefs.getString("online") ?? "false";
+      if (online == "true") {
+        ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+            title: "Error",
+            message: "End the trip to delete",
+            type: MessageType.error));
+        return;
+      }
+
       bool isPassenger =
           await HelperMethods.checkIsPassenger(firebaseUser!.uid);
 
@@ -68,11 +79,10 @@ class _SettingsPageState extends State<SettingsPage> {
               .child('drivers/${firebaseUser!.uid}');
 
       await databaseReference.remove();
+
       final FirebaseAuth _auth = FirebaseAuth.instance;
       await _auth.signOut();
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove("isPassenger");
+      await prefs.clear();
 
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => MobileLoginScreen()),
@@ -93,10 +103,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _updateUsername(String fullname) async {
-    if (fullname.isEmpty || fullname.split(" ").length < 2) {
+    if (fullname.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
           title: "Error",
-          message: "Invalid username !",
+          message: "Please enter a valid name!",
+          type: MessageType.error));
+      return;
+    } else if (fullname.split(" ").length != 2) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "Please enter a valid name!",
           type: MessageType.error));
       return;
     }
@@ -158,8 +174,20 @@ class _SettingsPageState extends State<SettingsPage> {
     final FirebaseAuth _auth = FirebaseAuth.instance;
 
     await _auth.signOut();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("isPassenger");
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String online = prefs.getString("online") ?? "false";
+
+    if (online == "true") {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "End the trip to logout",
+          type: MessageType.error));
+      return;
+    }
+
+    await prefs.clear(); // Removes all stored preferences
+    await FirebaseMessaging.instance.deleteToken();
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => MobileLoginScreen()),
@@ -382,26 +410,32 @@ class _SettingsPageState extends State<SettingsPage> {
                       left: 0,
                       right: 0,
                       child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 70, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: iconColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.logout, size: 26, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Log Out',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                        child: GestureDetector(
+                          onTap: () {
+                            _logout(context);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 70, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: iconColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.logout,
+                                    size: 26, color: Colors.white),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Log Out',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

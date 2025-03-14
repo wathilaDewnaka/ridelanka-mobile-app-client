@@ -46,7 +46,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
   int? forceResendingToken;
   bool isLoading = false;
   bool isResendLoading = false;
-  int countdown = 60;
+  int countdown = 120;
   Timer? _timer;
 
   @override
@@ -70,7 +70,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
 
   void startCountdown() {
     setState(() {
-      countdown = 60;
+      countdown = 120;
     });
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -171,7 +171,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
       });
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: widget.phoneNumber,
-        timeout: const Duration(seconds: 60),
+        timeout: const Duration(seconds: 120),
         forceResendingToken: forceResendingToken, // Ensure token is used
         verificationCompleted: (phoneAuthCredential) async {
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
@@ -194,10 +194,7 @@ class _MobileOTPScreenState extends State<MobileOTPScreen> {
               type: MessageType.success));
         },
         codeAutoRetrievalTimeout: (verificationId) {
-          ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-              title: "Error",
-              message: "Auto retrieval timeout!",
-              type: MessageType.error));
+          print("Timeout auto retrieve");
         },
       );
 

@@ -55,7 +55,7 @@ class Vehicle {
         endKm: endKm,
         startPlaceName: startPlaceName,
         count: json['ratings']['count'] ?? 0,
-        rate: (json['ratings']['total']) * 1.0 ?? 5.0,
+        rate: (json['ratings']['average']) * 1.0 ?? 5.0,
         seatCapacity: json['seatCapacity'],
         driverExperience: json['experience'],
         lang: json['lanuage'],

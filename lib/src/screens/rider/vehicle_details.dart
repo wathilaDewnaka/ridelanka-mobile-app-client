@@ -5,7 +5,6 @@ import 'package:client/src/widgets/progress_dialog.dart';
 import 'package:client/src/widgets/rating_bar_indicator.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
 import 'package:client/src/methods/helper_methods.dart';
 
 class VehicleDetails extends StatefulWidget {
@@ -216,7 +215,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                                 ),
                                               ),
                                               const Text(
-                                                "+94 77 123 4567",
+                                                "+94 77 089 1499",
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w500,
@@ -391,7 +390,7 @@ class _VehicleDetailsState extends State<VehicleDetails> {
                                         ),
                                         children: [
                                           TextSpan(
-                                            text: "Call +94 77 123 4567",
+                                            text: "Call +94 77 089 1499",
                                             style: const TextStyle(
                                               fontSize: 14,
                                               color: Colors.blue,

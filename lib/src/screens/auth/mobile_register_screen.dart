@@ -28,10 +28,6 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
 
   void registerUser() async {
     try {
-      // Validate email
-      setState(() {
-        isLoading = true;
-      });
       String email = emailController.text.trim();
       String name = nameController.text.trim();
 
@@ -87,15 +83,25 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
         return;
       }
 
+      // Validate email
+      setState(() {
+        isLoading = true;
+      });
       String fullName = "$title ${capitalizeFirstLetters(name)}";
 
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 60),
+        timeout: const Duration(seconds: 120),
         verificationCompleted: (phoneAuthCredential) async {
+          setState(() {
+            isLoading = false;
+          });
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (error) {
+          setState(() {
+            isLoading = false;
+          });
           print(error);
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Error",
@@ -103,6 +109,9 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
               type: MessageType.error));
         },
         codeSent: (verificationId, forceResendingToken) {
+          setState(() {
+            isLoading = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
               title: "Success",
               message: "OTP Sent to $phoneNumber successfully !",
@@ -125,15 +134,12 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
           print("Auto time out");
         },
       );
-
-      await Future.delayed(const Duration(seconds: 8));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
-          title: "Error", message: e.toString(), type: MessageType.error));
-    } finally {
       setState(() {
         isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error", message: e.toString(), type: MessageType.error));
     }
   }
 
@@ -177,8 +183,8 @@ class _MobileRegisterScreenState extends State<MobileRegisterScreen> {
                         ),
                         border: Border.all(color: Colors.grey), // Border for
                       ),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       child: DropdownButton<String>(
                         value: title,
                         items: ["Mr.", "Mrs.", "Miss", "Dr.", "Prof."]

@@ -12,7 +12,7 @@ class NotificationTab extends StatefulWidget {
   NotificationTab({super.key});
 
   static const Color mainBlue = Color(0xFF0051ED);
-
+  
   @override
   State<NotificationTab> createState() => _NotificationTabState();
 }
@@ -109,7 +109,6 @@ class _NotificationTabState extends State<NotificationTab> {
     }
 
     await userNotificationReference.push().set(userNotifications);
-
     await databaseReference.update({'isRead': "true", 'isActive': ''});
 
     String differenceInMicroseconds = "0";
@@ -131,14 +130,13 @@ class _NotificationTabState extends State<NotificationTab> {
     });
 
     await getNotifications();
+    Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking approved successfully!",
       title: "Success",
       type: MessageType.success,
     ));
-
-    Navigator.pop(context);
   }
 
   void rejectRenewal(String notificationId) async {
@@ -154,13 +152,13 @@ class _NotificationTabState extends State<NotificationTab> {
         .child('drivers/${firebaseUser!.uid}/notifications/$notificationId');
     await databaseReference.update({'isRead': "true", 'isActive': ''});
     await getNotifications();
+    Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking rejected successfully !",
       title: "Success",
       type: MessageType.success,
     ));
-    Navigator.pop(context);
   }
 
   void updateBookings(String? notificationId, String? userId) async {
@@ -225,7 +223,6 @@ class _NotificationTabState extends State<NotificationTab> {
 
       await driverBookingReference.push().set(bookingReference);
       await userNotificationReference.push().set(userNotifications);
-
       await databaseReference.update({'isRead': "true", 'isActive': ''});
       await userReference.update({
         'isActive': "Active",
@@ -242,15 +239,14 @@ class _NotificationTabState extends State<NotificationTab> {
         }
       });
     }
-
-    getNotifications();
+    await getNotifications();
+    Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking approved successfully !",
       title: "Success",
       type: MessageType.success,
     ));
-    Navigator.pop(context);
   }
 
   void rejectBookings(String? notificationId, String? userId) async {
@@ -299,15 +295,14 @@ class _NotificationTabState extends State<NotificationTab> {
     });
 
     await userReference.remove();
-
-    getNotifications();
+    await getNotifications();
+    Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
       message: "Booking rejected successfully !",
       title: "Success",
       type: MessageType.success,
     ));
-    Navigator.pop(context);
   }
 
   void markAsRead(String? notificationId) async {

@@ -273,6 +273,7 @@ class HelperMethods {
       // Initialize min distance variables
       int startKm = 100, endKm = 100;
       LatLng startLatLng = LatLng(0.0, 0.0), endLatLng = LatLng(0.0, 0.0);
+      bool isStartFirst = false;
 
       for (final point in decodedPoints) {
         final LatLng positionOnWay = LatLng(point.latitude, point.longitude);
@@ -282,10 +283,11 @@ class HelperMethods {
         if (haversineStart < 5 && haversineStart < startKm) {
           startKm = haversineStart;
           startLatLng = positionOnWay;
+          isStartFirst = true;
         }
 
         final int haversineEnd = haversine(positionOnWay, userDestination);
-        if (haversineEnd < 5 && haversineEnd < endKm) {
+        if (haversineEnd < 5 && haversineEnd < endKm && isStartFirst) {
           endKm = haversineEnd;
           endLatLng = positionOnWay;
         }

@@ -48,8 +48,8 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
         title: "Success",
         message: "Review posted successfully !",
         type: MessageType.success));
-    getRatings();
-
+        
+    await getRatings();
     Navigator.pop(context);
   }
 
@@ -99,21 +99,18 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
           }
         }
       }
-
-      bool canPost =
-          await HelperMethods.checkIsUserSubscribed(firebaseUser!.uid);
-
       setState(() {
         notificationAll = newNotifications.reversed.toList();
-        canPostReview = canPost;
         loading = false;
       });
     } else {
       print("No notifications found in the main path.");
     }
+    bool canPost = await HelperMethods.checkIsUserSubscribed(firebaseUser!.uid);
 
     setState(() {
       loading = false;
+      canPostReview = canPost;
     });
   }
 
@@ -302,18 +299,20 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
                         );
                       },
                     )
-                  : !loading ? const SizedBox(
-                      height: 100,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 16.0, left: 10),
-                        child: Text(
-                          "No reviews or ratings found",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        ),
-                      ),
-                    ) : null,
+                  : !loading
+                      ? const SizedBox(
+                          height: 100,
+                          width: double.infinity,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 16.0, left: 8),
+                            child: Text(
+                              "No reviews or ratings found",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(height: 100, width: double.infinity),
             ),
           ],
         ),
