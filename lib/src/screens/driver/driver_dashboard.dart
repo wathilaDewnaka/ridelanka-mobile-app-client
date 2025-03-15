@@ -136,7 +136,7 @@ class _DriverHomeState extends State<DriverHome> {
                     MenuButton(
                       iconImage:
                           'assets/images/driver_dashboard_images/notification.png',
-                      label: "View",
+                      label: "Notifications",
                       onPressed: () {
                         Navigator.push(
                             context,

@@ -1,6 +1,7 @@
 import 'package:client/global_variable.dart';
 import 'package:client/src/methods/helper_methods.dart';
 import 'package:client/src/screens/auth/mobile_login_screen.dart';
+import 'package:client/src/screens/driver/driver_dashboard.dart';
 import 'package:client/src/screens/rider/rider_navigation_menu.dart';
 import 'package:client/src/widgets/message_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -122,18 +123,21 @@ class _SettingsPageState extends State<SettingsPage> {
         ? FirebaseDatabase.instance.ref("users/${firebaseUser!.uid}")
         : FirebaseDatabase.instance.ref("drivers/${firebaseUser!.uid}");
 
-    await databaseReference.update({
-      "fullname": (title! +
-          " " +
-          capitalize(fullname.split(" ")[0]) +
-          " " +
-          capitalize(fullname.split(" ")[1]))
-    });
+    String fullnameAll =
+        "${title!} ${capitalize(fullname.split(" ")[0])} ${capitalize(fullname.split(" ")[1])}";
+
+    await databaseReference.update({"fullname": fullnameAll});
+
+    if (!isPassenger) {
+      driverName = fullnameAll;
+    }
 
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
+            builder: (context) => isPassenger
+                ? const RiderNavigationMenu(selectedIndex: 3)
+                : const DriverHome()),
         (route) => false);
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
@@ -162,7 +166,9 @@ class _SettingsPageState extends State<SettingsPage> {
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => RiderNavigationMenu(selectedIndex: 3)),
+            builder: (context) => isPassenger
+                ? const RiderNavigationMenu(selectedIndex: 3)
+                : const DriverHome()),
         (route) => false);
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",

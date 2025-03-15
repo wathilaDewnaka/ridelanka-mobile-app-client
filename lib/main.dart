@@ -31,10 +31,10 @@ Future<void> main() async {
   );
 
   firebaseUser = FirebaseAuth.instance.currentUser;
-  await requestPermissions();
-  await initializeService();
+  await requestPermissions(); // Call to request permissions
+  await initializeService(); // Call to initalize services (bg)
 
-  AwesomeNotifications().initialize(
+  AwesomeNotifications().initialize( // Notification chanell initalize
     'resource://drawable/van',
     [
       NotificationChannel(

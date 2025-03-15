@@ -11,6 +11,7 @@ class TripItem {
   final String trpId;
   final String attTime;
   final String isComming;
+  final String driverPhone;
 
   TripItem(
       {required this.id,
@@ -24,9 +25,11 @@ class TripItem {
       required this.trpId,
       required this.vehicleNo,
       required this.attTime,
-      required this.isComming});
+      required this.isComming,
+      required this.driverPhone});
 
-  factory TripItem.fromJson(Map<dynamic, dynamic> json, String? trpId, double vehPrice, String driveName, String vehicleName, String vehicleNo) {
+  factory TripItem.fromJson(Map<dynamic, dynamic> json, String? trpId,
+      double vehPrice, String driveName, String vehicleName, String vehicleNo, String phone) {
     return TripItem(
         id: json['driverUid'] ?? '',
         source: json['start'] ?? '',
@@ -38,7 +41,11 @@ class TripItem {
         driverName: driveName,
         vehicleNo: vehicleNo,
         trpId: trpId ?? "",
-        attTime: json['isActive'] == 'Active' ? json['attendance']['timestamp'] : '',
-        isComming: json['isActive'] == 'Active' ? json['attendance']['isComming'] : '');
+        driverPhone: phone,
+        attTime:
+            json['isActive'] == 'Active' ? json['attendance']['timestamp'] : '',
+        isComming: json['isActive'] == 'Active'
+            ? json['attendance']['isComming']
+            : '');
   }
 }

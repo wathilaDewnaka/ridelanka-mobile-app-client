@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+// Store user details
 User? firebaseUser;
 
 final CameraPosition googlePlex = CameraPosition(
@@ -16,6 +17,7 @@ StreamSubscription<Position>? homeTabPositionStream;
 Position? currentPosition;
 Driver? currentDriverInfo;
 
+// Map API Key
 String mapKey = 'AIzaSyAn78RjZUxRa0Dq71QscaEqMuhfXlXWqlE';
 
 bool isVehicleExist = false;

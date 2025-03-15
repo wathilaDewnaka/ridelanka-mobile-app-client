@@ -12,7 +12,7 @@ class NotificationTab extends StatefulWidget {
   NotificationTab({super.key});
 
   static const Color mainBlue = Color(0xFF0051ED);
-  
+
   @override
   State<NotificationTab> createState() => _NotificationTabState();
 }
@@ -99,7 +99,7 @@ class _NotificationTabState extends State<NotificationTab> {
 
     try {
       DatabaseReference fcm =
-          FirebaseDatabase.instance.ref().child("drivers/$userId/token");
+          FirebaseDatabase.instance.ref().child("users/$userId/token");
       DataSnapshot snapshot = await fcm.get();
       String token = snapshot.value as String;
       PushNotificationService.sendNotificationsToUsers(
@@ -118,11 +118,14 @@ class _NotificationTabState extends State<NotificationTab> {
         snapshot.child('subscriptionDate').value as String? ?? "";
 
     DateTime subscriptionDate =
-        DateTime.fromMicrosecondsSinceEpoch(int.tryParse(microseconds) ?? 0)
-            .add(Duration(days: 30));
+        DateTime.fromMillisecondsSinceEpoch(int.parse(microseconds));
 
-    differenceInMicroseconds =
-        subscriptionDate.microsecondsSinceEpoch.toString();
+    differenceInMicroseconds = subscriptionDate
+        .add(const Duration(days: 30))
+        .microsecondsSinceEpoch
+        .toString();
+    print(subscriptionDate);
+    print(differenceInMicroseconds);
 
     await userReference.update({
       'isActive': "Active",

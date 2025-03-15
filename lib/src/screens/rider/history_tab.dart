@@ -55,7 +55,8 @@ class _HistoryTabState extends State<HistoryTab> {
                 vehiclePrice,
                 driverData['fullname'] ?? "",
                 driverData['vehicleName'] ?? "",
-                driverData['vehicleNo'] ?? ""));
+                driverData['vehicleNo'] ?? "",
+                driverData['phone'] ?? ""));
           } catch (e) {
             print(e);
           }
@@ -600,7 +601,7 @@ class _HistoryTabState extends State<HistoryTab> {
                                                           trip.driverName,
                                                       recieverUid:
                                                           "drivers " + trip.id,
-                                                      recieverTel: "",
+                                                      recieverTel: trip.driverPhone,
                                                       isMobile: true,
                                                       senderId:
                                                           "users ${firebaseUser!.uid}",

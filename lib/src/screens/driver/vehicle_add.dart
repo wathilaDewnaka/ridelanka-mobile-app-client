@@ -248,9 +248,8 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
             widget.isAdd ? "Failed to add vehicle" : "Failed to edit vehicle",
         type: MessageType.error,
       ));
+      Navigator.pop(context);
     }
-
-    Navigator.pop(context);
   }
 
   void getPlacedDetails(String placeId, bool isStartLocation) async {

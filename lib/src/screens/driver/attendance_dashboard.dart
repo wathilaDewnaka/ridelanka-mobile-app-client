@@ -43,14 +43,13 @@ class _AttendancePageState extends State<AttendancePage> {
 
             DatabaseReference driverRef =
                 FirebaseDatabase.instance.ref().child('users/$uid');
-            print(notificationData);
             DataSnapshot snapshot = await driverRef.get();
 
             Map<dynamic, dynamic> userData =
                 snapshot.value as Map<dynamic, dynamic>;
 
             AttendanceMark notificationItem = AttendanceMark.fromJson(
-                notificationData, child.key, userData["fullname"]);
+                notificationData, child.key, userData["fullname"], userData['phone']);
             newNotifications.add(notificationItem);
           }
         }
@@ -215,7 +214,7 @@ class _AttendancePageState extends State<AttendancePage> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               color: const Color.fromARGB(255, 255, 255, 255),
-              child:  Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
@@ -227,7 +226,8 @@ class _AttendancePageState extends State<AttendancePage> {
                     const Text(
                       'Present / Absent',
                       style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right, // Ensures text is right-aligned
+                      textAlign:
+                          TextAlign.right, // Ensures text is right-aligned
                     ),
                 ],
               ),
@@ -261,10 +261,10 @@ class _AttendancePageState extends State<AttendancePage> {
                                           builder: (context) => ChatScreen(
                                                 recieverName:
                                                     _students[index].name,
-                                                recieverUid:
-                                                    "users " + _students[index].userId,
+                                                recieverUid: "users " +
+                                                    _students[index].userId,
                                                 recieverTel:
-                                                    _students[index].name,
+                                                    _students[index].phone,
                                                 isMobile: true,
                                                 senderId:
                                                     "drivers ${firebaseUser!.uid}",
@@ -277,9 +277,9 @@ class _AttendancePageState extends State<AttendancePage> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Text(
-                                _students[index].name,
-                                style: const TextStyle(color: Colors.grey),
+                              const Text(
+                                "Username",
+                                style: TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),
@@ -289,11 +289,12 @@ class _AttendancePageState extends State<AttendancePage> {
                             children: [
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _students[index].marked == 'P'
-                                      ? Colors.green
-                                      : Colors.grey.shade300,
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 15),
+                                  backgroundColor:
+                                      _students[index].marked == 'P'
+                                          ? Colors.green
+                                          : Colors.grey.shade300,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
                                 ),
                                 onPressed: () => _toggleAttendance(index, 'P'),
                                 child: const Text('P',
@@ -304,11 +305,12 @@ class _AttendancePageState extends State<AttendancePage> {
                               const SizedBox(width: 5),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _students[index].marked == 'A'
-                                      ? Colors.red
-                                      : Colors.grey.shade300,
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 15),
+                                  backgroundColor:
+                                      _students[index].marked == 'A'
+                                          ? Colors.red
+                                          : Colors.grey.shade300,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15),
                                 ),
                                 onPressed: () => _toggleAttendance(index, 'A'),
                                 child: const Text('A',
@@ -318,8 +320,8 @@ class _AttendancePageState extends State<AttendancePage> {
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                      ],
+                    ),
                   );
                 },
               ),
