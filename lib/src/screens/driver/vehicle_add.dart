@@ -66,7 +66,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
   }
 
   Future _uploadImage() async {
-    if (_image == null) return;
+    if (_image == null) return "null";
 
     try {
       String fileName = _image!.path + DateTime.now().toString();
@@ -140,6 +140,18 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
           lanuageType = details['lanuage'];
           imageUrl = details['vehicleImage'];
         });
+
+        Provider.of<AppData>(context, listen: false)
+            .driverStartAddress
+            .latitude = details['location']['startLat'];
+        Provider.of<AppData>(context, listen: false)
+            .driverStartAddress
+            .longituge = details['location']['startLng'];
+        Provider.of<AppData>(context, listen: false).driverEndAddress.latitude =
+            details['location']['endLat'];
+        Provider.of<AppData>(context, listen: false)
+            .driverEndAddress
+            .longituge = details['location']['endLng'];
       }
     } catch (e) {
       print("Error fetching data: $e");
@@ -200,7 +212,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
       "experience": experienceController.text,
       "routeDetails": descriptionController.text,
       "type": type,
-      "vehicleImage": img,
+      "vehicleImage": img != "null" ? img : imageUrl,
       "vehicleType": vehicleType,
       "lanuage": lanuageType,
       "startPlaceName": startLocationController.text,
@@ -232,15 +244,13 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
         type: MessageType.success,
       ));
 
-      if (widget.isAdd) {
-        isVehicleExist = true;
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const DriverHome()),
-            (route) => false);
-      } else {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
+
+      isVehicleExist = true;
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const DriverHome()),
+          (route) => false);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Error",
@@ -661,7 +671,7 @@ class _VehicleAddScreenState extends State<VehicleAddScreen> {
                                     ),
                                   )
                                 : Container(
-                                    child: imageUrl.isEmpty
+                                    child: _image != null
                                         ? Image.file(
                                             _image!,
                                           )
