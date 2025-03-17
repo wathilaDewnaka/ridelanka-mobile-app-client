@@ -280,14 +280,14 @@ class HelperMethods {
 
         // Calculate haversine distances
         final int haversineStart = haversine(positionOnWay, pickDestination);
-        if (haversineStart < 5 && haversineStart < startKm) {
+        if (haversineStart < 4 && haversineStart < startKm) {
           startKm = haversineStart;
           startLatLng = positionOnWay;
           isStartFirst = true;
         }
 
         final int haversineEnd = haversine(positionOnWay, userDestination);
-        if (haversineEnd < 5 && haversineEnd < endKm && isStartFirst) {
+        if (haversineEnd < 4 && haversineEnd < endKm && isStartFirst) {
           endKm = haversineEnd;
           endLatLng = positionOnWay;
         }

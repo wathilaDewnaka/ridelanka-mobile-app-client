@@ -23,6 +23,15 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
   bool canPostReview = false;
 
   void postNewReview(double rating, String text) async {
+    if (text.length < 100) {
+      ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
+          title: "Error",
+          message: "Should write atleast 100 characters !",
+          type: MessageType.error
+          ));
+      return;
+    }
+
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -42,13 +51,13 @@ class _ReviewsRatingsState extends State<ReviewsRatings> {
 
     Map<String, dynamic> mapOfData = await getAverageRating(widget.driverId);
     await databaseReference2
-        .update({"total": mapOfData['average'], "count": mapOfData['count']});
+        .update({"average": mapOfData['average'], "count": mapOfData['count']});
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
         message: "Review posted successfully !",
         type: MessageType.success));
-        
+
     await getRatings();
     Navigator.pop(context);
   }

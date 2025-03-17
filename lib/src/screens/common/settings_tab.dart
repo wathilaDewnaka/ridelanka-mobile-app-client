@@ -292,7 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     color: Colors.grey), // Border for
                               ),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
+                                  horizontal: 8, vertical: 4),
                               child: DropdownButton<String>(
                                 value: title,
                                 items: ["Mr.", "Mrs.", "Miss", "Dr.", "Prof."]
