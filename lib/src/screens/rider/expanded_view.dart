@@ -60,7 +60,7 @@ class ExpandedView extends StatefulWidget {
 class _ExpandedViewState extends State<ExpandedView> {
   bool isButtonDisabled = false;
   int remainingTime = 0; // Remaining time in seconds
-  int totalDisableTime = 5000; // Total disable time in seconds
+  int totalDisableTime = 400; // Total disable time in seconds
 
   @override
   void initState() {
