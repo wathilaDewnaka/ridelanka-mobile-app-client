@@ -515,40 +515,12 @@ class _HistoryTabState extends State<HistoryTab> {
                                                 color: Colors.grey[300],
                                               ),
                                               const SizedBox(height: 4),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    trip.destination,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 16,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  if (trip.status == "Active")
-                                                    Text(
-                                                      daysLeft(trip.date) > 0
-                                                          ? "Expires in ${daysLeft(trip.date)} days"
-                                                          : "Expired",
-                                                      style: TextStyle(
-                                                        color: daysLeft(
-                                                                    trip.date) <
-                                                                5
-                                                            ? Colors.red[600]
-                                                            : Colors.grey[500],
-                                                        fontWeight: daysLeft(
-                                                                    trip.date) <
-                                                                5
-                                                            ? FontWeight.bold
-                                                            : FontWeight.normal,
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                ],
+                                              Text(
+                                                trip.destination,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 16,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -567,8 +539,27 @@ class _HistoryTabState extends State<HistoryTab> {
                                           Text(
                                             trip.vehicleType,
                                             style: TextStyle(
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight:
+                                                    FontWeight.bold),
                                           ),
+                                          const SizedBox(width: 58),
+                                          if (trip.status == "Active")
+                                            Text(
+                                              daysLeft(trip.date) > 0
+                                                  ? "Expires in ${daysLeft(trip.date)} days"
+                                                  : "Expired",
+                                              style: TextStyle(
+                                                color:
+                                                    daysLeft(trip.date) < 5
+                                                        ? Colors.red[600]
+                                                        : Colors.grey[500],
+                                                fontWeight:
+                                                    daysLeft(trip.date) < 5
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                                fontSize: 14,
+                                              ),
+                                            ),
                                         ],
                                       ),
                                     )
@@ -601,7 +592,8 @@ class _HistoryTabState extends State<HistoryTab> {
                                                           trip.driverName,
                                                       recieverUid:
                                                           "drivers " + trip.id,
-                                                      recieverTel: trip.driverPhone,
+                                                      recieverTel:
+                                                          trip.driverPhone,
                                                       isMobile: true,
                                                       senderId:
                                                           "users ${firebaseUser!.uid}",
@@ -634,7 +626,9 @@ class _HistoryTabState extends State<HistoryTab> {
                                                   : trip.driverName[0],
                                               style: const TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 16, overflow: TextOverflow.ellipsis),
+                                                  fontSize: 16,
+                                                  overflow:
+                                                      TextOverflow.ellipsis),
                                             ),
                                           ],
                                         ),
