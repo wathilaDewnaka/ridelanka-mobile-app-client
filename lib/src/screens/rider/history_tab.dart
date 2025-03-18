@@ -531,28 +531,32 @@ class _HistoryTabState extends State<HistoryTab> {
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Icon(Icons.drive_eta),
-                                          SizedBox(
-                                            width: 8,
+                                          Row(
+                                            children: [
+                                              Icon(Icons.drive_eta),
+                                              SizedBox(
+                                                width: 8,
+                                              ),
+                                              Text(
+                                                trip.vehicleType,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            trip.vehicleType,
-                                            style: TextStyle(
-                                                fontWeight:
-                                                    FontWeight.bold),
-                                          ),
-                                          const SizedBox(width: 58),
                                           if (trip.status == "Active")
                                             Text(
                                               daysLeft(trip.date) > 0
                                                   ? "Expires in ${daysLeft(trip.date)} days"
                                                   : "Expired",
                                               style: TextStyle(
-                                                color:
-                                                    daysLeft(trip.date) < 5
-                                                        ? Colors.red[600]
-                                                        : Colors.grey[500],
+                                                color: daysLeft(trip.date) < 5
+                                                    ? Colors.red[600]
+                                                    : Colors.grey[500],
                                                 fontWeight:
                                                     daysLeft(trip.date) < 5
                                                         ? FontWeight.bold
