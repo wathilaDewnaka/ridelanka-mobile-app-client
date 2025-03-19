@@ -85,9 +85,10 @@ class _SettingsPageState extends State<SettingsPage> {
       await _auth.signOut();
       await prefs.clear();
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => MobileLoginScreen()),
-      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MobileLoginScreen()),
+          (route) => false);
 
       ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Account Deleted",
@@ -177,10 +178,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _logout(BuildContext context) async {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
-    await _auth.signOut();
-
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String online = prefs.getString("online") ?? "false";
 
@@ -192,12 +189,16 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    await _auth.signOut();
+
     await prefs.clear(); // Removes all stored preferences
     await FirebaseMessaging.instance.deleteToken();
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => MobileLoginScreen()),
-    );
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MobileLoginScreen()),
+        (route) => false);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",

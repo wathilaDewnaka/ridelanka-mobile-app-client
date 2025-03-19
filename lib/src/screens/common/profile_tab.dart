@@ -25,10 +25,6 @@ class _ProfileTabState extends State<ProfileTab> {
   bool isLoading = true; // Control UI visibility
 
   Future<void> _logout(BuildContext context) async {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
-    await _auth.signOut();
-
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String online = prefs.getString("online") ?? "false";
     if (online == "true") {
@@ -39,12 +35,16 @@ class _ProfileTabState extends State<ProfileTab> {
       return;
     }
 
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    await _auth.signOut();
     await prefs.clear(); // Removes all stored preferences
     await FirebaseMessaging.instance.deleteToken();
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => MobileLoginScreen()),
-    );
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MobileLoginScreen()),
+        (route) => false);
 
     ScaffoldMessenger.of(context).showSnackBar(createMessageBar(
         title: "Success",
